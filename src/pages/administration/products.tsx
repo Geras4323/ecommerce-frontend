@@ -34,12 +34,12 @@ const columns = [
   columnHelper.accessor("name", {
     header: "Nombre",
   }),
-  columnHelper.accessor("description", {
-    header: "Descripción",
-  }),
   columnHelper.accessor("price", {
     header: "Precio",
     cell: (info) => <span>$ {info.getValue()}</span>,
+  }),
+  columnHelper.accessor("description", {
+    header: "Descripción",
   }),
 ];
 
@@ -67,11 +67,11 @@ function Products() {
 
   return (
     <AdministrationLayout active="Productos">
-      <div className="flex h-full w-full gap-4 border border-secondary/20">
+      <div className="flex h-full w-full">
         <section
           className={cn(
-            selectedProduct ? "w-screen max-w-4xl" : "w-full",
-            "transition-all"
+            !!selectedProduct ? "w-1/2 2xl:w-2/3" : "w-full",
+            "h-full overflow-y-auto"
           )}
         >
           <Table>
@@ -136,7 +136,9 @@ function Products() {
 
         <section
           className={cn(
-            selectedProduct ? "relative h-full w-full" : "w-0 overflow-hidden"
+            selectedProduct
+              ? "relative h-full w-1/2 border-l border-l-secondary/20 pl-7 2xl:w-1/3"
+              : "hidden"
           )}
         >
           <div className="sticky top-20 h-fit py-4">

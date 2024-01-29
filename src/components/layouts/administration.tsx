@@ -56,18 +56,16 @@ export function AdministrationLayout({
     <>
       <Toaster richColors />
       <GeneralLayout title="Dashboard" description="This is the dashboard">
-        <div className="flex min-h-screen w-full">
-          <article className="relative z-10 h-auto w-20 min-w-20 bg-red-200/20">
-            <section className="sticky left-0 top-16 flex h-[calc(100vh-64px)] w-full flex-col overflow-hidden border-r border-r-secondary/20 bg-base-100 transition-all hover:w-72">
-              {sections.map((section) => (
-                <SectionItem
-                  key={section.name}
-                  section={section}
-                  active={section.name === active}
-                />
-              ))}
-            </section>
-          </article>
+        <div className="relative flex h-screen w-full pl-20">
+          <section className="absolute left-0 top-0 z-10 flex h-full w-20 flex-col overflow-hidden border-r border-r-secondary/20 bg-base-100 pt-16 transition-all hover:w-72">
+            {sections.map((section) => (
+              <SectionItem
+                key={section.name}
+                section={section}
+                active={section.name === active}
+              />
+            ))}
+          </section>
 
           <article className="h-full w-full px-4 pb-4 pt-20">
             {children}
