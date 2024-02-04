@@ -8,6 +8,43 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 
+export function DiscardCategoryChangesModal({
+  isOpen,
+  onClose,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  function handleConfirm() {
+    onConfirm();
+    onClose();
+  }
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Descartar cambios"
+      description={
+        <span>
+          Tiene cambios sin guardar ¿Está seguro de que desea descartarlos?
+        </span>
+      }
+    >
+      <div className="flex h-auto w-full items-center justify-end gap-2">
+        <button className="btn btn-ghost w-28" onClick={onClose}>
+          Cancelar
+        </button>
+        <button className="btn btn-primary w-28" onClick={handleConfirm}>
+          Confirmar
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 export function DeleteCategoryModal({
   isOpen,
   category,
@@ -44,7 +81,7 @@ export function DeleteCategoryModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Eliminar Categoría"
+      title="Eliminar categoría"
       description={
         <span>
           ¿Está seguro de que desea eliminar la categoría <b>{category.name}</b>
@@ -111,7 +148,7 @@ export function DeleteCategoryImageModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Eliminar Imagen"
+      title="Eliminar imagen"
       description={
         <span>
           ¿Está seguro de que desea eliminar la imagen de la categoría{" "}

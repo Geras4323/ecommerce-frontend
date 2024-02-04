@@ -1,5 +1,7 @@
 import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
+import { DiscardCategoryChangesModal } from "@/components/modals/administration/categories";
 import { type Category } from "@/functions/categories";
+import { useCategoyStore } from "@/hooks/states/categories";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
@@ -8,7 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { AlertCircle, PanelLeftClose, Upload } from "lucide-react";
 import Image from "next/image";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,21 +21,23 @@ const inputSchema = z.object({
   name: z.string(),
 });
 
-export function CategoryCreateAside({
-  isOpen,
-  setIsOpen,
-}: {
-  isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-}) {
+export function CategoryCreateAside() {
   const queryClient = useQueryClient();
 
+  const {
+    create_isOpen,
+    create_close,
+    create_isChanged,
+    create_change,
+    create_modal_discardChanges_isOpen,
+    create_modal_discardChanges_change,
+  } = useCategoyStore();
+
   const [image, setImage] = useState<File>();
-  const [hasDataChanged, setHasDataChanged] = useState(false);
 
   function resetInputData() {
     reset({ code: "", name: "" });
-    setHasDataChanged(false);
+    create_change(false);
   }
 
   function resetImage() {
@@ -42,6 +46,16 @@ export function CategoryCreateAside({
 
   function refreshQuery() {
     queryClient.invalidateQueries({ queryKey: ["categories"] });
+  }
+
+  function handleCancel() {
+    if (!image && !create_isChanged) {
+      create_change(false);
+      create_close();
+      return;
+    }
+
+    create_modal_discardChanges_change(true);
   }
 
   const {
@@ -57,11 +71,11 @@ export function CategoryCreateAside({
 
   watch((value, { type }) => {
     if (type !== "change") return;
-    setHasDataChanged(value.name !== "" || value.code !== "");
+    create_change(value.name !== "" || value.code !== "");
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
-    if (hasDataChanged) dataMutation.mutate(data);
+    if (create_isChanged) dataMutation.mutate(data);
   };
 
   const dataMutation = useMutation<ServerSuccess<Category>, ServerError, Input>(
@@ -78,7 +92,7 @@ export function CategoryCreateAside({
         toast.success("Categoría creada exitosamente");
         resetInputData();
         refreshQuery();
-        setIsOpen(false);
+        create_close();
       },
     }
   );
@@ -101,23 +115,25 @@ export function CategoryCreateAside({
       resetInputData();
       refreshQuery();
       resetImage();
-      setIsOpen(false);
+      create_close();
     },
   });
 
   return (
     <section
       className={cn(
-        isOpen
+        create_isOpen
           ? "mr-6 h-full w-1/2 border-r border-r-secondary/20 pr-6 opacity-100 2xl:w-1/3"
           : "w-0 overflow-hidden border-r border-r-transparent opacity-0",
         "transition-all duration-300"
       )}
     >
       <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
-        <span className="whitespace-nowrap text-2xl">Nueva categoría</span>
+        <span className="whitespace-nowrap text-2xl">
+          Crear nueva categoría
+        </span>
         <button
-          onClick={() => setIsOpen(false)}
+          onClick={handleCancel}
           className="btn btn-ghost btn-outline border border-secondary/30"
         >
           <PanelLeftClose className="size-6" />
@@ -136,10 +152,10 @@ export function CategoryCreateAside({
                   htmlFor="new_image"
                   className={cn(
                     image ? "opacity-0" : "opacity-100",
-                    "absolute left-0 top-0 z-10 flex size-full cursor-pointer items-center justify-center bg-neutral/50 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+                    "absolute left-0 top-0 z-10 flex size-full cursor-pointer items-center justify-center bg-secondary/20 backdrop-blur-sm transition-opacity group-hover:opacity-100"
                   )}
                 >
-                  <Upload className="size-8 animate-bounce text-primary" />
+                  <Upload className="size-8 animate-bounce text-white" />
                 </label>
                 <input
                   id="new_image"
@@ -174,6 +190,7 @@ export function CategoryCreateAside({
               <input
                 id="code"
                 type="text"
+                placeholder="Nuevo código"
                 {...register("code")}
                 className="input input-bordered w-full focus:outline-none"
               />
@@ -186,6 +203,7 @@ export function CategoryCreateAside({
               <input
                 id="name"
                 type="text"
+                placeholder="Nuevo nombre"
                 {...register("name")}
                 className="input input-bordered w-full focus:outline-none"
               />
@@ -197,20 +215,16 @@ export function CategoryCreateAside({
         <section className="mt-8 flex gap-4">
           <button
             type="button"
-            disabled={!hasDataChanged && !image}
+            disabled={!create_isChanged && !image}
             className="btn btn-ghost w-32"
-            onClick={() => {
-              resetInputData();
-              resetImage();
-              setIsOpen(false);
-            }}
+            onClick={handleCancel}
           >
             Cancelar
           </button>
           <LoadableButton
             type="submit"
             isLoading={dataMutation.isPending || imageMutation.isPending}
-            disabled={!hasDataChanged && !image}
+            disabled={!create_isChanged && !image}
             className="btn-primary w-32"
             animation="loading-dots"
           >
@@ -218,6 +232,16 @@ export function CategoryCreateAside({
           </LoadableButton>
         </section>
       </form>
+
+      <DiscardCategoryChangesModal
+        isOpen={create_modal_discardChanges_isOpen}
+        onClose={() => create_modal_discardChanges_change(false)}
+        onConfirm={() => {
+          resetInputData();
+          resetImage();
+          create_close();
+        }}
+      />
     </section>
   );
 }

@@ -57,7 +57,7 @@ export function AdministrationLayout({
       <Toaster richColors />
       <GeneralLayout title="Dashboard" description="This is the dashboard">
         <div className="relative flex h-screen w-full pl-20">
-          <section className="absolute left-0 top-0 z-10 flex h-full w-20 flex-col overflow-hidden border-r border-r-secondary/20 bg-base-100 pt-16 transition-all hover:w-72">
+          <section className="absolute left-0 top-0 z-20 flex h-full w-20 flex-col overflow-hidden border-r border-r-secondary/20 bg-base-100 pt-16 transition-all delay-300 hover:w-72">
             {sections.map((section) => (
               <SectionItem
                 key={section.name}

@@ -1,5 +1,4 @@
 import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
-import { type Category } from "@/functions/categories";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
@@ -8,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { AlertCircle, PanelRightClose, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -16,7 +15,9 @@ import NoImage from "../../../../public/no_image.png";
 import {
   DeleteCategoryImageModal,
   DeleteCategoryModal,
+  DiscardCategoryChangesModal,
 } from "@/components/modals/administration/categories";
+import { useCategoyStore } from "@/hooks/states/categories";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -24,28 +25,23 @@ const inputSchema = z.object({
   name: z.string(),
 });
 
-export function CategoryDataAside({
-  category,
-  setSelectedCategory,
-}: {
-  category: Category | null;
-  setSelectedCategory: Dispatch<SetStateAction<Category | null>>;
-}) {
+export function CategoryDataAside() {
+  const { category, category_select, update_isChanged, update_change } =
+    useCategoyStore();
+
   const queryClient = useQueryClient();
 
   const [image, setImage] = useState<File>();
-  const [hasDataChanged, setHasDataChanged] = useState(false);
   const [isDeleteCategoryModalOpen, setIsDeleteCategoryModalOpen] =
     useState(false);
   const [isDeleteCategoryImageModalOpen, setIsDeleteCategoryImageModalOpen] =
     useState(false);
+  const [isDiscardChangesModalOpen, setIsDiscardChangesModalOpen] =
+    useState(false);
 
   function resetInputData() {
-    reset({
-      code: category?.code,
-      name: category?.name,
-    });
-    setHasDataChanged(false);
+    reset({ code: category?.code, name: category?.name });
+    update_change(false);
   }
 
   function resetImage() {
@@ -54,6 +50,16 @@ export function CategoryDataAside({
 
   function refreshQuery() {
     queryClient.invalidateQueries({ queryKey: ["categories"] });
+  }
+
+  function handleCancel() {
+    if (!image && !update_isChanged) {
+      update_change(false);
+      category_select(null);
+      return;
+    }
+
+    setIsDiscardChangesModalOpen(true);
   }
 
   const {
@@ -71,13 +77,13 @@ export function CategoryDataAside({
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
-    if (hasDataChanged) dataMutation.mutate(data);
+    if (update_isChanged) dataMutation.mutate(data);
     if (image) imageMutation.mutate();
   };
 
   watch((value, { type }) => {
     if (type !== "change") return;
-    setHasDataChanged(
+    update_change(
       value.name !== category?.name || value.code !== category?.code
     );
   });
@@ -130,7 +136,7 @@ export function CategoryDataAside({
       <div className="mb-8 flex h-12 w-full items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => setSelectedCategory(null)}
+            onClick={handleCancel}
             className="btn btn-ghost btn-outline border border-secondary/30"
           >
             <PanelRightClose className="size-6" />
@@ -139,7 +145,7 @@ export function CategoryDataAside({
         </div>
         <button
           onClick={() => setIsDeleteCategoryModalOpen(true)}
-          className="btn btn-error w-12 flex-row flex-nowrap items-center justify-end gap-4 overflow-hidden whitespace-nowrap rounded-md px-3 text-primary transition-all hover:w-56"
+          className="btn btn-error w-12 flex-row flex-nowrap items-center justify-end gap-4 overflow-hidden whitespace-nowrap rounded-md px-3 text-white transition-all hover:w-56"
         >
           <span>Eliminar categoría</span>
           <div className="min-w-6">
@@ -191,7 +197,7 @@ export function CategoryDataAside({
                   <button
                     type="button"
                     onClick={() => setIsDeleteCategoryImageModalOpen(true)}
-                    className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-primary opacity-0 group-hover:opacity-100"
+                    className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="size-5" />
                   </button>
@@ -200,7 +206,7 @@ export function CategoryDataAside({
                   htmlFor="update_image"
                   className="absolute left-0 top-0 z-30 flex size-full cursor-pointer items-center justify-center opacity-0 backdrop-blur-sm transition-opacity group-hover:bg-neutral/50 group-hover:opacity-100"
                 >
-                  <Upload className="size-8 animate-bounce text-primary" />
+                  <Upload className="size-8 animate-bounce text-white" />
                 </label>
                 <input
                   id="update_image"
@@ -239,19 +245,16 @@ export function CategoryDataAside({
         <section className="mt-8 flex gap-4">
           <button
             type="button"
-            disabled={!hasDataChanged && !image}
+            disabled={!update_isChanged && !image}
             className="btn btn-ghost w-32"
-            onClick={() => {
-              resetInputData();
-              resetImage();
-            }}
+            onClick={handleCancel}
           >
             Cancelar
           </button>
           <LoadableButton
             type="submit"
             isLoading={dataMutation.isPending || imageMutation.isPending}
-            disabled={!hasDataChanged && !image}
+            disabled={!update_isChanged && !image}
             className="btn-primary w-32"
             animation="loading-dots"
           >
@@ -262,10 +265,19 @@ export function CategoryDataAside({
 
       {category && (
         <>
+          <DiscardCategoryChangesModal
+            isOpen={isDiscardChangesModalOpen}
+            onClose={() => setIsDiscardChangesModalOpen(false)}
+            onConfirm={() => {
+              resetInputData();
+              resetImage();
+              category_select(null);
+            }}
+          />
           <DeleteCategoryModal
             isOpen={isDeleteCategoryModalOpen}
             onClose={() => setIsDeleteCategoryModalOpen(false)}
-            onSuccess={() => setSelectedCategory(null)}
+            onSuccess={() => category_select(null)}
             category={category}
           />
           <DeleteCategoryImageModal

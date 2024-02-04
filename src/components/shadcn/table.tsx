@@ -61,7 +61,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "h-12 cursor-pointer border-b border-b-secondary/30 transition-colors hover:bg-secondary/10 data-[state=selected]:bg-stone-800",
+      "h-12 border-b border-b-secondary/30 transition-colors hover:bg-secondary/10 data-[state=selected]:bg-stone-800",
       !!className && className
     )}
     {...props}

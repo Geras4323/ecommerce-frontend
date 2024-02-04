@@ -21,10 +21,10 @@ import {
 } from "@tanstack/react-table";
 import { Search } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import NoImage from "../../../public/no_image.png";
 import { CategoryDataAside } from "src/containers/administration/categories/dataAside";
 import { CategoryCreateAside } from "src/containers/administration/categories/createAside";
+import { useCategoyStore } from "@/hooks/states/categories";
 
 const columnHelper = createColumnHelper<Category>();
 
@@ -66,10 +66,15 @@ const columns = [
 ];
 
 function Categories() {
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
-  const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
+  const {
+    category,
+    category_select,
+    create_isOpen,
+    create_open,
+    create_close,
+    create_isChanged,
+    create_modal_discardChanges_change,
+  } = useCategoyStore();
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -90,31 +95,26 @@ function Categories() {
   });
   const numberOfColumns = table.getTotalSize();
 
-  useEffect(() => {
-    setSelectedCategory((prev) => {
-      const updateCat = categoriesQuery.data?.find(
-        (category) => category.id === selectedCategory?.id
-      );
-      if (updateCat) return updateCat;
-      return prev;
-    });
-  }, [categoriesQuery.data, selectedCategory?.id]);
+  // useEffect(() => {
+  //   setSelectedCategory((prev) => {
+  //     const updateCat = categoriesQuery.data?.find(
+  //       (category) => category.id === selectedCategory?.id
+  //     );
+  //     if (updateCat) return updateCat;
+  //     return prev;
+  //   });
+  // }, [categoriesQuery.data, selectedCategory?.id]);
 
   return (
     <AdministrationLayout active="Categorías">
       <div className="flex h-full w-full">
         {/* CREATE */}
-        <CategoryCreateAside
-          isOpen={isCreateCategoryOpen}
-          setIsOpen={setIsCreateCategoryOpen}
-        />
+        <CategoryCreateAside />
 
         {/* MAIN TABLE */}
         <section
           className={cn(
-            !!selectedCategory || isCreateCategoryOpen
-              ? "w-1/2 2xl:w-2/3"
-              : "w-full",
+            !!category || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
             "flex h-full flex-col transition-all duration-300"
           )}
         >
@@ -123,12 +123,13 @@ function Categories() {
 
             <button
               className={cn(
-                isCreateCategoryOpen
+                create_isOpen
                   ? "mr-0 w-0 overflow-hidden border-none p-0"
                   : "mr-8 w-40",
                 "btn btn-primary whitespace-nowrap transition-all duration-300"
               )}
-              onClick={() => setIsCreateCategoryOpen(true)}
+              onClick={create_open}
+              disabled={!!category}
             >
               Crear categoría
             </button>
@@ -175,9 +176,26 @@ function Categories() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    onClick={() => setSelectedCategory(row.original)}
+                    onClick={() => {
+                      if (create_isChanged) {
+                        create_modal_discardChanges_change(true);
+                        return;
+                      }
+
+                      if (create_isOpen) create_close();
+
+                      if (!category) {
+                        category_select(row.original);
+                        return;
+                      }
+
+                      category_select(
+                        category?.id === row.original.id ? null : row.original
+                      );
+                    }}
                     className={cn(
-                      row.original.id === selectedCategory?.id &&
+                      "cursor-pointer",
+                      row.original.id === category?.id &&
                         "bg-secondary/20 hover:bg-secondary/20"
                     )}
                   >
@@ -207,10 +225,7 @@ function Categories() {
         </section>
 
         {/* DATA ASIDE */}
-        <CategoryDataAside
-          category={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-        />
+        <CategoryDataAside />
       </div>
     </AdministrationLayout>
   );

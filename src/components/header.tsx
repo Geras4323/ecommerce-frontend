@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export const Header = () => {
   return (
-    <header className="fixed z-20 flex h-16 w-full items-center justify-between border-b border-b-secondary/20 bg-base-300/70 px-6 py-2 backdrop-blur">
+    <header className="fixed z-50 flex h-16 w-full items-center justify-between border-b border-b-secondary/20 bg-base-300/70 px-6 py-2 backdrop-blur">
       <Link href="/">
         <Image
           width={700}
