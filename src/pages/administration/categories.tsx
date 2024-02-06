@@ -24,7 +24,7 @@ import Image from "next/image";
 import NoImage from "../../../public/no_image.png";
 import { CategoryDataAside } from "src/containers/administration/categories/dataAside";
 import { CategoryCreateAside } from "src/containers/administration/categories/createAside";
-import { useCategoyStore } from "@/hooks/states/categories";
+import { useCategoryStore } from "@/hooks/states/categories";
 
 const columnHelper = createColumnHelper<Category>();
 
@@ -74,7 +74,7 @@ function Categories() {
     create_close,
     create_isChanged,
     create_modal_discardChanges_change,
-  } = useCategoyStore();
+  } = useCategoryStore();
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -95,16 +95,6 @@ function Categories() {
   });
   const numberOfColumns = table.getTotalSize();
 
-  // useEffect(() => {
-  //   setSelectedCategory((prev) => {
-  //     const updateCat = categoriesQuery.data?.find(
-  //       (category) => category.id === selectedCategory?.id
-  //     );
-  //     if (updateCat) return updateCat;
-  //     return prev;
-  //   });
-  // }, [categoriesQuery.data, selectedCategory?.id]);
-
   return (
     <AdministrationLayout active="Categorías">
       <div className="flex h-full w-full">
@@ -119,8 +109,6 @@ function Categories() {
           )}
         >
           <div className="mb-8 flex min-h-12 w-full items-center justify-start">
-            {/* <span className="text-2xl">Categorías</span> */}
-
             <button
               className={cn(
                 create_isOpen
@@ -179,6 +167,7 @@ function Categories() {
                     onClick={() => {
                       if (create_isChanged) {
                         create_modal_discardChanges_change(true);
+                        category_select(row.original);
                         return;
                       }
 

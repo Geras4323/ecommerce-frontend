@@ -1,6 +1,7 @@
 import { LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import type { Category } from "@/functions/categories";
+import { useCategoryStore } from "@/hooks/states/categories";
 import type { CloudinaryError, CloudinarySuccess } from "@/types/cloudinary";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
@@ -10,16 +11,25 @@ import { toast } from "sonner";
 
 export function DiscardCategoryChangesModal({
   isOpen,
-  onClose,
+  onClose: onCloseProp,
   onConfirm,
+  deselectCategory,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  deselectCategory?: boolean;
 }) {
+  const { category_remove } = useCategoryStore();
+
+  function onClose() {
+    if (deselectCategory) category_remove();
+    onCloseProp();
+  }
+
   function handleConfirm() {
     onConfirm();
-    onClose();
+    onCloseProp();
   }
 
   return (

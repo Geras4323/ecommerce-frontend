@@ -17,7 +17,7 @@ import {
   DeleteCategoryModal,
   DiscardCategoryChangesModal,
 } from "@/components/modals/administration/categories";
-import { useCategoyStore } from "@/hooks/states/categories";
+import { useCategoryStore } from "@/hooks/states/categories";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -26,8 +26,13 @@ const inputSchema = z.object({
 });
 
 export function CategoryDataAside() {
-  const { category, category_select, update_isChanged, update_change } =
-    useCategoyStore();
+  const {
+    category,
+    category_remove,
+    create_isOpen,
+    update_isChanged,
+    update_change,
+  } = useCategoryStore();
 
   const queryClient = useQueryClient();
 
@@ -55,7 +60,7 @@ export function CategoryDataAside() {
   function handleCancel() {
     if (!image && !update_isChanged) {
       update_change(false);
-      category_select(null);
+      category_remove();
       return;
     }
 
@@ -126,7 +131,7 @@ export function CategoryDataAside() {
   return (
     <section
       className={cn(
-        category
+        category && !create_isOpen
           ? "ml-6 h-full w-1/2 border-l border-l-secondary/20 pl-6 opacity-100 2xl:w-1/3"
           : "w-0 overflow-hidden border-l border-l-transparent opacity-0",
         "transition-all duration-300"
@@ -271,13 +276,13 @@ export function CategoryDataAside() {
             onConfirm={() => {
               resetInputData();
               resetImage();
-              category_select(null);
+              category_remove();
             }}
           />
           <DeleteCategoryModal
             isOpen={isDeleteCategoryModalOpen}
             onClose={() => setIsDeleteCategoryModalOpen(false)}
-            onSuccess={() => category_select(null)}
+            onSuccess={() => category_remove()}
             category={category}
           />
           <DeleteCategoryImageModal

@@ -21,7 +21,7 @@ type CategoryStore = {
   update_change: (state: boolean) => void;
 };
 
-export const useCategoyStore = create<CategoryStore>()((set) => ({
+export const useCategoryStore = create<CategoryStore>()((set) => ({
   category: null,
   category_select: (category: Category | null) => set({ category: category }),
   category_remove: () => set({ category: null }),

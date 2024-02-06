@@ -1,7 +1,7 @@
 import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
 import { DiscardCategoryChangesModal } from "@/components/modals/administration/categories";
 import { type Category } from "@/functions/categories";
-import { useCategoyStore } from "@/hooks/states/categories";
+import { useCategoryStore } from "@/hooks/states/categories";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
@@ -31,7 +31,7 @@ export function CategoryCreateAside() {
     create_change,
     create_modal_discardChanges_isOpen,
     create_modal_discardChanges_change,
-  } = useCategoyStore();
+  } = useCategoryStore();
 
   const [image, setImage] = useState<File>();
 
@@ -241,6 +241,7 @@ export function CategoryCreateAside() {
           resetImage();
           create_close();
         }}
+        deselectCategory
       />
     </section>
   );
