@@ -14,6 +14,7 @@ export const imageSchema = z
 export type Product = z.infer<typeof productSchema>;
 export const productSchema = z
   .object({
+    code: z.string(),
     name: z.string(),
     description: z.string(),
     price: z.number(),
@@ -26,6 +27,6 @@ export const productSchema = z
 
 export async function getProducts() {
   const url = `${vars.serverUrl}/api/v1/products`;
-  const res = await axios.get(url);
+  const res = await axios.get(url, { withCredentials: true });
   return productSchema.array().parse(res.data);
 }

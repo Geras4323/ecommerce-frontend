@@ -7,45 +7,59 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn/table";
-import { type Product, getProducts } from "@/functions/products";
 import { withAuth } from "@/functions/session";
-import type { CloudinaryError, CloudinarySuccess } from "@/types/cloudinary";
-import type { ServerError, ServerSuccess } from "@/types/types";
+import type { ServerError } from "@/types/types";
 import { cn } from "@/utils/lib";
-import { vars } from "@/utils/vars";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import axios from "axios";
-import { PanelRightClose } from "lucide-react";
-import { useState } from "react";
-import { Toaster, toast } from "sonner";
+import { Search } from "lucide-react";
+import Image from "next/image";
+import NoImage from "../../../public/no_image.png";
+import { getProducts, type Product } from "@/functions/products";
+import { useProductStore } from "@/hooks/states/products";
+import { ProductCreateAside } from "src/containers/administration/products/createAside";
+import { ProductDataAside } from "src/containers/administration/products/dataAside";
+import { getCategories } from "@/functions/categories";
+import { getSuppliers } from "@/functions/suppliers";
 
 const columnHelper = createColumnHelper<Product>();
 
-const columns = [
-  columnHelper.accessor("id", {
-    header: "ID",
-  }),
-  columnHelper.accessor("name", {
-    header: "Nombre",
-  }),
-  columnHelper.accessor("price", {
-    header: "Precio",
-    cell: (info) => <span>$ {info.getValue()}</span>,
-  }),
-  columnHelper.accessor("description", {
-    header: "Descripción",
-  }),
-];
-
 function Products() {
-  // const [image, setImage] = useState<File | undefined>();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const {
+    product,
+    product_select,
+    create_isOpen,
+    create_open,
+    create_close,
+    create_isChanged,
+    create_modal_discardChanges_change,
+  } = useProductStore();
+
+  const categoriesQuery = useQuery<
+    Awaited<ReturnType<typeof getCategories>>,
+    ServerError
+  >({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
+
+  const suppliersQuery = useQuery<
+    Awaited<ReturnType<typeof getSuppliers>>,
+    ServerError
+  >({
+    queryKey: ["suppliers"],
+    queryFn: getSuppliers,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
 
   const productsQuery = useQuery<
     Awaited<ReturnType<typeof getProducts>>,
@@ -53,39 +67,144 @@ function Products() {
   >({
     queryKey: ["products"],
     queryFn: getProducts,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     retry: false,
   });
+
+  const columns = [
+    columnHelper.display({
+      id: `image_`,
+      header: "PRODUCTOS",
+      cell: (info) => (
+        <div className="mr-4 min-w-24">
+          <Image
+            alt={info.row.original.name}
+            src={info.row.original.images?.[0]?.url ?? NoImage}
+            width={100}
+            height={100}
+            className="size-24 rounded-md object-cover"
+          />
+        </div>
+      ),
+    }),
+    columnHelper.accessor("code", {
+      header: "Código",
+      cell: (info) => (
+        <p className="mr-4 h-8 w-16 text-base text-secondary">
+          {info.getValue()}
+        </p>
+      ),
+    }),
+    columnHelper.accessor("price", {
+      header: "Precio",
+      cell: (info) => (
+        <div className="mr-4 w-28 whitespace-nowrap text-2xl">
+          $ {info.getValue().toLocaleString("es-AR")}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("name", {
+      header: "Nombre",
+      cell: (info) => (
+        <div className="mr-4 w-32 text-lg">{info.getValue()}</div>
+      ),
+    }),
+    columnHelper.accessor("categoryID", {
+      header: "Categoría",
+      cell: (info) => (
+        <div className="mr-4 w-28 text-lg">
+          {categoriesQuery.data?.find((c) => c.id === info.getValue())?.name}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("supplierID", {
+      header: "Proveedor",
+      cell: (info) => (
+        <div className="mr-4 w-32 text-lg">
+          {suppliersQuery.data?.find((s) => s.id === info.getValue())?.name}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("description", {
+      header: "Descripción",
+      cell: (info) => (
+        <span className="w-24 truncate text-base text-secondary">
+          {info.getValue()}
+        </span>
+      ),
+    }),
+  ];
 
   const table = useReactTable({
     columns,
     data: productsQuery.data ?? [],
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getColumnCanGlobalFilter: () => true,
   });
-
-  const numberOfColumns = table.getAllLeafColumns().length;
+  const numberOfColumns = table.getTotalSize();
 
   return (
     <AdministrationLayout active="Productos">
       <div className="flex h-full w-full">
+        {/* CREATE */}
+        <ProductCreateAside />
+
+        {/* MAIN TABLE */}
         <section
           className={cn(
-            !!selectedProduct ? "w-1/2 2xl:w-2/3" : "w-full",
-            "h-full overflow-y-auto"
+            !!product || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
+            "relative flex h-full flex-col p-4 transition-all duration-300"
           )}
         >
+          <div
+            className={cn(
+              create_isOpen || product
+                ? "visible opacity-100"
+                : "invisible opacity-0",
+              "absolute bottom-0 left-0 right-0 top-0 z-10 bg-base-100/50 backdrop-blur-md transition-opacity"
+            )}
+          />
+
+          <div className="mb-8 flex min-h-12 w-full items-center justify-start">
+            <button
+              className={cn(
+                create_isOpen
+                  ? "mr-0 w-0 overflow-hidden border-none p-0"
+                  : "mr-8 w-40",
+                "btn btn-primary whitespace-nowrap transition-all duration-300"
+              )}
+              onClick={create_open}
+              disabled={!!product}
+            >
+              Crear producto
+            </button>
+
+            <div className="input flex w-96 items-center justify-start border border-secondary/30 p-0">
+              <div className="flex h-full min-w-12 items-center justify-center border-r border-r-secondary/30">
+                <Search className="size-6 text-secondary" />
+              </div>
+              <input
+                type="text"
+                placeholder="Filtrar por cualquier campo"
+                className="h-full w-full bg-transparent px-3"
+                onChange={(event) => table.setGlobalFilter(event.target.value)}
+              />
+            </div>
+          </div>
+
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
                   key={headerGroup.id}
-                  className="cursor-default bg-secondary/10 hover:bg-secondary/10"
+                  className="bg-secondary/20 hover:bg-secondary/20"
                 >
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
-                      className="text-primary"
+                      className="cursor-default"
                     >
                       {header.isPlaceholder
                         ? null
@@ -103,10 +222,17 @@ function Products() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    onClick={() => setSelectedProduct(row.original)}
+                    onClick={() => {
+                      if (product || create_isOpen) return;
+
+                      product_select(row.original);
+                    }}
                     className={cn(
-                      row.original.id === selectedProduct?.id &&
-                        "bg-secondary/20"
+                      product || create_isOpen
+                        ? `cursor-default ${
+                            row.original.id === product?.id && "bg-secondary/20"
+                          }`
+                        : "cursor-pointer hover:bg-secondary/20"
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -126,7 +252,7 @@ function Products() {
                     colSpan={numberOfColumns}
                     className="h-12 text-center"
                   >
-                    No results
+                    Sin resultados
                   </TableCell>
                 </TableRow>
               )}
@@ -134,25 +260,8 @@ function Products() {
           </Table>
         </section>
 
-        <section
-          className={cn(
-            selectedProduct
-              ? "relative h-full w-1/2 border-l border-l-secondary/20 pl-7 2xl:w-1/3"
-              : "hidden"
-          )}
-        >
-          <div className="sticky top-20 h-fit py-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSelectedProduct(null)}
-                className="btn btn-ghost"
-              >
-                <PanelRightClose className="size-6" />
-              </button>
-              <span className="text-2xl">{selectedProduct?.name}</span>
-            </div>
-          </div>
-        </section>
+        {/* DATA ASIDE */}
+        <ProductDataAside />
       </div>
     </AdministrationLayout>
   );
@@ -160,53 +269,3 @@ function Products() {
 
 export const getServerSideProps = withAuth("admin");
 export default Products;
-
-// const uploadMutation = useMutation<
-//   ServerSuccess<CloudinarySuccess>,
-//   ServerError<CloudinaryError>,
-//   File | undefined
-// >({
-//   mutationFn: async (data) => {
-//     return axios.post(
-//       `${vars.serverUrl}/api/v1/categories/1/image`,
-//       {
-//         file: data,
-//       },
-//       {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//         },
-//       }
-//     );
-//   },
-//   onSuccess: (res) => {
-//     if (res.data.error.message) {
-//       toast.error("Error en la subida");
-//       return;
-//     }
-//     toast.success("Foto subida exitosamente");
-//   },
-//   onError: (err) => {
-//     console.log(err.response?.data.Response.message);
-//   },
-// });
-
-// const deleteMutation = useMutation<
-//   ServerSuccess<CloudinarySuccess>,
-//   ServerError<CloudinaryError>,
-//   void
-// >({
-//   mutationFn: async () => {
-//     return axios.delete(`${vars.serverUrl}/api/v1/categories/1/image`);
-//   },
-//   onSuccess: (res) => {
-//     if (res.data.error.message) {
-//       toast.error(res.data.error.message);
-//       return;
-//     }
-//     toast.success("Foto eliminada exitosamente");
-//   },
-//   onError: (err) => {
-//     console.log(err.response?.data.Response.message);
-//   },
-// });

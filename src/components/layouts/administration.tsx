@@ -67,9 +67,7 @@ export function AdministrationLayout({
             ))}
           </section>
 
-          <article className="h-full w-full px-4 pb-4 pt-20">
-            {children}
-          </article>
+          <article className="h-full w-full px-0.5 pt-16">{children}</article>
         </div>
       </GeneralLayout>
     </>
