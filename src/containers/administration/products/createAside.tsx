@@ -30,7 +30,7 @@ import { type SubmitHandler, useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-type Input = z.infer<typeof inputSchema>;
+type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
   name: z.string().min(1, { message: "Debe tener un nombre" }),
   price: z
@@ -53,7 +53,6 @@ export function ProductCreateAside() {
   const {
     create_isOpen,
     create_close,
-    create_isChanged,
     create_change,
     create_modal_discardChanges_isOpen,
     create_modal_discardChanges_change,
@@ -81,6 +80,18 @@ export function ProductCreateAside() {
     retry: false,
   });
 
+  function checkChange() {
+    const values = getValues();
+    return (
+      values.name !== "" ||
+      values.code !== "" ||
+      values.description !== "" ||
+      values.price !== "" ||
+      values.categoryID !== undefined ||
+      values.supplierID !== undefined
+    );
+  }
+
   function resetInputData() {
     reset();
     create_change(false);
@@ -95,12 +106,10 @@ export function ProductCreateAside() {
   }
 
   function handleCancel() {
-    if (!image && !create_isChanged) {
-      create_change(false);
+    if (!image && !checkChange()) {
       create_close();
       return;
     }
-
     create_modal_discardChanges_change(true);
   }
 
@@ -110,34 +119,23 @@ export function ProductCreateAside() {
     handleSubmit,
     formState: { errors },
     control,
-    watch,
+    getValues,
   } = useForm<Input>({
     resolver: zodResolver(inputSchema),
-    defaultValues: { code: "", name: "" },
+    defaultValues: { code: "", name: "", price: "" },
   });
 
-  watch((value, { type }) => {
-    if (type !== "change") return;
-    create_change(
-      value.name !== "" ||
-        value.code !== "" ||
-        value.description !== "" ||
-        value.price !== undefined ||
-        value.categoryID !== undefined ||
-        value.supplierID !== undefined
-    );
-  });
+  const onSubmit: SubmitHandler<Input> = (data) => {
+    if (checkChange()) {
+      dataMutation.mutate(data);
+      return;
+    }
 
-  const onSubmit: SubmitHandler<z.output<typeof inputSchema>> = (data) => {
-    if (create_isChanged) dataMutation.mutate(data);
-    console.log(data);
+    resetInputData();
+    create_close();
   };
 
-  const dataMutation = useMutation<
-    ServerSuccess<Product>,
-    ServerError,
-    z.output<typeof inputSchema>
-  >({
+  const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
     mutationFn: async (data) => {
       const url = `${vars.serverUrl}/api/v1/products`;
       return axios.post(url, [data], { withCredentials: true });
@@ -223,7 +221,7 @@ export function ProductCreateAside() {
                 <DollarSign className="size-6 text-secondary" />
               </div>
               <input
-                type="number"
+                type="text"
                 placeholder="..."
                 {...register("price")}
                 className="h-full w-full bg-transparent pr-3"
@@ -329,7 +327,6 @@ export function ProductCreateAside() {
         <section className="mt-8 flex gap-4">
           <button
             type="button"
-            disabled={!create_isChanged && !image}
             className="btn btn-ghost w-32"
             onClick={handleCancel}
           >
@@ -339,7 +336,6 @@ export function ProductCreateAside() {
             type="submit"
             // isLoading={dataMutation.isPending || imageMutation.isPending}
             isLoading={dataMutation.isPending}
-            disabled={!create_isChanged && !image}
             className="btn-primary w-32"
             animation="loading-dots"
           >

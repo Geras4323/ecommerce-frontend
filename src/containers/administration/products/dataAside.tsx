@@ -59,7 +59,6 @@ export function ProductDataAside() {
     product_remove,
     create_isOpen,
     update_isChanged,
-    update_change,
   } = useProductStore();
 
   const queryClient = useQueryClient();
@@ -71,48 +70,6 @@ export function ProductDataAside() {
     useState(false);
   const [isDiscardChangesModalOpen, setIsDiscardChangesModalOpen] =
     useState(false);
-
-  function resetInputData() {
-    reset({ code: product?.code, name: product?.name });
-    // update_change(false);
-  }
-
-  function resetImage() {
-    setImage(undefined);
-  }
-
-  function refreshQuery() {
-    queryClient.invalidateQueries({ queryKey: ["products"] });
-  }
-
-  function handleCancel() {
-    if (!image && !update_isChanged) {
-      // update_change(false);
-      product_remove();
-      return;
-    }
-
-    setIsDiscardChangesModalOpen(true);
-  }
-
-  const {
-    reset,
-    register,
-    handleSubmit,
-    formState: { errors },
-    control,
-    watch,
-  } = useForm<Input>({
-    resolver: zodResolver(inputSchema),
-    values: {
-      code: product?.code ?? "",
-      name: product?.name ?? "",
-      description: product?.description ?? "",
-      price: `${product?.price}` ?? `${-1}`,
-      categoryID: `${product?.categoryID}` ?? `${-1}`,
-      supplierID: `${product?.supplierID}` ?? `${-1}`,
-    },
-  });
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -134,22 +91,56 @@ export function ProductDataAside() {
     retry: false,
   });
 
-  const onSubmit: SubmitHandler<Input> = (data) => {
-    if (update_isChanged) dataMutation.mutate(data);
-    // if (image) imageMutation.mutate();
-  };
+  function checkChange() {
+    const values = getValues();
+    return (
+      values.name !== product?.name ||
+      values.code !== product?.code ||
+      values.description !== product?.description ||
+      Number(values.price) !== product?.price ||
+      Number(values.categoryID) !== product?.categoryID ||
+      Number(values.supplierID) !== product?.supplierID
+    );
+  }
 
-  // watch((value, { type }) => {
-  //   if (type !== "change") return;
-  //   update_change(
-  //     value.name !== product?.name ||
-  //       value.code !== product?.code ||
-  //       value.description !== product?.description ||
-  //       value.price !== product?.price ||
-  //       value.categoryID !== product?.categoryID ||
-  //       value.supplierID !== product?.supplierID
-  //   );
-  // });
+  function resetInputData() {
+    reset({ code: product?.code, name: product?.name });
+  }
+
+  function resetImage() {
+    setImage(undefined);
+  }
+
+  function refreshQuery() {
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  }
+
+  function handleCancel() {
+    if (!image && !checkChange()) {
+      product_remove();
+      return;
+    }
+    setIsDiscardChangesModalOpen(true);
+  }
+
+  const {
+    reset,
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+    getValues,
+  } = useForm<Input>({
+    resolver: zodResolver(inputSchema),
+    values: {
+      code: product?.code ?? "",
+      name: product?.name ?? "",
+      description: product?.description ?? "",
+      price: `${product?.price}` ?? `${-1}`,
+      categoryID: `${product?.categoryID}` ?? `${-1}`,
+      supplierID: `${product?.supplierID}` ?? `${-1}`,
+    },
+  });
 
   const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
     mutationFn: async (data) => {
@@ -167,6 +158,17 @@ export function ProductDataAside() {
       product_remove();
     },
   });
+
+  const onSubmit: SubmitHandler<Input> = (data) => {
+    if (checkChange()) {
+      dataMutation.mutate(data);
+      return;
+    }
+
+    resetInputData();
+    product_remove();
+    // if (image) imageMutation.mutate();
+  };
 
   // const imageMutation = useMutation<any, ServerError, void>({
   //   mutationFn: async () => {
@@ -247,7 +249,7 @@ export function ProductDataAside() {
                 <DollarSign className="size-6 text-secondary" />
               </div>
               <input
-                type="number"
+                type="text"
                 placeholder="..."
                 {...register("price")}
                 className="h-full w-full bg-transparent pr-3"
