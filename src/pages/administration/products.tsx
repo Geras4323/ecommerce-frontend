@@ -31,15 +31,8 @@ import { getSuppliers } from "@/functions/suppliers";
 const columnHelper = createColumnHelper<Product>();
 
 function Products() {
-  const {
-    product,
-    product_select,
-    create_isOpen,
-    create_open,
-    create_close,
-    create_isChanged,
-    create_modal_discardChanges_change,
-  } = useProductStore();
+  const { product, product_select, create_isOpen, create_open } =
+    useProductStore();
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -74,7 +67,6 @@ function Products() {
   const columns = [
     columnHelper.display({
       id: `image_`,
-      header: "PRODUCTOS",
       cell: (info) => (
         <div className="mr-4 min-w-24">
           <Image

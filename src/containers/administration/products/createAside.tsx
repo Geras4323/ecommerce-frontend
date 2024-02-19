@@ -21,7 +21,7 @@ import {
   AlertCircle,
   DollarSign,
   PanelLeftClose,
-  Search,
+  Trash2,
   Upload,
 } from "lucide-react";
 import Image from "next/image";
@@ -138,13 +138,13 @@ export function ProductCreateAside() {
   const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
     mutationFn: async (data) => {
       const url = `${vars.serverUrl}/api/v1/products`;
-      return axios.post(url, [data], { withCredentials: true });
+      return axios.post(url, data, { withCredentials: true });
     },
-    onSuccess: (product) => {
-      // if (image) {
-      //   // imageMutation.mutate(product.data.id);
-      //   return;
-      // }
+    onSuccess: (res) => {
+      if (image) {
+        imageMutation.mutate(res.data.id);
+        return;
+      }
       toast.success("Producto creado exitosamente");
       resetInputData();
       refreshQuery();
@@ -152,27 +152,27 @@ export function ProductCreateAside() {
     },
   });
 
-  // const imageMutation = useMutation<any, ServerError, number>({
-  //   mutationFn: async (catID) => {
-  //     return axios.post(
-  //       `${vars.serverUrl}/api/v1/products/${catID}/image`,
-  //       { file: image },
-  //       {
-  //         withCredentials: true,
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-  //   },
-  //   onSuccess: () => {
-  //     toast.success("Subido");
-  //     resetInputData();
-  //     refreshQuery();
-  //     resetImage();
-  //     create_close();
-  //   },
-  // });
+  const imageMutation = useMutation<any, ServerError, number>({
+    mutationFn: async (catID) => {
+      return axios.post(
+        `${vars.serverUrl}/api/v1/products/${catID}/image`,
+        { file: image },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      toast.success("Subido");
+      resetInputData();
+      refreshQuery();
+      resetImage();
+      create_close();
+    },
+  });
 
   return (
     <section
@@ -324,7 +324,56 @@ export function ProductCreateAside() {
           </div>
         </div>
 
-        <section className="mt-8 flex gap-4">
+        <div className="col-span-2 flex w-full flex-col gap-1">
+          <label className="text-lg text-secondary">Imágen:</label>
+          <section className="flex min-w-fit flex-row gap-4">
+            <div className="flex size-48 min-w-48 items-center justify-center rounded-xl border border-secondary/50">
+              <div className="group relative size-11/12 overflow-hidden rounded-md">
+                {image && (
+                  <button
+                    type="button"
+                    onClick={() => setImage(undefined)}
+                    className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="size-5" />
+                  </button>
+                )}
+                <label
+                  htmlFor="new_image"
+                  className={cn(
+                    image ? "opacity-0" : "opacity-100",
+                    "absolute left-0 top-0 z-10 flex size-full cursor-pointer items-center justify-center bg-secondary/20 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+                  )}
+                >
+                  <Upload className="size-8 animate-bounce text-white" />
+                </label>
+                <input
+                  id="new_image"
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => setImage(e.target.files?.[0])}
+                />
+                {image && (
+                  <Image
+                    alt="preview"
+                    width={200}
+                    height={200}
+                    src={URL.createObjectURL(image)}
+                    className="absolute size-full rounded-md"
+                  />
+                )}
+              </div>
+            </div>
+            {image && (
+              <div className="flex items-center justify-center gap-2 text-error">
+                <AlertCircle className="size-4" />
+                <ErrorSpan message="Imagen no guardada" />
+              </div>
+            )}
+          </section>
+        </div>
+
+        <section className="flex gap-4">
           <button
             type="button"
             className="btn btn-ghost w-32"
@@ -334,12 +383,11 @@ export function ProductCreateAside() {
           </button>
           <LoadableButton
             type="submit"
-            // isLoading={dataMutation.isPending || imageMutation.isPending}
-            isLoading={dataMutation.isPending}
+            isLoading={dataMutation.isPending || imageMutation.isPending}
             className="btn-primary w-32"
             animation="loading-dots"
           >
-            Guardar
+            Crear
           </LoadableButton>
         </section>
       </form>

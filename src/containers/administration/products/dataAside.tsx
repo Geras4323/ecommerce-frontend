@@ -13,7 +13,7 @@ import {
   Upload,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -34,6 +34,7 @@ import {
 import { getCategories } from "@/functions/categories";
 import { getSuppliers } from "@/functions/suppliers";
 import { type Product } from "@/functions/products";
+import { type CloudinarySuccess } from "@/types/cloudinary";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -142,6 +143,17 @@ export function ProductDataAside() {
     },
   });
 
+  const onSubmit: SubmitHandler<Input> = (data) => {
+    if (checkChange() || image) {
+      if (checkChange()) dataMutation.mutate(data);
+      if (image) imageMutation.mutate();
+      return;
+    }
+
+    resetInputData();
+    product_remove();
+  };
+
   const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
     mutationFn: async (data) => {
       return axios.put(
@@ -153,42 +165,44 @@ export function ProductDataAside() {
     onSuccess: (p) => {
       product_select(p.data); // update product in aside
       toast.success("Actualizado");
-      refreshQuery();
-      resetInputData();
-      product_remove();
+      if (!image) {
+        refreshQuery();
+        product_remove();
+      }
     },
   });
 
-  const onSubmit: SubmitHandler<Input> = (data) => {
-    if (checkChange()) {
-      dataMutation.mutate(data);
-      return;
-    }
-
-    resetInputData();
-    product_remove();
-    // if (image) imageMutation.mutate();
-  };
-
-  // const imageMutation = useMutation<any, ServerError, void>({
-  //   mutationFn: async () => {
-  //     return axios.post(
-  //       `${vars.serverUrl}/api/v1/categories/${product?.id}/image`,
-  //       { file: image },
-  //       {
-  //         withCredentials: true,
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-  //   },
-  //   onSuccess: () => {
-  //     toast.success("Subido");
-  //     refreshQuery();
-  //     resetImage();
-  //   },
-  // });
+  const imageMutation = useMutation<
+    ServerSuccess<{ id: number; cloud: CloudinarySuccess }>,
+    ServerError,
+    void
+  >({
+    mutationFn: async () => {
+      return axios.post(
+        `${vars.serverUrl}/api/v1/products/${product?.id}/image`,
+        { file: image },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    },
+    onSuccess: (res) => {
+      toast.success("Subido");
+      refreshQuery();
+      resetImage();
+      if (product)
+        product_select({
+          ...product,
+          images: [
+            { id: res.data.id, url: res.data.cloud.Response.secure_url },
+          ],
+        });
+      if (checkChange()) product_remove();
+    },
+  });
 
   return (
     <section
@@ -216,7 +230,7 @@ export function ProductDataAside() {
         >
           <span>Eliminar producto</span>
           <div className="min-w-6">
-            <AlertCircle className="size-6" />
+            <Trash2 className="size-6" />
           </div>
         </button>
       </div>
@@ -350,9 +364,112 @@ export function ProductDataAside() {
             />
             <ErrorSpan message={errors.description?.message} />
           </div>
+
+          <div className="col-span-2 flex flex-col gap-1">
+            <label className="text-lg text-secondary">Imágen:</label>
+            <section className="flex min-w-fit flex-row gap-4">
+              <div className="flex size-48 min-w-48 items-center justify-center rounded-xl border border-secondary/50">
+                <div className="group relative size-11/12 overflow-hidden rounded-md">
+                  {product?.images?.[0] && (
+                    <button
+                      type="button"
+                      onClick={() => setIsDeleteProductImageModalOpen(true)}
+                      className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="size-5" />
+                    </button>
+                  )}
+                  <label
+                    htmlFor="update_image"
+                    className="absolute left-0 top-0 z-30 flex size-full cursor-pointer items-center justify-center opacity-0 backdrop-blur-sm transition-opacity group-hover:bg-neutral/50 group-hover:opacity-100"
+                  >
+                    <Upload className="size-8 animate-bounce text-white" />
+                  </label>
+                  <input
+                    id="update_image"
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => setImage(e.target.files?.[0])}
+                  />
+                  {image && (
+                    <Image
+                      alt="preview"
+                      width={200}
+                      height={200}
+                      src={URL.createObjectURL(image)}
+                      className="absolute size-full rounded-md"
+                    />
+                  )}
+                  <Image
+                    alt={product?.name ?? ""}
+                    src={product?.images?.[0]?.url ?? NoImage}
+                    width={200}
+                    height={200}
+                    className="z-10 size-full select-none rounded-md bg-secondary/10 object-cover"
+                  />
+                </div>
+              </div>
+              {image && (
+                <div className="flex items-center justify-center gap-2 text-error">
+                  <AlertCircle className="size-4" />
+                  <ErrorSpan message="Imagen no guardada" />
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* <div className="col-span-2 flex flex-col gap-1">
+            <label htmlFor="description" className="text-lg text-secondary">
+              Imágenes:
+            </label>
+            <div className="flex min-h-36 w-full gap-4">
+              <label
+                htmlFor="new_images"
+                className="flex h-36 min-w-36 cursor-pointer items-center justify-center rounded-lg bg-secondary/20"
+              >
+                <Upload className="size-8 animate-bounce text-white" />
+              </label>
+              <input
+                id="new_images"
+                name="files"
+                type="file"
+                className="hidden"
+                multiple
+                onChange={(e) => {
+                  if (!e.target.files) return;
+                  setImages(e.target.files);
+                }}
+              />
+
+              <div className="flex min-h-36 w-full gap-4 overflow-hidden overflow-x-auto rounded-lg">
+                {images &&
+                  Array.from(images).map((image, i) => (
+                    <Image
+                      key={image.name}
+                      alt={`toUpload ${i}`}
+                      src={URL.createObjectURL(image)}
+                      width={200}
+                      height={200}
+                      className="h-full w-36 flex-shrink-0 rounded-lg bg-secondary/10 opacity-50"
+                    />
+                  ))}
+
+                {product?.images.map((image, i) => (
+                  <Image
+                    key={image.id}
+                    alt={`image ${i}`}
+                    src={image.url}
+                    width={200}
+                    height={200}
+                    className="h-full w-36 flex-shrink-0 rounded-lg bg-secondary/10"
+                  />
+                ))}
+              </div>
+            </div>
+          </div> */}
         </div>
 
-        <section className="mt-8 flex gap-4">
+        <section className="flex gap-4">
           <button
             type="button"
             disabled={!update_isChanged && !image}
@@ -363,8 +480,7 @@ export function ProductDataAside() {
           </button>
           <LoadableButton
             type="submit"
-            // isLoading={dataMutation.isPending || imageMutation.isPending}
-            isLoading={dataMutation.isPending}
+            isLoading={dataMutation.isPending || imageMutation.isPending}
             disabled={!update_isChanged && !image}
             className="btn-primary w-32"
             animation="loading-dots"

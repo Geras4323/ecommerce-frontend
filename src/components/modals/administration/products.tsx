@@ -124,6 +124,8 @@ export function DeleteProductImageModal({
   onClose: () => void;
   product: Product;
 }) {
+  const { product_select } = useProductStore();
+
   const queryClient = useQueryClient();
 
   function onClose() {
@@ -141,11 +143,8 @@ export function DeleteProductImageModal({
       const url = `${vars.serverUrl}/api/v1/products/${product.id}/image`;
       return axios.delete(url, { withCredentials: true });
     },
-    onSuccess: (res) => {
-      if (res.data.error.message) {
-        toast.error(res.data.error.message);
-        return;
-      }
+    onSuccess: () => {
+      product_select({ ...product, images: [] });
       onClose();
     },
     onError: (err) => {
@@ -160,7 +159,7 @@ export function DeleteProductImageModal({
       title="Eliminar imagen"
       description={
         <span>
-          ¿Está seguro de que desea eliminar la imagen de la categoría{" "}
+          ¿Está seguro de que desea eliminar la imagen del producto{" "}
           <b>{product.name}</b>?
         </span>
       }
