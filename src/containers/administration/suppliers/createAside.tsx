@@ -1,28 +1,25 @@
 import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
-import { DiscardCategoryChangesModal } from "@/components/modals/administration/categories";
+import { DiscardSupplierChangesModal } from "@/components/modals/administration/suppliers";
 import { type Category } from "@/functions/categories";
-import { useCategoryStore } from "@/hooks/states/categories";
-import { type CloudinarySuccess } from "@/types/cloudinary";
+import { useSupplierStore } from "@/hooks/states/suppliers";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { AlertCircle, PanelLeftClose, Trash2, Upload } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
+import { PanelLeftClose } from "lucide-react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
-  code: z.string().optional(),
+  // code: z.string().optional(),
   name: z.string(),
 });
 
-export function CategoryCreateAside() {
+export function SupplierCreateAside() {
   const queryClient = useQueryClient();
 
   const {
@@ -30,29 +27,23 @@ export function CategoryCreateAside() {
     create_close,
     create_modal_discardChanges_isOpen,
     create_modal_discardChanges_change,
-  } = useCategoryStore();
-
-  const [image, setImage] = useState<File>();
+  } = useSupplierStore();
 
   function checkChange() {
     const values = getValues();
-    return values.code !== "" || values.name !== "";
+    return values.name !== "";
   }
 
   function resetInputData() {
     reset();
   }
 
-  function resetImage() {
-    setImage(undefined);
-  }
-
   function refreshQuery() {
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
+    queryClient.invalidateQueries({ queryKey: ["suppliers"] });
   }
 
   function handleCancel() {
-    if (!image && !checkChange()) {
+    if (!checkChange()) {
       create_close();
       return;
     }
@@ -67,7 +58,8 @@ export function CategoryCreateAside() {
     getValues,
   } = useForm<Input>({
     resolver: zodResolver(inputSchema),
-    defaultValues: { code: "", name: "" },
+    defaultValues: { name: "" },
+    // defaultValues: { code: "", name: "" },
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
@@ -82,47 +74,17 @@ export function CategoryCreateAside() {
   const dataMutation = useMutation<ServerSuccess<Category>, ServerError, Input>(
     {
       mutationFn: async (data) => {
-        const url = `${vars.serverUrl}/api/v1/categories`;
+        const url = `${vars.serverUrl}/api/v1/suppliers`;
         return axios.post(url, data, { withCredentials: true });
       },
-      onSuccess: (res) => {
-        if (image) {
-          imageMutation.mutate(res.data.id);
-          return;
-        }
-        toast.success("Categoría creada exitosamente");
+      onSuccess: () => {
+        toast.success("Proveedor creado exitosamente");
         resetInputData();
         refreshQuery();
         create_close();
       },
     }
   );
-
-  const imageMutation = useMutation<
-    ServerSuccess<CloudinarySuccess>,
-    ServerError,
-    number
-  >({
-    mutationFn: async (catID) => {
-      return axios.post(
-        `${vars.serverUrl}/api/v1/categories/${catID}/image`,
-        { file: image },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-    },
-    onSuccess: () => {
-      toast.success("Subido");
-      resetInputData();
-      refreshQuery();
-      resetImage();
-      create_close();
-    },
-  });
 
   return (
     <section
@@ -135,7 +97,7 @@ export function CategoryCreateAside() {
     >
       <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
         <span className="whitespace-nowrap text-2xl">
-          Crear nueva categoría
+          Crear nuevo proveedor
         </span>
         <button
           onClick={handleCancel}
@@ -150,54 +112,8 @@ export function CategoryCreateAside() {
         className="flex flex-col items-end gap-4"
       >
         <div className="flex w-full items-center gap-4">
-          <section className="relative min-w-fit">
-            <div className="flex size-56 items-center justify-center rounded-xl border border-secondary/50">
-              <div className="group relative size-11/12 overflow-hidden rounded-md">
-                {image && (
-                  <button
-                    type="button"
-                    onClick={() => setImage(undefined)}
-                    className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="size-5" />
-                  </button>
-                )}
-                <label
-                  htmlFor="new_image"
-                  className={cn(
-                    image ? "opacity-0" : "opacity-100",
-                    "absolute left-0 top-0 z-10 flex size-full cursor-pointer items-center justify-center bg-secondary/20 backdrop-blur-sm transition-opacity group-hover:opacity-100"
-                  )}
-                >
-                  <Upload className="size-8 animate-bounce text-white" />
-                </label>
-                <input
-                  id="new_image"
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => setImage(e.target.files?.[0])}
-                />
-                {image && (
-                  <Image
-                    alt="preview"
-                    width={200}
-                    height={200}
-                    src={URL.createObjectURL(image)}
-                    className="absolute size-full rounded-md"
-                  />
-                )}
-              </div>
-            </div>
-            {image && (
-              <div className="absolute mt-1 flex w-full items-center justify-center gap-2 text-error">
-                <AlertCircle className="size-4" />
-                <ErrorSpan message="Imagen no guardada" />
-              </div>
-            )}
-          </section>
-
           <section className="flex w-full flex-col gap-4">
-            <div className="flex flex-col gap-1">
+            {/* <div className="flex flex-col gap-1">
               <label htmlFor="code" className="text-lg text-secondary">
                 Código:
               </label>
@@ -209,7 +125,7 @@ export function CategoryCreateAside() {
                 className="input input-bordered w-full focus:outline-none"
               />
               <ErrorSpan message={errors.code?.message} />
-            </div>
+            </div> */}
             <div className="flex flex-col gap-1">
               <label htmlFor="name" className="text-lg text-secondary">
                 <MandatoryMark /> Nombre:
@@ -236,7 +152,7 @@ export function CategoryCreateAside() {
           </button>
           <LoadableButton
             type="submit"
-            isLoading={dataMutation.isPending || imageMutation.isPending}
+            isLoading={dataMutation.isPending}
             className="btn-primary w-32"
             animation="loading-dots"
           >
@@ -245,15 +161,14 @@ export function CategoryCreateAside() {
         </section>
       </form>
 
-      <DiscardCategoryChangesModal
+      <DiscardSupplierChangesModal
         isOpen={create_modal_discardChanges_isOpen}
         onClose={() => create_modal_discardChanges_change(false)}
         onConfirm={() => {
           resetInputData();
-          resetImage();
           create_close();
         }}
-        deselectCategory
+        deselectSupplier
       />
     </section>
   );

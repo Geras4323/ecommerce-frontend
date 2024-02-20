@@ -12,14 +12,14 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import NoImage from "../../../../public/no_image.png";
+import { useCategoryStore } from "@/hooks/states/categories";
+import { type Category } from "@/functions/categories";
+import { type CloudinarySuccess } from "@/types/cloudinary";
 import {
   DeleteCategoryImageModal,
   DeleteCategoryModal,
   DiscardCategoryChangesModal,
 } from "@/components/modals/administration/categories";
-import { useCategoryStore } from "@/hooks/states/categories";
-import { type Category } from "@/functions/categories";
-import { type CloudinarySuccess } from "@/types/cloudinary";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
