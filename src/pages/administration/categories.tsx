@@ -31,7 +31,6 @@ const columnHelper = createColumnHelper<Category>();
 const columns = [
   columnHelper.display({
     id: `image_`,
-    header: "CATEGORÍAS",
     cell: (info) => (
       <div className="mr-4 min-w-24">
         <Image
@@ -47,12 +46,14 @@ const columns = [
   columnHelper.accessor("code", {
     header: "Código",
     cell: (info) => (
-      <span className="mr-4 text-base text-secondary">{info.getValue()}</span>
+      <p className="mr-4 h-8 w-16 text-base text-secondary">
+        {info.getValue()}
+      </p>
     ),
   }),
   columnHelper.accessor("name", {
     header: "Nombre",
-    cell: (info) => <span className="mr-4 text-lg">{info.getValue()}</span>,
+    cell: (info) => <div className="mr-4 w-32 text-lg">{info.getValue()}</div>,
   }),
   columnHelper.accessor("image", {
     header: "Imagen",
@@ -66,15 +67,8 @@ const columns = [
 ];
 
 function Categories() {
-  const {
-    category,
-    category_select,
-    create_isOpen,
-    create_open,
-    create_close,
-    create_isChanged,
-    create_modal_discardChanges_change,
-  } = useCategoryStore();
+  const { category, category_select, create_isOpen, create_open } =
+    useCategoryStore();
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -105,9 +99,18 @@ function Categories() {
         <section
           className={cn(
             !!category || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
-            "flex h-full flex-col transition-all duration-300"
+            "relative flex h-full flex-col p-4 transition-all duration-300"
           )}
         >
+          <div
+            className={cn(
+              create_isOpen || category
+                ? "visible opacity-100"
+                : "invisible opacity-0",
+              "absolute bottom-0 left-0 right-0 top-0 z-10 bg-base-100/50 backdrop-blur-md transition-opacity"
+            )}
+          />
+
           <div className="mb-8 flex min-h-12 w-full items-center justify-start">
             <button
               className={cn(
@@ -123,7 +126,7 @@ function Categories() {
             </button>
 
             <div className="input flex w-96 items-center justify-start border border-secondary/30 p-0">
-              <div className="flex h-full w-12 items-center justify-center border-r border-r-secondary/30">
+              <div className="flex h-full min-w-12 items-center justify-center border-r border-r-secondary/30">
                 <Search className="size-6 text-secondary" />
               </div>
               <input
@@ -165,27 +168,17 @@ function Categories() {
                   <TableRow
                     key={row.id}
                     onClick={() => {
-                      if (create_isChanged) {
-                        create_modal_discardChanges_change(true);
-                        category_select(row.original);
-                        return;
-                      }
+                      if (category || create_isOpen) return;
 
-                      if (create_isOpen) create_close();
-
-                      if (!category) {
-                        category_select(row.original);
-                        return;
-                      }
-
-                      category_select(
-                        category?.id === row.original.id ? null : row.original
-                      );
+                      category_select(row.original);
                     }}
                     className={cn(
-                      "cursor-pointer",
-                      row.original.id === category?.id &&
-                        "bg-secondary/20 hover:bg-secondary/20"
+                      category || create_isOpen
+                        ? `cursor-default ${
+                            row.original.id === category?.id &&
+                            "bg-secondary/20"
+                          }`
+                        : "cursor-pointer hover:bg-secondary/20"
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (

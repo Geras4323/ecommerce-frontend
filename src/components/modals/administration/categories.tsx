@@ -125,6 +125,8 @@ export function DeleteCategoryImageModal({
   onClose: () => void;
   category: Category;
 }) {
+  const { category_select } = useCategoryStore();
+
   const queryClient = useQueryClient();
 
   function onClose() {
@@ -142,11 +144,8 @@ export function DeleteCategoryImageModal({
       const url = `${vars.serverUrl}/api/v1/categories/${category.id}/image`;
       return axios.delete(url, { withCredentials: true });
     },
-    onSuccess: (res) => {
-      if (res.data.error.message) {
-        toast.error(res.data.error.message);
-        return;
-      }
+    onSuccess: () => {
+      category_select({ ...category, image: undefined });
       onClose();
     },
     onError: (err) => {

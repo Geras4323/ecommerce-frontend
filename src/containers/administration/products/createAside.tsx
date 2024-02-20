@@ -53,7 +53,6 @@ export function ProductCreateAside() {
   const {
     create_isOpen,
     create_close,
-    create_change,
     create_modal_discardChanges_isOpen,
     create_modal_discardChanges_change,
   } = useProductStore();
@@ -94,7 +93,6 @@ export function ProductCreateAside() {
 
   function resetInputData() {
     reset();
-    create_change(false);
   }
 
   function resetImage() {
@@ -130,7 +128,6 @@ export function ProductCreateAside() {
       dataMutation.mutate(data);
       return;
     }
-
     resetInputData();
     create_close();
   };
@@ -153,9 +150,9 @@ export function ProductCreateAside() {
   });
 
   const imageMutation = useMutation<any, ServerError, number>({
-    mutationFn: async (catID) => {
+    mutationFn: async (prodID) => {
       return axios.post(
-        `${vars.serverUrl}/api/v1/products/${catID}/image`,
+        `${vars.serverUrl}/api/v1/products/${prodID}/image`,
         { file: image },
         {
           withCredentials: true,

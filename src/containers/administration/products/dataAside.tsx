@@ -59,7 +59,7 @@ export function ProductDataAside() {
     product_select,
     product_remove,
     create_isOpen,
-    update_isChanged,
+    // update_isChanged,
   } = useProductStore();
 
   const queryClient = useQueryClient();
@@ -149,7 +149,6 @@ export function ProductDataAside() {
       if (image) imageMutation.mutate();
       return;
     }
-
     resetInputData();
     product_remove();
   };
@@ -472,7 +471,6 @@ export function ProductDataAside() {
         <section className="flex gap-4">
           <button
             type="button"
-            disabled={!update_isChanged && !image}
             className="btn btn-ghost w-32"
             onClick={handleCancel}
           >
@@ -481,7 +479,6 @@ export function ProductDataAside() {
           <LoadableButton
             type="submit"
             isLoading={dataMutation.isPending || imageMutation.isPending}
-            disabled={!update_isChanged && !image}
             className="btn-primary w-32"
             animation="loading-dots"
           >

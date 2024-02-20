@@ -18,6 +18,8 @@ import {
   DiscardCategoryChangesModal,
 } from "@/components/modals/administration/categories";
 import { useCategoryStore } from "@/hooks/states/categories";
+import { type Category } from "@/functions/categories";
+import { type CloudinarySuccess } from "@/types/cloudinary";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -26,13 +28,8 @@ const inputSchema = z.object({
 });
 
 export function CategoryDataAside() {
-  const {
-    category,
-    category_remove,
-    create_isOpen,
-    update_isChanged,
-    update_change,
-  } = useCategoryStore();
+  const { category, category_select, category_remove, create_isOpen } =
+    useCategoryStore();
 
   const queryClient = useQueryClient();
 
@@ -44,9 +41,13 @@ export function CategoryDataAside() {
   const [isDiscardChangesModalOpen, setIsDiscardChangesModalOpen] =
     useState(false);
 
+  function checkChange() {
+    const values = getValues();
+    return values.code !== category?.code || values.name !== category.name;
+  }
+
   function resetInputData() {
     reset({ code: category?.code, name: category?.name });
-    update_change(false);
   }
 
   function resetImage() {
@@ -58,12 +59,10 @@ export function CategoryDataAside() {
   }
 
   function handleCancel() {
-    if (!image && !update_isChanged) {
-      update_change(false);
+    if (!image && !checkChange()) {
       category_remove();
       return;
     }
-
     setIsDiscardChangesModalOpen(true);
   }
 
@@ -72,7 +71,7 @@ export function CategoryDataAside() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
+    getValues,
   } = useForm<Input>({
     resolver: zodResolver(inputSchema),
     values: {
@@ -82,33 +81,40 @@ export function CategoryDataAside() {
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
-    if (update_isChanged) dataMutation.mutate(data);
-    if (image) imageMutation.mutate();
+    if (checkChange() || image) {
+      if (checkChange()) dataMutation.mutate(data);
+      if (image) imageMutation.mutate();
+      return;
+    }
+    resetInputData();
+    category_remove();
   };
 
-  watch((value, { type }) => {
-    if (type !== "change") return;
-    update_change(
-      value.name !== category?.name || value.code !== category?.code
-    );
-  });
+  const dataMutation = useMutation<ServerSuccess<Category>, ServerError, Input>(
+    {
+      mutationFn: async (data) => {
+        return axios.put(
+          `${vars.serverUrl}/api/v1/categories/${category?.id}`,
+          data,
+          { withCredentials: true }
+        );
+      },
+      onSuccess: (c) => {
+        category_select(c.data);
+        toast.success("Actualizado");
+        if (!image) {
+          refreshQuery();
+          category_remove();
+        }
+      },
+    }
+  );
 
-  const dataMutation = useMutation<ServerSuccess, ServerError, Input>({
-    mutationFn: async (data) => {
-      return axios.put(
-        `${vars.serverUrl}/api/v1/categories/${category?.id}`,
-        data,
-        { withCredentials: true }
-      );
-    },
-    onSuccess: () => {
-      toast.success("Actualizado");
-      refreshQuery();
-      resetInputData();
-    },
-  });
-
-  const imageMutation = useMutation<any, ServerError, void>({
+  const imageMutation = useMutation<
+    ServerSuccess<CloudinarySuccess>,
+    ServerError,
+    void
+  >({
     mutationFn: async () => {
       return axios.post(
         `${vars.serverUrl}/api/v1/categories/${category?.id}/image`,
@@ -121,10 +127,14 @@ export function CategoryDataAside() {
         }
       );
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast.success("Subido");
       refreshQuery();
       resetImage();
+      if (category) {
+        category_select({ ...category, image: res.data.Response.secure_url });
+      }
+      if (checkChange()) category_remove();
     },
   });
 
@@ -132,9 +142,9 @@ export function CategoryDataAside() {
     <section
       className={cn(
         category && !create_isOpen
-          ? "ml-6 h-full w-1/2 border-l border-l-secondary/20 pl-6 opacity-100 2xl:w-1/3"
-          : "w-0 overflow-hidden border-l border-l-transparent opacity-0",
-        "transition-all duration-300"
+          ? "h-full w-1/2 border-l border-l-secondary/20 px-4 opacity-100 2xl:w-1/3"
+          : "w-0 overflow-hidden border-l border-l-transparent px-0 opacity-0",
+        "flex flex-col py-4 transition-all duration-300"
       )}
     >
       {/* HEADER */}
@@ -250,7 +260,6 @@ export function CategoryDataAside() {
         <section className="mt-8 flex gap-4">
           <button
             type="button"
-            disabled={!update_isChanged && !image}
             className="btn btn-ghost w-32"
             onClick={handleCancel}
           >
@@ -259,7 +268,6 @@ export function CategoryDataAside() {
           <LoadableButton
             type="submit"
             isLoading={dataMutation.isPending || imageMutation.isPending}
-            disabled={!update_isChanged && !image}
             className="btn-primary w-32"
             animation="loading-dots"
           >
