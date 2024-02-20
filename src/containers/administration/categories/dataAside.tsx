@@ -149,14 +149,14 @@ export function CategoryDataAside() {
     >
       {/* HEADER */}
       <div className="mb-8 flex h-12 w-full items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex w-full items-center gap-4 truncate">
           <button
             onClick={handleCancel}
             className="btn btn-ghost btn-outline border border-secondary/30"
           >
             <PanelRightClose className="size-6" />
           </button>
-          <span className="text-2xl">{category?.name}</span>
+          <span className="truncate text-2xl">{category?.name}</span>
         </div>
         <button
           onClick={() => setIsDeleteCategoryModalOpen(true)}
