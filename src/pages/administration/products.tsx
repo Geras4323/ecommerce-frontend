@@ -111,11 +111,18 @@ function Products() {
     }),
     columnHelper.accessor("supplierID", {
       header: "Proveedor",
-      cell: (info) => (
-        <div className="mr-4 w-32 text-lg">
-          {suppliersQuery.data?.find((s) => s.id === info.getValue())?.name}
-        </div>
-      ),
+      cell: (info) => {
+        const value = info.getValue();
+        return value ? (
+          <div className="mr-4 w-32 text-lg">
+            {suppliersQuery.data?.find((s) => s.id === value)?.name}
+          </div>
+        ) : (
+          <span className="mr-4 w-32 text-base italic text-secondary">
+            Sin proveedor
+          </span>
+        );
+      },
     }),
     columnHelper.accessor("description", {
       header: "Descripción",

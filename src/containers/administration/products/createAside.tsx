@@ -42,8 +42,9 @@ const inputSchema = z.object({
     .string({ required_error: "Categoría requerida" })
     .transform((id) => parseInt(id)),
   supplierID: z
-    .string({ required_error: "Proveedor requerido" })
-    .transform((id) => parseInt(id)),
+    .string()
+    .optional()
+    .transform((id) => (id ? parseInt(id) : undefined)),
   description: z.string().min(10, { message: "Mínimo 10 caracteres" }),
 });
 
@@ -274,22 +275,28 @@ export function ProductCreateAside() {
                 <ErrorSpan message={errors.categoryID?.message} />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex h-full flex-col justify-start gap-1">
                 <label htmlFor="supplier" className="text-lg text-secondary">
-                  <MandatoryMark /> Proveedor:
+                  Proveedor:
                 </label>
                 <Controller
                   name="supplierID"
                   control={control}
                   render={({ field }) => (
                     <Select
-                      // defaultValue="no_category"
+                      defaultValue="no_supplier"
                       onValueChange={(v) => field.onChange(v)}
                     >
                       <SelectTrigger className="input input-bordered w-full border outline-none">
-                        <SelectValue placeholder="Seleccionar proveedor" />
+                        {/* <SelectValue placeholder="Seleccionar proveedor" /> */}
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectOption value="no_supplier">
+                          <span className="italic text-secondary">
+                            Sin proveedor
+                          </span>
+                        </SelectOption>
                         {suppliersQuery.data?.map((supplier) => (
                           <SelectOption
                             key={supplier.id}
