@@ -69,14 +69,14 @@ export default function Home() {
                     href="/administration/categories"
                     className="btn btn-primary"
                   >
-                    Administration
+                    Administración
                   </Link>
                   <Link href="/showroom" className="btn btn-primary">
-                    Go to Showroom
+                    Ir al showroom
                   </Link>
                   <hr />
                   <button onClick={signOut} className="btn btn-outline">
-                    Sign Out
+                    Cerrar sesión
                   </button>
                 </div>
               ) : (
@@ -85,7 +85,7 @@ export default function Home() {
                     Login
                   </Link>
                   <Link href="/showroom" className="btn btn-primary">
-                    Go to Showroom
+                    Ir al showroom
                   </Link>
                 </div>
               )}

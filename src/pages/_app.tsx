@@ -3,6 +3,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import type { AppProps } from "next/app";
 import { useState } from "react";
+import { Montserrat, Comfortaa } from "next/font/google";
+
+const montserrat = Montserrat({ subsets: ["latin"] });
 
 export default function App({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient());
@@ -10,7 +13,9 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Component {...pageProps} />
+        <div className={montserrat.className}>
+          <Component {...pageProps} />
+        </div>
       </ThemeProvider>
     </QueryClientProvider>
   );
