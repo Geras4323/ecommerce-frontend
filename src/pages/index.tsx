@@ -1,4 +1,4 @@
-import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
+// import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
 import Logo from "../../public/logoNB.png";
 import Image from "next/image";
 import Link from "next/link";

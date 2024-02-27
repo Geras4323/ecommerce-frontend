@@ -27,7 +27,7 @@ export function ThemeSwitcher() {
       <SunIcon className="size-5" />
       <input
         type="checkbox"
-        className="toggle rounded-md transition-all duration-500"
+        className="toggle rounded-md transition-all"
         onClick={switchTheme}
         checked={theme === "dark"}
         readOnly

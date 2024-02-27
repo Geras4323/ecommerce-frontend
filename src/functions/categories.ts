@@ -15,6 +15,6 @@ const categorySchema = z
 
 export async function getCategories() {
   const url = `${vars.serverUrl}/api/v1/categories`;
-  const res = await axios.get(url);
+  const res = await axios.get(url, { withCredentials: true });
   return categorySchema.array().parse(res.data);
 }

@@ -18,7 +18,6 @@ export const productSchema = z
     name: z.string(),
     description: z.string(),
     price: z.number(),
-    orderProducts: z.any(),
     images: imageSchema,
     categoryID: z.number(),
     supplierID: z.number(),

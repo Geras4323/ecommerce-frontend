@@ -14,7 +14,7 @@ export type ServerSuccess<T = any> = AxiosResponse<T>;
 export type ServerError<T = any> = AxiosError<T>;
 
 export type WithChildren = {
-  children: ReactNode;
+  children?: ReactNode;
 };
 
 export type WithClassName = {

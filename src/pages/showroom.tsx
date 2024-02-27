@@ -1,21 +1,18 @@
 import { type Category, getCategories } from "@/functions/categories";
 import { GeneralLayout } from "@/layouts/GeneralLayout";
-import { useQuery } from "@tanstack/react-query";
+import { type UseMutationResult, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { type Dispatch, type SetStateAction, useState } from "react";
-// import Placeholder from "../../public/placeholder.svg";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/shadcn/carousel";
 import { type Product, getProducts } from "@/functions/products";
 import { cn } from "@/utils/lib";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { useShoppingCart } from "@/hooks/cart";
+import type { ServerError } from "@/types/types";
+import Link from "next/link";
 
 function Showroom() {
+  const cart = useShoppingCart();
+
   const [selectedCategory, setSelectedCategory] = useState<Category>();
 
   const categoriesQuery = useQuery({
@@ -68,9 +65,31 @@ function Showroom() {
           <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
             {productsQuery.data?.map((product) => {
               if (!selectedCategory)
-                return <ProductItem key={product.id} product={product} />;
+                return (
+                  <ProductItem
+                    key={product.id}
+                    product={product}
+                    addToCart={cart.addCartItem}
+                    inCart={
+                      cart.cartItems.data?.findIndex(
+                        (cI) => cI.productID === product.id
+                      ) !== -1
+                    }
+                  />
+                );
               if (selectedCategory?.id === product.categoryID)
-                return <ProductItem key={product.id} product={product} />;
+                return (
+                  <ProductItem
+                    key={product.id}
+                    product={product}
+                    addToCart={cart.addCartItem}
+                    inCart={
+                      cart.cartItems.data?.findIndex(
+                        (cI) => cI.productID === product.id
+                      ) !== -1
+                    }
+                  />
+                );
             })}
           </div>
         </section>
@@ -135,7 +154,23 @@ function CategoryItem({
   );
 }
 
-function ProductItem({ product }: { product: Product }) {
+function ProductItem({
+  product,
+  inCart,
+  addToCart,
+}: {
+  product: Product;
+  inCart: boolean;
+  addToCart: UseMutationResult<
+    any,
+    ServerError,
+    {
+      productID: number;
+      quantity: number;
+    },
+    unknown
+  >;
+}) {
   const [quantity, setQuantity] = useState(1);
 
   return (
@@ -154,9 +189,12 @@ function ProductItem({ product }: { product: Product }) {
           <span className="text-lg font-semibold text-primary/80">
             {product.name}
           </span>
-          <span className="text-2xl text-primary dark:text-gray-400">
-            ${product.price}
-          </span>
+          <div className="flex items-end gap-1">
+            <span className="text-xl text-primary/70">$</span>
+            <span className="text-2xl text-primary">
+              {product.price?.toLocaleString("es-AR")}
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-col gap-0.5 text-primary/60">
@@ -166,33 +204,51 @@ function ProductItem({ product }: { product: Product }) {
         </div>
 
         <div className="flex w-full justify-end gap-4">
-          <div className="flex h-8 w-full items-center rounded-lg">
-            <button
-              onClick={() => setQuantity((prev) => (prev > 1 ? --prev : prev))}
-              className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0"
-            >
-              <Minus className="size-4" />
-            </button>
-            <input
-              value={quantity}
-              onChange={(e) => {
-                const num = Number(e.target.value);
-                if (!isNaN(num)) setQuantity(num);
-              }}
-              className="btn-sm m-0 h-8 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center font-semibold outline-none"
-            />
-            <button
-              onClick={() => setQuantity((prev) => ++prev)}
-              className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0"
-            >
-              <Plus className="size-4" />
-            </button>
-          </div>
+          {!inCart && (
+            <div className="flex h-8 w-full items-center rounded-lg">
+              <button
+                onClick={() =>
+                  setQuantity((prev) => (prev > 1 ? --prev : prev))
+                }
+                className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0"
+              >
+                <Minus className="size-4" />
+              </button>
+              <input
+                value={quantity}
+                onChange={(e) => {
+                  const num = Number(e.target.value);
+                  if (!isNaN(num)) setQuantity(num);
+                }}
+                className="btn-sm m-0 h-8 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center font-semibold outline-none"
+              />
+              <button
+                onClick={() => setQuantity((prev) => ++prev)}
+                className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0"
+              >
+                <Plus className="size-4" />
+              </button>
+            </div>
+          )}
 
-          <button className="btn btn-primary btn-sm flex min-w-48 items-center gap-3">
-            <ShoppingCart className="size-5" />
-            Añadir al carrito
-          </button>
+          {!inCart ? (
+            <button
+              onClick={() =>
+                addToCart.mutate({ productID: product.id, quantity })
+              }
+              className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
+            >
+              <ShoppingCart className="size-5" />
+              Añadir al carrito
+            </button>
+          ) : (
+            <Link
+              href="/cart"
+              className="btn btn-outline btn-sm flex min-w-48 items-center gap-3"
+            >
+              Ver en el carrito
+            </Link>
+          )}
         </div>
       </div>
     </div>
