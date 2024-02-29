@@ -23,16 +23,12 @@ export function ThemeSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <SunIcon className="size-5" />
-      <input
-        type="checkbox"
-        className="toggle rounded-md transition-all"
-        onClick={switchTheme}
-        checked={theme === "dark"}
-        readOnly
-      />
-      <MoonIcon className="size-5" />
-    </div>
+    <button onClick={switchTheme} className="btn btn-square btn-ghost btn-sm">
+      {theme === "light" ? (
+        <SunIcon className="size-5" />
+      ) : (
+        <MoonIcon className="size-5" />
+      )}
+    </button>
   );
 }

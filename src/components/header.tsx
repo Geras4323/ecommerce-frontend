@@ -61,48 +61,51 @@ export const Header = () => {
           className="-ml-6 w-80"
         />
       </Link>
-      <ThemeSwitcher />
 
       {session ? (
-        <Popover
-          open={isSessionOpen}
-          onOpenChange={() => setIsSessionOpen((prev) => !prev)}
-        >
-          <PopoverTrigger className="relative flex cursor-pointer items-center gap-2 px-2 text-primary">
-            <span className="text-lg">
-              {session.data?.first_name} {session.data?.first_name}
-            </span>
-            <ChevronDown
-              className={cn(
-                isSessionOpen && "rotate-180",
-                "size-5 transition-all"
+        <div className="flex items-center gap-4">
+          <ThemeSwitcher />
+
+          <Popover
+            open={isSessionOpen}
+            onOpenChange={() => setIsSessionOpen((prev) => !prev)}
+          >
+            <PopoverTrigger className="btn btn-ghost btn-sm relative flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary">
+              <span className="text-lg font-medium">
+                {session.data?.first_name} {session.data?.first_name}
+              </span>
+              <ChevronDown
+                className={cn(
+                  isSessionOpen && "rotate-180",
+                  "size-5 transition-all"
+                )}
+              />
+              {cart.cartItems.data?.length !== 0 && (
+                <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
               )}
-            />
-            {cart.cartItems.data?.length !== 0 && (
-              <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
-            )}
-          </PopoverTrigger>
-          <PopoverContent align="end" sideOffset={17} className="">
-            <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-xl border border-secondary/20 bg-base-100">
-              {sections.map((section) => (
-                <Link
-                  key={section.title}
-                  href={section.url}
-                  className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
-                >
-                  <div className="relative">
-                    <section.Svg className="size-5" />
-                    {section.title === "Mi carrito" &&
-                      cart.cartItems.data?.length !== 0 && (
-                        <div className="absolute -right-2 -top-1 size-2 rounded-full bg-error" />
-                      )}
-                  </div>
-                  <span>{section.title}</span>
-                </Link>
-              ))}
-            </article>
-          </PopoverContent>
-        </Popover>
+            </PopoverTrigger>
+            <PopoverContent align="end" sideOffset={17} className="">
+              <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-xl border border-secondary/20 bg-base-100">
+                {sections.map((section) => (
+                  <Link
+                    key={section.title}
+                    href={section.url}
+                    className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
+                  >
+                    <div className="relative">
+                      <section.Svg className="size-5" />
+                      {section.title === "Mi carrito" &&
+                        cart.cartItems.data?.length !== 0 && (
+                          <div className="absolute -right-2 -top-1 size-2 rounded-full bg-error" />
+                        )}
+                    </div>
+                    <span>{section.title}</span>
+                  </Link>
+                ))}
+              </article>
+            </PopoverContent>
+          </Popover>
+        </div>
       ) : (
         <Link href="/login" className="btn btn-primary btn-sm">
           Iniciar sesión
