@@ -43,11 +43,11 @@ export default function Order() {
 
   return (
     <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
-      <div className="mx-auto mb-8 flex w-screen max-w-5xl flex-col gap-4 pt-24">
+      <div className="mx-auto flex h-screen w-screen max-w-5xl flex-col gap-4 pb-24 pt-24">
         <h1 className="border-b border-b-secondary/20 py-2 text-xl font-medium">
           DETALLE DEL PEDIDO
         </h1>
-        <section className="flex h-full w-full flex-row gap-8">
+        <section className="flex h-full w-full flex-row gap-4">
           <article className="flex h-full w-3/5 flex-col gap-4 overflow-y-auto">
             {orderQuery.data?.orderProducts?.map((item) => {
               const product = productsQuery.data?.find(
@@ -60,7 +60,7 @@ export default function Order() {
             })}
           </article>
 
-          <article className="flex h-full w-2/5 flex-col gap-4">
+          <article className="flex h-full w-2/5 flex-col gap-4 border-l border-l-secondary/20 pl-4">
             <div className="flex items-center gap-2">
               <Hash className="size-5 text-secondary" />
               <span className="text-lg text-secondary">Pedido Nro</span>
@@ -91,7 +91,7 @@ export default function Order() {
               )}
             </div>
 
-            <hr className="border-b border-t-0 border-b-secondary/30" />
+            <hr className="border-b border-t-0 border-b-secondary/20" />
 
             <div className="flex items-center gap-2">
               <DollarSign className="size-5 text-secondary" />

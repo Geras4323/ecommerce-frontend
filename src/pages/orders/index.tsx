@@ -31,12 +31,18 @@ export default function Orders() {
 
   return (
     <GeneralLayout title="Pedidos" description="Pedidos">
-      <div className="mx-auto mb-8 flex w-screen max-w-3xl flex-col gap-4 pt-24">
+      <div className="mx-auto flex h-screen w-screen max-w-3xl flex-col gap-4 py-24">
         <h1 className="border-b border-b-secondary/20 py-2 text-xl font-medium">
           PEDIDOS
         </h1>
         <section className="flex h-full w-full flex-row gap-8">
           <article className="flex h-full w-full flex-col gap-4 overflow-y-auto">
+            {ordersQuery.data?.map((item) => (
+              <OrdersItem key={item.id} item={item} />
+            ))}
+            {ordersQuery.data?.map((item) => (
+              <OrdersItem key={item.id} item={item} />
+            ))}
             {ordersQuery.data?.map((item) => (
               <OrdersItem key={item.id} item={item} />
             ))}
