@@ -17,6 +17,7 @@
     "@tanstack/react-table": "^8.11.7",
     "@types/js-cookie": "^3.0.6",
     "axios": "^1.6.5",
+    "date-fns": "^3.3.1",
     "embla-carousel": "8.0.0-rc19",
     "embla-carousel-react": "8.0.0-rc19",
     "js-cookie": "^3.0.5",

@@ -1,5 +1,5 @@
 import type { TCartItem } from "@/functions/cart";
-import { Product, getProducts } from "@/functions/products";
+import { type Product, getProducts } from "@/functions/products";
 import { useShoppingCart } from "@/hooks/cart";
 import { GeneralLayout } from "@/layouts/GeneralLayout";
 import type { ServerError, ServerSuccess } from "@/types/types";
@@ -7,20 +7,23 @@ import {
   useQuery,
   type UseMutationResult,
   useMutation,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { Check, Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 import NoImage from "../../public/no_image.png";
 import { cn } from "@/utils/lib";
-import { Order } from "@/functions/orders";
 import { vars } from "@/utils/vars";
-import { useSession } from "@/hooks/session";
 import axios from "axios";
+import { LoadableButton } from "@/components/forms";
+import { useRouter } from "next/router";
+import { type OrderItem } from "@/functions/orders";
 
 export default function Cart() {
-  const session = useSession();
   const cart = useShoppingCart();
+
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const productsQuery = useQuery({
     queryKey: ["products"],
@@ -38,72 +41,75 @@ export default function Cart() {
   }, 0);
 
   const createOrderMutation = useMutation<
-    ServerSuccess<Order>,
+    ServerSuccess<OrderItem>,
     ServerError,
     void
   >({
     mutationFn: async () => {
-      const url = `${vars.serverUrl}/api/v1/orders/user/${session.data?.id}`;
+      const url = `${vars.serverUrl}/api/v1/orders`;
       const items = cart.cartItems.data?.map((d) => ({
         productID: d.productID,
         quantity: d.quantity,
       }));
       return axios.post(url, items, { withCredentials: true });
     },
+    onSuccess: (order) => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      router.push(`/orders/${order.data.id}`);
+    },
   });
 
   return (
     <GeneralLayout title="Carrito" description="Carrito de compras">
-      <div className="mx-auto flex h-fit gap-8 pt-24">
-        {/* ITEMS */}
-        <section className="mb-8 flex w-screen max-w-7xl flex-col gap-4">
-          <div className="flex h-fit items-end justify-between border-b border-b-secondary/20 py-2">
-            <h2 className="text-xl font-medium">CARRITO DE COMPRAS</h2>
+      {/* ITEMS */}
+      <section className="mx-auto mb-8 flex w-screen max-w-7xl flex-col gap-4 pt-24">
+        <div className="flex h-fit items-end justify-between border-b border-b-secondary/20 py-2">
+          <h2 className="text-xl font-medium">CARRITO DE COMPRAS</h2>
 
-            <div className="flex items-end gap-4">
-              <h2 className="text-lg font-medium">TOTAL</h2>
-              <div className="flex items-end gap-1">
-                <span className="text-xl text-primary/70">$</span>
-                <span className="text-2xl text-primary">
-                  {total?.toLocaleString("es-AR")}
-                </span>
-              </div>
-              <span className="pb-0.5 text-xl text-secondary">|</span>
-              <button
-                onClick={() => createOrderMutation.mutate()}
-                className="btn btn-primary btn-sm ml-1"
-              >
-                <Check className="size-5" />
-                Confirmar pedido
-              </button>
+          <div className="flex items-end gap-4">
+            <h2 className="text-lg font-medium">TOTAL</h2>
+            <div className="flex items-end gap-1">
+              <span className="text-xl text-primary/70">$</span>
+              <span className="text-2xl text-primary">
+                {total?.toLocaleString("es-AR")}
+              </span>
             </div>
+            <span className="pb-0.5 text-xl text-secondary">|</span>
+            <LoadableButton
+              onClick={() => createOrderMutation.mutate()}
+              isPending={createOrderMutation.isPending}
+              className="btn btn-primary btn-sm ml-1"
+            >
+              <Check className="size-5" />
+              Confirmar pedido
+            </LoadableButton>
           </div>
+        </div>
 
-          <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
-            {productsQuery.data &&
-              cart.cartItems.data?.map((item) => {
-                const product = productsQuery.data.find(
-                  (p) => p.id === item.productID
+        <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
+          {productsQuery.data &&
+            cart.cartItems.data?.map((item) => {
+              const product = productsQuery.data.find(
+                (p) => p.id === item.productID
+              );
+              if (product)
+                return (
+                  <CartItem
+                    key={item.id}
+                    item={item}
+                    removeItem={cart.removeCartItem}
+                    updateItem={cart.modifyCartItem}
+                    product={product}
+                  />
                 );
-                if (product)
-                  return (
-                    <CartItem
-                      key={item.id}
-                      item={item}
-                      removeItem={cart.removeCartItem}
-                      updateItem={cart.modifyCartItem}
-                      product={product}
-                    />
-                  );
-              })}
-          </div>
-        </section>
-      </div>
+            })}
+        </div>
+      </section>
     </GeneralLayout>
   );
 }
 
-function CartItem({
+export function CartItem({
   item,
   updateItem,
   removeItem,
@@ -167,13 +173,13 @@ function CartItem({
           </span>
         </div>
 
-        <div className="flex h-8 w-full items-center rounded-lg">
+        <div className="flex h-8 w-24 items-center rounded-lg">
           <button
             onClick={() =>
               updateItem.mutate({ id: item.id, quantity: --item.quantity })
             }
             disabled={item.quantity === 1}
-            className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0"
+            className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 disabled:text-secondary/50"
           >
             <Minus className="size-4" />
           </button>

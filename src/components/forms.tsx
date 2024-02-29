@@ -17,7 +17,7 @@ export function MandatoryMark({ className }: WithClassName) {
 
 export const LoadableButton = ({
   type,
-  isLoading,
+  isPending,
   className,
   disabled,
   children,
@@ -25,7 +25,7 @@ export const LoadableButton = ({
   onClick,
 }: {
   type?: "button" | "reset" | "submit";
-  isLoading: boolean;
+  isPending: boolean;
   className?: string;
   disabled?: boolean;
   children?: ReactNode;
@@ -41,18 +41,18 @@ export const LoadableButton = ({
   return (
     <button
       onClick={(e) => {
-        if (isLoading || !onClick) return;
+        if (isPending || !onClick) return;
         onClick(e);
       }}
-      type={isLoading ? "button" : type}
+      type={isPending ? "button" : type}
       className={cn(
         "btn",
         !!className && className,
-        isLoading && "no-animation cursor-default"
+        isPending && "no-animation cursor-default"
       )}
       disabled={disabled}
     >
-      {isLoading ? <span className={cn("loading", animation)} /> : children}
+      {isPending ? <span className={cn("loading", animation)} /> : children}
     </button>
   );
 };

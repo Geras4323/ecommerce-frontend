@@ -9,17 +9,19 @@ import {
   ShoppingCartIcon,
   User2,
   Package,
+  CreditCard,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useState } from "react";
 import { cn } from "@/utils/lib";
+import { useShoppingCart } from "@/hooks/cart";
 
 type Section = {
   title: string;
   Svg: LucideIcon;
   url: string;
 };
-const sections: Section[] = [
+const sections = [
   {
     title: "Mis datos",
     Svg: User2,
@@ -35,10 +37,16 @@ const sections: Section[] = [
     Svg: ShoppingCartIcon,
     url: "/cart",
   },
-];
+  {
+    title: "Mis pedidos",
+    Svg: CreditCard,
+    url: "/orders",
+  },
+] as const satisfies readonly Section[];
 
 export const Header = () => {
   const session = useSession();
+  const cart = useShoppingCart();
 
   const [isSessionOpen, setIsSessionOpen] = useState(false);
 
@@ -60,7 +68,7 @@ export const Header = () => {
           open={isSessionOpen}
           onOpenChange={() => setIsSessionOpen((prev) => !prev)}
         >
-          <PopoverTrigger className="flex cursor-pointer items-center gap-2 px-2 text-primary">
+          <PopoverTrigger className="relative flex cursor-pointer items-center gap-2 px-2 text-primary">
             <span className="text-lg">
               {session.data?.first_name} {session.data?.first_name}
             </span>
@@ -70,6 +78,9 @@ export const Header = () => {
                 "size-5 transition-all"
               )}
             />
+            {cart.cartItems.data?.length !== 0 && (
+              <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
+            )}
           </PopoverTrigger>
           <PopoverContent align="end" sideOffset={17} className="">
             <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-xl border border-secondary/20 bg-base-100">
@@ -79,7 +90,13 @@ export const Header = () => {
                   href={section.url}
                   className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
                 >
-                  <section.Svg className="size-5" />
+                  <div className="relative">
+                    <section.Svg className="size-5" />
+                    {section.title === "Mi carrito" &&
+                      cart.cartItems.data?.length !== 0 && (
+                        <div className="absolute -right-2 -top-1 size-2 rounded-full bg-error" />
+                      )}
+                  </div>
                   <span>{section.title}</span>
                 </Link>
               ))}

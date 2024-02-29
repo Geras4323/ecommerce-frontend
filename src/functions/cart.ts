@@ -12,8 +12,8 @@ export const cartItemSchema = z
   })
   .and(databaseEntrySchema);
 
-export async function getCartItems(userID: number) {
-  const url = `${vars.serverUrl}/api/v1/cart/${userID}`;
+export async function getCartItems() {
+  const url = `${vars.serverUrl}/api/v1/cart`;
   const res = await axios.get(url, { withCredentials: true });
   return cartItemSchema.array().parse(res.data);
 }
@@ -23,7 +23,7 @@ export async function createCartItem(
   productID: number,
   quantity: number
 ) {
-  const url = `${vars.serverUrl}/api/v1/cart/${userID}`;
+  const url = `${vars.serverUrl}/api/v1/cart`;
   const res = await axios.post(
     url,
     { productID, quantity },

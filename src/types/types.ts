@@ -5,7 +5,7 @@ import { z } from "zod";
 export type DatabaseEntry = z.infer<typeof databaseEntrySchema>;
 export const databaseEntrySchema = z.object({
   id: z.number(),
-  // createdAt: z.string(),
+  createdAt: z.string(),
   // updatedAt: z.string(),
   // deletedAt: z.string().nullable(),
 });

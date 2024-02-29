@@ -21,9 +21,10 @@ export function useShoppingCart() {
 
   const cartItems = useQuery({
     queryKey: ["cart"],
-    queryFn: () => getCartItems(session.data?.id ?? -1),
+    queryFn: getCartItems,
     enabled: !!session.data,
     retry: false,
+    staleTime: 1000 * 30,
   });
 
   const addCartItem = useMutation<
