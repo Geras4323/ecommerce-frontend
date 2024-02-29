@@ -20,27 +20,32 @@ type Section = {
   title: string;
   Svg: LucideIcon;
   url: string;
+  disabled: boolean;
 };
 const sections = [
   {
     title: "Mis datos",
     Svg: User2,
     url: "/account",
+    disabled: true,
   },
   {
     title: "Showroom",
     Svg: Package,
     url: "/showroom",
+    disabled: false,
   },
   {
     title: "Mi carrito",
     Svg: ShoppingCartIcon,
     url: "/cart",
+    disabled: false,
   },
   {
     title: "Mis pedidos",
     Svg: CreditCard,
     url: "/orders",
+    disabled: false,
   },
 ] as const satisfies readonly Section[];
 
@@ -86,22 +91,25 @@ export const Header = () => {
             </PopoverTrigger>
             <PopoverContent align="end" sideOffset={17} className="">
               <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-xl border border-secondary/20 bg-base-100">
-                {sections.map((section) => (
-                  <Link
-                    key={section.title}
-                    href={section.url}
-                    className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
-                  >
-                    <div className="relative">
-                      <section.Svg className="size-5" />
-                      {section.title === "Mi carrito" &&
-                        cart.cartItems.data?.length !== 0 && (
-                          <div className="absolute -right-2 -top-1 size-2 rounded-full bg-error" />
-                        )}
-                    </div>
-                    <span>{section.title}</span>
-                  </Link>
-                ))}
+                {sections.map((section) => {
+                  if (!section.disabled)
+                    return (
+                      <Link
+                        key={section.title}
+                        href={section.url}
+                        className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
+                      >
+                        <div className="relative">
+                          <section.Svg className="size-5" />
+                          {section.title === "Mi carrito" &&
+                            cart.cartItems.data?.length !== 0 && (
+                              <div className="absolute -right-2 -top-1 size-2 rounded-full bg-error" />
+                            )}
+                        </div>
+                        <span>{section.title}</span>
+                      </Link>
+                    );
+                })}
               </article>
             </PopoverContent>
           </Popover>
