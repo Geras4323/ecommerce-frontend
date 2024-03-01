@@ -1,4 +1,5 @@
-import { OrdersItem, getOrders } from "@/functions/orders";
+import { type OrdersItem as TOrdersItem, getOrders } from "@/functions/orders";
+import { withAuth } from "@/functions/session";
 import { GeneralLayout } from "@/layouts/GeneralLayout";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -35,25 +36,29 @@ export default function Orders() {
         <h1 className="border-b border-b-secondary/20 py-2 text-xl font-medium">
           PEDIDOS
         </h1>
-        <section className="flex h-full w-full flex-row gap-8">
-          <article className="flex h-full w-full flex-col gap-4 overflow-y-auto">
-            {ordersQuery.data?.map((item) => (
+        <section className="flex h-full w-full flex-col gap-4 overflow-y-auto">
+          {ordersQuery.isPending ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <LoadingOrdersItem key={i} />
+            ))
+          ) : ordersQuery.isError ? (
+            <div className="flex h-16 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
+              Se ha producido un error
+            </div>
+          ) : (
+            ordersQuery.data?.map((item) => (
               <OrdersItem key={item.id} item={item} />
-            ))}
-            {ordersQuery.data?.map((item) => (
-              <OrdersItem key={item.id} item={item} />
-            ))}
-            {ordersQuery.data?.map((item) => (
-              <OrdersItem key={item.id} item={item} />
-            ))}
-          </article>
+            ))
+          )}
         </section>
       </div>
     </GeneralLayout>
   );
 }
 
-function OrdersItem({ item }: { item: OrdersItem }) {
+export const getServerSideProps = withAuth("noAdmin");
+
+function OrdersItem({ item }: { item: TOrdersItem }) {
   return (
     <div className="flex w-full items-center justify-between gap-6 rounded-xl border-2 border-secondary/20 p-4">
       <article className="flex h-full w-1/2 flex-col gap-4">
@@ -107,6 +112,42 @@ function OrdersItem({ item }: { item: OrdersItem }) {
         >
           <ClipboardCheck className="size-5" /> Ver detalle
         </Link>
+      </article>
+    </div>
+  );
+}
+
+function LoadingOrdersItem() {
+  return (
+    <div className="flex w-full items-center justify-between gap-6 rounded-xl border-2 border-secondary/20 p-4">
+      <article className="flex h-full w-1/2 flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <Hash className="size-5 text-secondary" />
+          <span className="text-lg text-secondary">Pedido Nro</span>
+          <div className="h-7 w-16 animate-pulse rounded-lg bg-secondary/30" />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <CalendarDaysIcon className="size-5 text-secondary" />
+          <span className="text-lg text-secondary">Iniciado el</span>
+          <div className="h-7 w-36 animate-pulse rounded-lg bg-secondary/30" />
+        </div>
+      </article>
+
+      <article className="flex h-full w-1/2 flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <DollarSign className="size-5 text-secondary" />
+          <span className="text-lg text-secondary">Monto:</span>
+          <div className="h-7 w-28 animate-pulse rounded-lg bg-secondary/30" />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Package className="size-5 text-secondary" />
+          <span className="text-lg text-secondary">Contiene</span>
+          <div className="h-7 w-28 animate-pulse rounded-lg bg-secondary/30" />
+        </div>
+
+        <div className="mt-2 h-8 w-48 animate-pulse self-end rounded-lg bg-secondary/30" />
       </article>
     </div>
   );

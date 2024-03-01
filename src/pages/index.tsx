@@ -109,7 +109,7 @@ export default function Home() {
               ) : (
                 <div className="flex w-full flex-col gap-4 [&>*]:hover:shadow-lg">
                   <Link href="/login" className="btn btn-primary">
-                    Login
+                    Iniciar sesión
                   </Link>
                   <Link href="/showroom" className="btn btn-primary">
                     Ir al showroom
@@ -117,47 +117,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-
-            {/* <div className="w-full text-lg">
-              {session ? (
-                <section className="flex flex-col gap-4">
-                  <p className="text-secondary">
-                    Welcome{" "}
-                    <b className="text-primary/90">
-                      {session.first_name} {session.last_name}
-                    </b>
-                  </p>
-
-                  {session.role === "admin" && (
-                    <div
-                      className="btn btn-outline"
-                    >
-                      Administration
-                    </div>
-                  )}
-
-                  <div onClick={signOut} className="btn btn-outline">
-                    Sign out
-                  </div>
-                </section>
-              ) : (
-                <section className="flex w-full flex-col items-center gap-3 text-center">
-                  <Link href="/login" className="btn btn-primary w-full">
-                    Login
-                  </Link>
-                  <Link
-                    href="/auth/create-account"
-                    className="btn btn-outline w-full"
-                  >
-                    Sign up
-                  </Link>
-                </section>
-              )}
-            </div> */}
-
-            {/* <Link href="/showroom" className="btn btn-primary w-full">
-              Go to Showroom
-            </Link> */}
           </div>
         </div>
       </div>

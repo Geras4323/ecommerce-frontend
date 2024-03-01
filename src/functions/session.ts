@@ -24,11 +24,13 @@ export const sessionSchema = z.object({
   orders: z.any().nullable(),
 });
 
-export async function getSession() {
+export async function getSession(sessionCookie?: string) {
   const url = `${vars.serverUrl}/api/v1/auth/session`;
-  const res = await axios.get(url, {
-    withCredentials: true,
-  });
+  const options: Record<string, any> = { withCredentials: true };
+  if (sessionCookie) {
+    options["headers"] = { Cookie: `ec_session=${sessionCookie}` };
+  }
+  const res = await axios.get(url, options);
   return sessionSchema.parse(res.data);
 }
 
@@ -51,11 +53,13 @@ export const withAuth: X = (desiredRole) => async (c) => {
   if (!sessionCookie) return redirectToLanding;
 
   const session = await queryClient
-    .fetchQuery<Session, ServerError, Session>({
+    .fetchQuery<Session, ServerError>({
       queryKey: ["session"],
-      queryFn: getSession,
+      queryFn: () => getSession(sessionCookie),
     })
     .catch(() => undefined);
+
+  console.log(session);
 
   if (!session) return redirectToLanding;
 
@@ -86,7 +90,7 @@ export const leaveIfLoggedIn: GetServerSideProps = async (c) => {
   const session = await queryClient
     .fetchQuery<Session, ServerError, Session>({
       queryKey: ["session"],
-      queryFn: getSession,
+      queryFn: () => getSession(sessionCookie),
     })
     .catch(() => undefined);
 

@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useState } from "react";
 import { cn } from "@/utils/lib";
 import { useShoppingCart } from "@/hooks/cart";
+import { useRouter } from "next/router";
 
 type Section = {
   title: string;
@@ -53,6 +54,8 @@ export const Header = () => {
   const session = useSession();
   const cart = useShoppingCart();
 
+  const router = useRouter();
+
   const [isSessionOpen, setIsSessionOpen] = useState(false);
 
   return (
@@ -67,17 +70,27 @@ export const Header = () => {
         />
       </Link>
 
-      {session ? (
-        <div className="flex items-center gap-4">
-          <ThemeSwitcher />
+      <div className="flex items-center gap-4">
+        <ThemeSwitcher />
 
+        {session.isPending ? (
+          <div className="h-8 w-44 animate-pulse rounded-lg bg-secondary/30" />
+        ) : session.isError ? (
+          <div>
+            {router.pathname !== "/" && router.pathname !== "/login" && (
+              <Link href="/login" className="btn btn-primary btn-sm">
+                Iniciar sesión
+              </Link>
+            )}
+          </div>
+        ) : (
           <Popover
             open={isSessionOpen}
             onOpenChange={() => setIsSessionOpen((prev) => !prev)}
           >
             <PopoverTrigger className="btn btn-ghost btn-sm relative flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary">
               <span className="text-lg font-medium">
-                {session.data?.first_name} {session.data?.first_name}
+                {session.data.first_name} {session.data.last_name}
               </span>
               <ChevronDown
                 className={cn(
@@ -113,12 +126,8 @@ export const Header = () => {
               </article>
             </PopoverContent>
           </Popover>
-        </div>
-      ) : (
-        <Link href="/login" className="btn btn-primary btn-sm">
-          Iniciar sesión
-        </Link>
-      )}
+        )}
+      </div>
     </header>
   );
 };

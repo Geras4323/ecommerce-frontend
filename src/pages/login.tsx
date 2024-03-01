@@ -12,11 +12,12 @@ import Logo from "../../public/logoNB.png";
 import { type Session } from "@/types/session";
 import { useRouter } from "next/router";
 import { leaveIfLoggedIn } from "@/functions/session";
+import { vars } from "@/utils/vars";
 
 type Inputs = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
-  email: z.string().min(1, { message: "Campo requerido" }),
-  password: z.string().min(1, { message: "Campo requerido" }),
+  email: z.string().min(1, { message: "Email requerido" }),
+  password: z.string().min(1, { message: "Contraseña requerida" }),
 });
 
 function Login() {
@@ -24,11 +25,11 @@ function Login() {
 
   const loginMutation = useMutation<
     ServerSuccess<Session>,
-    ServerError,
+    ServerError<string>,
     Inputs
   >({
     mutationFn: async (data) => {
-      const url = "http://localhost:1323/api/v1/auth/login";
+      const url = `${vars.serverUrl}/api/v1/auth/login`;
       return axios.post(url, data, { withCredentials: true });
     },
     onSuccess: (res) =>
@@ -52,7 +53,7 @@ function Login() {
       <GeneralLayout title="Login" description="Login">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="mx-auto flex h-screen w-full max-w-sm flex-col justify-center gap-4"
+          className="mx-auto my-auto flex h-fit w-full max-w-lg flex-col justify-center gap-4 rounded-xl border border-secondary/10 bg-secondary/10 p-12 shadow-lg"
         >
           <Image
             width={700}
@@ -75,17 +76,25 @@ function Login() {
           </FormInput>
 
           <FormInput>
-            <label htmlFor="email">Password</label>
+            <label htmlFor="email">Contraseña</label>
             <input
               {...register("password")}
-              type="text"
+              type="password"
               className="input input-bordered"
-              placeholder="Password"
+              placeholder="Contraseña"
             />
             {errors.password && <ErrorSpan message={errors.password.message} />}
           </FormInput>
 
-          <button className="btn btn-primary mt-2">Sumbit</button>
+          {loginMutation.isError && (
+            <div className="col-span-2 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-medium text-primary">
+              {loginMutation.error.response?.data === "Invalid credentials"
+                ? "Email o contraseña incorrectos"
+                : "Se ha producido un error"}
+            </div>
+          )}
+
+          <button className="btn btn-primary mt-2">Iniciar sesión</button>
         </form>
       </GeneralLayout>
     </>

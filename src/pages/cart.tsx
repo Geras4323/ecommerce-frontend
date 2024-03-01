@@ -18,6 +18,7 @@ import axios from "axios";
 import { LoadableButton } from "@/components/forms";
 import { useRouter } from "next/router";
 import { type OrderItem } from "@/functions/orders";
+import { withAuth } from "@/functions/session";
 
 export default function Cart() {
   const cart = useShoppingCart();
@@ -68,27 +69,41 @@ export default function Cart() {
 
           <div className="flex items-end gap-4">
             <h2 className="text-lg font-medium">TOTAL</h2>
-            <div className="flex items-end gap-1">
-              <span className="text-xl text-primary/70">$</span>
-              <span className="text-2xl text-primary">
-                {total?.toLocaleString("es-AR")}
-              </span>
-            </div>
+            {cart.cartItems.isPending ? (
+              <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/30" />
+            ) : (
+              <div className="flex items-end gap-1">
+                <span className="text-xl text-primary/70">$</span>
+                <span className="text-2xl text-primary">
+                  {total?.toLocaleString("es-AR")}
+                </span>
+              </div>
+            )}
+
             <span className="pb-0.5 text-xl text-secondary">|</span>
-            <LoadableButton
-              onClick={() => createOrderMutation.mutate()}
-              isPending={createOrderMutation.isPending}
-              className="btn btn-primary btn-sm ml-1"
-            >
-              <Check className="size-5" />
-              Confirmar pedido
-            </LoadableButton>
+
+            {cart.cartItems.data?.length !== 0 && (
+              <LoadableButton
+                onClick={() => createOrderMutation.mutate()}
+                isPending={createOrderMutation.isPending}
+                className="btn btn-primary btn-sm ml-1"
+              >
+                <Check className="size-5" />
+                Confirmar pedido
+              </LoadableButton>
+            )}
           </div>
         </div>
 
         <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
-          {productsQuery.data &&
-            cart.cartItems.data?.map((item) => {
+          {productsQuery.isPending || cart.cartItems.isPending ? (
+            Array.from({ length: 4 }).map((_, i) => <LoadingCartItem key={i} />)
+          ) : productsQuery.isError || cart.cartItems.isError ? (
+            <div className="col-span-2 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
+              Se ha producido un error
+            </div>
+          ) : (
+            cart.cartItems.data.map((item) => {
               const product = productsQuery.data.find(
                 (p) => p.id === item.productID
               );
@@ -102,12 +117,15 @@ export default function Cart() {
                     product={product}
                   />
                 );
-            })}
+            })
+          )}
         </div>
       </section>
     </GeneralLayout>
   );
 }
+
+export const getServerSideProps = withAuth("noAdmin");
 
 export function CartItem({
   item,
@@ -202,6 +220,30 @@ export function CartItem({
             <Plus className="size-4" />
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+export function LoadingCartItem() {
+  return (
+    <div className="flex h-28 w-full animate-pulse justify-between rounded-xl border-2 border-secondary/20 p-4">
+      <div className="flex flex-row gap-4">
+        {/* Image */}
+        <div className="size-16 rounded-full bg-secondary/20" />
+
+        {/* Title and description */}
+        <div className="flex flex-col gap-2">
+          <div className="h-8 w-80 rounded-md bg-secondary/20" />
+          <div className="h-8 w-56 rounded-md bg-secondary/20" />
+          <div className="h-8 w-52 rounded-md bg-secondary/20" />
+        </div>
+      </div>
+
+      <div className="flex h-full flex-col items-center justify-center gap-3">
+        <div className="flex h-6 w-24 rounded-md bg-secondary/20" />
+
+        <div className="flex h-7 w-28 rounded-lg bg-secondary/20" />
       </div>
     </div>
   );
