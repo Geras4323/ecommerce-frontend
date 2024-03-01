@@ -3,12 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { GeneralLayout } from "src/layouts/GeneralLayout";
 import { useSession } from "@/hooks/session";
-import Cookies from "js-cookie";
 import { useRouter } from "next/router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getImages } from "@/functions/images";
 import { type ServerError } from "@/types/types";
 import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
+import { vars } from "@/utils/vars";
+import axios from "axios";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -24,12 +25,13 @@ export default function Home() {
     refetchOnWindowFocus: false,
   });
 
-  function signOut() {
-    Cookies.remove("ec_session", {
-      path: "/",
-    });
-    router.reload();
-  }
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const url = `${vars.serverUrl}/api/v1/auth/logout`;
+      return axios.post(url, null, { withCredentials: true });
+    },
+    onSuccess: () => router.reload(),
+  });
 
   const firstMarqueeUrls = imagesQuery.data?.map((image) => image.url);
   const secondMarqueeUrls = firstMarqueeUrls?.toReversed();
@@ -97,7 +99,10 @@ export default function Home() {
                     Ir al showroom
                   </Link>
                   <hr />
-                  <button onClick={signOut} className="btn btn-outline">
+                  <button
+                    onClick={() => logoutMutation.mutate()}
+                    className="btn btn-outline"
+                  >
                     Cerrar sesión
                   </button>
                 </div>
