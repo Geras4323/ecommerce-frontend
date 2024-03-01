@@ -1,4 +1,5 @@
 import { type ServerError } from "@/types/types";
+import { vars } from "@/utils/vars";
 import {
   type DehydratedState,
   QueryClient,
@@ -23,11 +24,10 @@ export const sessionSchema = z.object({
   orders: z.any().nullable(),
 });
 
-export async function getSession(sessionCookie: string) {
-  const url = "http://localhost:1323/api/v1/auth/session";
+export async function getSession() {
+  const url = `${vars.serverUrl}/api/v1/auth/session`;
   const res = await axios.get(url, {
     withCredentials: true,
-    headers: { Cookie: `ec_session=${sessionCookie}` },
   });
   return sessionSchema.parse(res.data);
 }
@@ -53,7 +53,7 @@ export const withAuth: X = (desiredRole) => async (c) => {
   const session = await queryClient
     .fetchQuery<Session, ServerError, Session>({
       queryKey: ["session"],
-      queryFn: () => getSession(sessionCookie),
+      queryFn: getSession,
     })
     .catch(() => undefined);
 
@@ -86,7 +86,7 @@ export const leaveIfLoggedIn: GetServerSideProps = async (c) => {
   const session = await queryClient
     .fetchQuery<Session, ServerError, Session>({
       queryKey: ["session"],
-      queryFn: () => getSession(sessionCookie),
+      queryFn: getSession,
     })
     .catch(() => undefined);
 
