@@ -2,14 +2,7 @@ import { databaseEntrySchema } from "@/types/types";
 import { vars } from "@/utils/vars";
 import axios from "axios";
 import { z } from "zod";
-
-export type ImageSchema = z.infer<typeof imageSchema>;
-export const imageSchema = z
-  .object({
-    url: z.string(),
-  })
-  .and(databaseEntrySchema)
-  .array();
+import { imageSchema } from "./images";
 
 export type Product = z.infer<typeof productSchema>;
 export const productSchema = z
@@ -18,7 +11,7 @@ export const productSchema = z
     name: z.string(),
     description: z.string(),
     price: z.number(),
-    images: imageSchema,
+    images: imageSchema.array(),
     categoryID: z.number(),
     supplierID: z.number(),
   })

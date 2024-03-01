@@ -1,4 +1,3 @@
-// import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
 import Logo from "../../public/logoNB.png";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,10 +5,24 @@ import { GeneralLayout } from "src/layouts/GeneralLayout";
 import { useSession } from "@/hooks/session";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
+import { getImages } from "@/functions/images";
+import { type ServerError } from "@/types/types";
+import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
 
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
+
+  const imagesQuery = useQuery<
+    Awaited<ReturnType<typeof getImages>>,
+    ServerError
+  >({
+    queryKey: ["images"],
+    queryFn: getImages,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   function signOut() {
     Cookies.remove("ec_session", {
@@ -17,6 +30,9 @@ export default function Home() {
     });
     router.reload();
   }
+
+  const firstMarqueeUrls = imagesQuery.data?.map((image) => image.url);
+  const secondMarqueeUrls = firstMarqueeUrls?.toReversed();
 
   return (
     <GeneralLayout title="Home" description="This is the home">
@@ -34,9 +50,15 @@ export default function Home() {
               "https://www.ikea.com/us/en/images/products/arkelstorp-desk-black__0735967_pe740301_s5.jpg?f=s",
               "https://cdn-learn.adafruit.com/assets/assets/000/001/161/medium800/led_strips_digitalledstrip.jpg?1396769336",
             ]}
-          />
+          /> */}
+          {firstMarqueeUrls && (
+            <VerticalImageMarquee speed={"slow"} urls={firstMarqueeUrls} />
+          )}
 
-          <VerticalImageMarquee
+          {secondMarqueeUrls && (
+            <VerticalImageMarquee speed={"medium"} urls={secondMarqueeUrls} />
+          )}
+          {/* <VerticalImageMarquee
             speed={"medium"}
             urls={[
               "https://i5.walmartimages.ca/images/Large/735/328/6000196735328.jpg",
