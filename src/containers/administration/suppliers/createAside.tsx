@@ -152,7 +152,7 @@ export function SupplierCreateAside() {
           </button>
           <LoadableButton
             type="submit"
-            isLoading={dataMutation.isPending}
+            isPending={dataMutation.isPending}
             className="btn-primary w-32"
             animation="loading-dots"
           >

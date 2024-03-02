@@ -387,7 +387,7 @@ export function ProductCreateAside() {
           </button>
           <LoadableButton
             type="submit"
-            isLoading={dataMutation.isPending || imageMutation.isPending}
+            isPending={dataMutation.isPending || imageMutation.isPending}
             className="btn-primary w-32"
             animation="loading-dots"
           >

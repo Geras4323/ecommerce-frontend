@@ -197,7 +197,11 @@ export function ProductDataAside() {
         product_select({
           ...product,
           images: [
-            { id: res.data.id, url: res.data.cloud.Response.secure_url },
+            {
+              id: res.data.id,
+              url: res.data.cloud.Response.secure_url,
+              createdAt: "",
+            },
           ],
         });
       if (checkChange()) product_remove();
@@ -488,7 +492,7 @@ export function ProductDataAside() {
           </button>
           <LoadableButton
             type="submit"
-            isLoading={dataMutation.isPending || imageMutation.isPending}
+            isPending={dataMutation.isPending || imageMutation.isPending}
             className="btn-primary w-32"
             animation="loading-dots"
           >

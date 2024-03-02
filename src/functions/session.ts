@@ -58,8 +58,6 @@ export const withAuth: X = (desiredRole) => async (c) => {
     })
     .catch(() => undefined);
 
-  console.log(session);
-
   if (!session) return redirectToLanding;
 
   if (desiredRole === "admin" && session.role !== "admin")

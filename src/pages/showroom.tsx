@@ -9,8 +9,11 @@ import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useShoppingCart } from "@/hooks/cart";
 import type { ServerError } from "@/types/types";
 import Link from "next/link";
+import { useSession } from "@/hooks/session";
+import { useRouter } from "next/router";
 
 function Showroom() {
+  const session = useSession();
   const cart = useShoppingCart();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
@@ -70,6 +73,7 @@ function Showroom() {
                     key={product.id}
                     product={product}
                     addToCart={cart.addCartItem}
+                    logged={!!session.data}
                     inCart={
                       cart.cartItems.data?.findIndex(
                         (cI) => cI.productID === product.id
@@ -83,6 +87,7 @@ function Showroom() {
                     key={product.id}
                     product={product}
                     addToCart={cart.addCartItem}
+                    logged={!!session.data}
                     inCart={
                       cart.cartItems.data?.findIndex(
                         (cI) => cI.productID === product.id
@@ -156,10 +161,12 @@ function CategoryItem({
 
 function ProductItem({
   product,
+  logged,
   inCart,
   addToCart,
 }: {
   product: Product;
+  logged: boolean;
   inCart: boolean;
   addToCart: UseMutationResult<
     any,
@@ -171,6 +178,8 @@ function ProductItem({
     unknown
   >;
 }) {
+  const router = useRouter();
+
   const [quantity, setQuantity] = useState(1);
 
   return (
@@ -231,11 +240,15 @@ function ProductItem({
             </div>
           )}
 
-          {!inCart ? (
+          {!inCart || !logged ? (
             <button
-              onClick={() =>
-                addToCart.mutate({ productID: product.id, quantity })
-              }
+              onClick={() => {
+                if (!logged) {
+                  router.push("/login");
+                  return;
+                }
+                addToCart.mutate({ productID: product.id, quantity });
+              }}
               className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
             >
               <ShoppingCart className="size-5" />

@@ -32,7 +32,6 @@ function Login() {
       return axios.post(url, data, { withCredentials: true });
     },
     onSuccess: (res) => {
-      console.log(res.data);
       res.data.role === "admin" ? router.push("/") : router.push("/showroom");
     },
   });

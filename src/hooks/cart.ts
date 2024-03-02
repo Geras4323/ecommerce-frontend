@@ -14,9 +14,7 @@ export function useShoppingCart() {
 
   const refetchProducts = () => {
     queryClient.invalidateQueries({ queryKey: ["products"] });
-    console.log(1);
     queryClient.invalidateQueries({ queryKey: ["cart"] });
-    console.log(2);
   };
 
   const cartItems = useQuery({
