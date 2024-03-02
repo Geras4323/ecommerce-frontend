@@ -77,11 +77,13 @@ export const Header = () => {
           <div className="h-8 w-44 animate-pulse rounded-lg bg-secondary/30" />
         ) : session.isError ? (
           <div>
-            {router.pathname !== "/" && router.pathname !== "/login" && (
-              <Link href="/login" className="btn btn-primary btn-sm">
-                Iniciar sesión
-              </Link>
-            )}
+            {router.pathname !== "/" &&
+              router.pathname !== "/login" &&
+              router.pathname !== "/signup" && (
+                <Link href="/login" className="btn btn-primary btn-sm">
+                  Iniciar sesión
+                </Link>
+              )}
           </div>
         ) : (
           <Popover
@@ -90,7 +92,7 @@ export const Header = () => {
           >
             <PopoverTrigger className="btn btn-ghost btn-sm relative flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary">
               <span className="text-lg font-medium">
-                {session.data.first_name} {session.data.last_name}
+                {session.data.name} {session.data.surname}
               </span>
               <ChevronDown
                 className={cn(

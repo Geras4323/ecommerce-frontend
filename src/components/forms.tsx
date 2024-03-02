@@ -7,8 +7,15 @@ export function ErrorSpan({ message }: { message?: string }) {
   return <span className="text-base text-error">{message}</span>;
 }
 
-export function FormInput({ children }: WithChildren) {
-  return <section className="flex flex-col gap-2">{children}</section>;
+export function FormInput({
+  children,
+  className,
+}: WithChildren & WithClassName) {
+  return (
+    <section className={cn(!!className && className, "flex flex-col gap-2")}>
+      {children}
+    </section>
+  );
 }
 
 export function MandatoryMark({ className }: WithClassName) {

@@ -98,7 +98,7 @@ export default function Home() {
                   <Link href="/showroom" className="btn btn-primary">
                     Ir al showroom
                   </Link>
-                  <hr />
+                  <hr className="border-b border-t-0 border-b-secondary/30" />
                   <button
                     onClick={() => logoutMutation.mutate()}
                     className="btn btn-outline"
@@ -111,7 +111,11 @@ export default function Home() {
                   <Link href="/login" className="btn btn-primary">
                     Iniciar sesión
                   </Link>
-                  <Link href="/showroom" className="btn btn-primary">
+                  <Link href="/signup" className="btn btn-outline">
+                    Registrarse
+                  </Link>
+                  <hr className="border-b border-t-0 border-b-secondary/30" />
+                  <Link href="/showroom" className="btn btn-outline">
                     Ir al showroom
                   </Link>
                 </div>

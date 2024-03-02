@@ -6,12 +6,11 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ServerSuccess, ServerError } from "@/types/types";
 import { Toaster } from "sonner";
-import { ErrorSpan, FormInput } from "@/components/forms";
+import { ErrorSpan, FormInput, LoadableButton } from "@/components/forms";
 import Image from "next/image";
 import Logo from "../../public/logoNB.png";
-import { type Session } from "@/types/session";
 import { useRouter } from "next/router";
-import { leaveIfLoggedIn } from "@/functions/session";
+import { type Session, leaveIfLoggedIn } from "@/functions/session";
 import { vars } from "@/utils/vars";
 
 type Inputs = z.infer<typeof inputSchema>;
@@ -32,8 +31,10 @@ function Login() {
       const url = `${vars.serverUrl}/api/v1/auth/login`;
       return axios.post(url, data, { withCredentials: true });
     },
-    onSuccess: (res) =>
-      res.data.role === "admin" ? router.push("/") : router.push("/showroom"),
+    onSuccess: (res) => {
+      console.log(res.data);
+      res.data.role === "admin" ? router.push("/") : router.push("/showroom");
+    },
   });
 
   const {
@@ -53,14 +54,14 @@ function Login() {
       <GeneralLayout title="Login" description="Login">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="mx-auto my-auto flex h-fit w-full max-w-lg flex-col justify-center gap-4 rounded-xl border border-secondary/10 bg-secondary/10 p-12 shadow-lg"
+          className="mx-auto my-auto flex h-fit w-full max-w-lg flex-col justify-center gap-4 rounded-xl p-12 shadow-xl"
         >
           <Image
             width={700}
             height={300}
             src={Logo}
             alt="logo"
-            className="-ml-1 w-full"
+            className="-ml-1 w-full max-w-md"
           />
 
           <FormInput>
@@ -94,7 +95,12 @@ function Login() {
             </div>
           )}
 
-          <button className="btn btn-primary mt-2">Iniciar sesión</button>
+          <LoadableButton
+            isPending={loginMutation.isPending}
+            className="btn btn-primary mt-2"
+          >
+            Iniciar sesión
+          </LoadableButton>
         </form>
       </GeneralLayout>
     </>
