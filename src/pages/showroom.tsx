@@ -13,7 +13,7 @@ import { useSession } from "@/hooks/session";
 import { useRouter } from "next/router";
 
 function Showroom() {
-  const session = useSession();
+  const { session } = useSession();
   const cart = useShoppingCart();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
@@ -63,10 +63,10 @@ function Showroom() {
 
         {/* PRODUCTS */}
         <section className="mb-8 flex w-screen max-w-6xl flex-col gap-4">
-          <title className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
+          <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
             <Package className="size-6" />
             <h2 className="text-xl font-medium">PRODUCTOS</h2>
-          </title>
+          </div>
           <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
             {productsQuery.data?.map((product) => {
               if (!selectedCategory)

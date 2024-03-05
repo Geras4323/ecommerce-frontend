@@ -24,7 +24,7 @@ import { useSession } from "@/hooks/session";
 import { format } from "date-fns";
 
 export default function Cart() {
-  const session = useSession();
+  const { session } = useSession();
   const cart = useShoppingCart();
 
   const router = useRouter();

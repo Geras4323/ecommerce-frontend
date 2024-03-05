@@ -9,7 +9,7 @@ import { useSession } from "./session";
 import type { ServerError } from "@/types/types";
 
 export function useShoppingCart() {
-  const session = useSession();
+  const { session } = useSession();
   const queryClient = useQueryClient();
 
   const refetchProducts = () => {

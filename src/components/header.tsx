@@ -10,6 +10,7 @@ import {
   User2,
   Package,
   WalletCards,
+  LogOut,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useState } from "react";
@@ -51,7 +52,7 @@ const sections = [
 ] as const satisfies readonly Section[];
 
 export const Header = () => {
-  const session = useSession();
+  const { session, logoutMutation } = useSession();
   const cart = useShoppingCart();
 
   const router = useRouter();
@@ -106,7 +107,7 @@ export const Header = () => {
                 )}
             </PopoverTrigger>
             <PopoverContent align="end" sideOffset={17} className="">
-              <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-xl border border-secondary/20 bg-base-100">
+              <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-lg border border-secondary/20 bg-base-100">
                 {sections.map((section) => {
                   if (!section.disabled)
                     return (
@@ -126,6 +127,16 @@ export const Header = () => {
                       </Link>
                     );
                 })}
+
+                <hr className="border-b-0 border-t border-t-secondary/20" />
+
+                <button
+                  onClick={() => logoutMutation.mutate()}
+                  className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
+                >
+                  <LogOut className="size-5" />
+                  <span>Cerrar sesión</span>
+                </button>
               </article>
             </PopoverContent>
           </Popover>

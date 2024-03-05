@@ -3,17 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { GeneralLayout } from "src/layouts/GeneralLayout";
 import { useSession } from "@/hooks/session";
-import { useRouter } from "next/router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getImages } from "@/functions/images";
 import { type ServerError } from "@/types/types";
 import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
-import { vars } from "@/utils/vars";
-import axios from "axios";
 
 export default function Home() {
-  const { data: session } = useSession();
-  const router = useRouter();
+  const { session, logoutMutation } = useSession();
 
   const imagesQuery = useQuery<
     Awaited<ReturnType<typeof getImages>>,
@@ -23,14 +19,6 @@ export default function Home() {
     queryFn: getImages,
     retry: false,
     refetchOnWindowFocus: false,
-  });
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const url = `${vars.serverUrl}/api/v1/auth/logout`;
-      return axios.post(url, null, { withCredentials: true });
-    },
-    onSuccess: () => router.reload(),
   });
 
   const firstMarqueeUrls = imagesQuery.data?.map((image) => image.url);
@@ -87,9 +75,9 @@ export default function Home() {
             />
 
             <div className="flex w-full flex-col">
-              {session ? (
+              {session.data ? (
                 <div className="flex w-full flex-col gap-4 [&>*]:hover:shadow-lg">
-                  {session.role === "admin" && (
+                  {session.data.role === "admin" && (
                     <Link
                       href="/administration/categories"
                       className="btn btn-primary"
