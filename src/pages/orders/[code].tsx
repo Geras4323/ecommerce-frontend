@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type Product, getProducts } from "@/functions/products";
 import {
   CalendarDaysIcon,
+  CreditCard,
   DollarSign,
   Hash,
   Info,
@@ -55,9 +56,10 @@ export default function Order() {
   return (
     <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
       <div className="mx-auto flex h-screen w-screen max-w-5xl flex-col gap-4 pb-24 pt-24">
-        <h1 className="border-b border-b-secondary/20 py-2 text-xl font-medium">
-          DETALLE DEL PEDIDO
-        </h1>
+        <div className="flex w-full items-center gap-4 border-b border-b-secondary/20">
+          <CreditCard className="size-6" />
+          <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
+        </div>
         <section className="flex h-full w-full flex-row gap-4">
           <article className="flex h-full w-3/5 flex-col gap-4 overflow-y-auto">
             {productsQuery.isPending || orderQuery.isPending ? (

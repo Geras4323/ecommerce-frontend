@@ -5,9 +5,9 @@ import {
   type LucideIcon,
   Boxes,
   ClipboardList,
-  CreditCard,
   Package,
   UsersRound,
+  WalletCards,
 } from "lucide-react";
 import Link from "next/link";
 import { Toaster } from "sonner";
@@ -49,7 +49,7 @@ const sections = [
   {
     name: "Pedidos",
     url: "/administration/orders",
-    icon: CreditCard,
+    icon: WalletCards,
     disabled: false,
   },
 ] as const satisfies readonly Section[];

@@ -89,12 +89,14 @@ export default function Home() {
             <div className="flex w-full flex-col">
               {session ? (
                 <div className="flex w-full flex-col gap-4 [&>*]:hover:shadow-lg">
-                  <Link
-                    href="/administration/categories"
-                    className="btn btn-primary"
-                  >
-                    Administración
-                  </Link>
+                  {session.role === "admin" && (
+                    <Link
+                      href="/administration/categories"
+                      className="btn btn-primary"
+                    >
+                      Administración
+                    </Link>
+                  )}
                   <Link href="/showroom" className="btn btn-primary">
                     Ir al showroom
                   </Link>

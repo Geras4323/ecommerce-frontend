@@ -9,7 +9,7 @@ import {
   ShoppingCartIcon,
   User2,
   Package,
-  CreditCard,
+  WalletCards,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useState } from "react";
@@ -44,7 +44,7 @@ const sections = [
   },
   {
     title: "Mis pedidos",
-    Svg: CreditCard,
+    Svg: WalletCards,
     url: "/orders",
     disabled: false,
   },
@@ -100,9 +100,10 @@ export const Header = () => {
                   "size-5 transition-all"
                 )}
               />
-              {cart.cartItems.data?.length !== 0 && (
-                <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
-              )}
+              {!cart.cartItems.isPending &&
+                cart.cartItems.data?.length !== 0 && (
+                  <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
+                )}
             </PopoverTrigger>
             <PopoverContent align="end" sideOffset={17} className="">
               <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-xl border border-secondary/20 bg-base-100">

@@ -9,18 +9,22 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Check, Minus, Plus, Trash2 } from "lucide-react";
+import { Check, Minus, Plus, ShoppingCart, Trash2, Undo2 } from "lucide-react";
 import Image from "next/image";
 import NoImage from "../../public/no_image.png";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { LoadableButton } from "@/components/forms";
 import { useRouter } from "next/router";
 import { type OrderItem } from "@/functions/orders";
-import { withAuth } from "@/functions/session";
+import { type Session, withAuth } from "@/functions/session";
+import Link from "next/link";
+import { useSession } from "@/hooks/session";
+import { format } from "date-fns";
 
 export default function Cart() {
+  const session = useSession();
   const cart = useShoppingCart();
 
   const router = useRouter();
@@ -56,8 +60,66 @@ export default function Cart() {
     },
     onSuccess: (order) => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      if (session.data) {
+        discordNotifyMutation.mutate({
+          session: session.data,
+          order: order.data,
+        });
+        return;
+      }
       router.push(`/orders/${order.data.id}`);
     },
+  });
+
+  const discordNotifyMutation = useMutation<
+    void,
+    AxiosError,
+    { session: Session; order: OrderItem }
+  >({
+    mutationFn: async (data) => {
+      const products: { name?: string; value: string; inline: boolean }[] = [];
+
+      data.order.orderProducts.map((item) => {
+        return products.push({
+          name: productsQuery.data?.find((p) => p.id === item.productID)?.name,
+          value: `x ${item.quantity}`,
+          inline: true,
+        });
+      });
+
+      return axios.postForm(`${vars.discordNotify}`, {
+        payload_json: JSON.stringify({
+          embeds: [
+            {
+              title: `Nuevo pedido`,
+              description: `
+                **Nombre**: \`${data.session.name} ${data.session.surname}\`
+
+                **Email**:  \`${data.session.email}\`
+
+                **Número de teléfono**:  \`${data.session.phone ?? "-"}\`
+
+
+                **Número de orden**: \`${data.order.id}\`
+                **Fecha**: \`${format(
+                  new Date(data.order.createdAt),
+                  "dd-MM-yyyy HH:mm"
+                )}\`
+
+                **Total**:  \`$${total?.toLocaleString("es-AR")}\`
+
+                **Descripción**:
+              `,
+              fields: products,
+              color: 65280,
+            },
+          ],
+        }),
+      });
+    },
+    onError: (err) => console.log(err),
+    onSettled: (_, __, variables) =>
+      router.push(`/orders/${variables.order.id}`),
   });
 
   return (
@@ -65,34 +127,39 @@ export default function Cart() {
       {/* ITEMS */}
       <section className="mx-auto mb-8 flex w-screen max-w-7xl flex-col gap-4 pt-24">
         <div className="flex h-fit items-end justify-between border-b border-b-secondary/20 py-2">
-          <h2 className="text-xl font-medium">CARRITO DE COMPRAS</h2>
-
-          <div className="flex items-end gap-4">
-            <h2 className="text-lg font-medium">TOTAL</h2>
-            {cart.cartItems.isPending ? (
-              <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/30" />
-            ) : (
-              <div className="flex items-end gap-1">
-                <span className="text-xl text-primary/70">$</span>
-                <span className="text-2xl text-primary">
-                  {total?.toLocaleString("es-AR")}
-                </span>
-              </div>
-            )}
-
-            <span className="pb-0.5 text-xl text-secondary">|</span>
-
-            {cart.cartItems.data?.length !== 0 && (
-              <LoadableButton
-                onClick={() => createOrderMutation.mutate()}
-                isPending={createOrderMutation.isPending}
-                className="btn btn-primary btn-sm ml-1"
-              >
-                <Check className="size-5" />
-                Confirmar pedido
-              </LoadableButton>
-            )}
+          <div className="flex items-center gap-4">
+            <ShoppingCart className="size-6" />
+            <h1 className="text-xl font-medium">CARRITO DE COMPRAS</h1>
           </div>
+
+          {cart.cartItems.data?.length !== 0 && (
+            <div className="flex items-end gap-4">
+              <span className="text-lg font-medium">TOTAL</span>
+              {cart.cartItems.isPending ? (
+                <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/30" />
+              ) : (
+                <div className="flex items-end gap-1">
+                  <span className="text-xl text-primary/70">$</span>
+                  <span className="text-2xl text-primary">
+                    {total?.toLocaleString("es-AR")}
+                  </span>
+                </div>
+              )}
+
+              <span className="pb-0.5 text-xl text-secondary">|</span>
+
+              {cart.cartItems.data?.length !== 0 && (
+                <LoadableButton
+                  onClick={() => createOrderMutation.mutate()}
+                  isPending={createOrderMutation.isPending}
+                  className="btn btn-primary btn-sm ml-1"
+                >
+                  <Check className="size-5" />
+                  Confirmar pedido
+                </LoadableButton>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
@@ -101,6 +168,14 @@ export default function Cart() {
           ) : productsQuery.isError || cart.cartItems.isError ? (
             <div className="col-span-2 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
               Se ha producido un error
+            </div>
+          ) : cart.cartItems.data.length === 0 ? (
+            <div className="col-span-2 mx-auto mt-4 flex w-fit items-center justify-center gap-4">
+              <p className="text-xl">El carrito está vacío</p>
+              <Link href="/showroom" className="btn btn-primary btn-sm">
+                <Undo2 className="size-4" />
+                Volver al showroom
+              </Link>
             </div>
           ) : (
             cart.cartItems.data.map((item) => {

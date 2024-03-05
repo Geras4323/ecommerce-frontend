@@ -5,7 +5,7 @@ import Image from "next/image";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { type Product, getProducts } from "@/functions/products";
 import { cn } from "@/utils/lib";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { Boxes, Minus, Package, Plus, ShoppingCart } from "lucide-react";
 import { useShoppingCart } from "@/hooks/cart";
 import type { ServerError } from "@/types/types";
 import Link from "next/link";
@@ -44,7 +44,8 @@ function Showroom() {
         {/* CATEGORIES */}
         <section className="relative h-auto min-w-80">
           <div className="sticky top-24 flex h-fit w-full flex-col gap-4">
-            <div className="flex h-fit items-center border-b border-b-secondary/20 py-2">
+            <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
+              <Boxes className="size-6" />
               <h2 className="text-xl font-medium">CATEGORÍAS</h2>
             </div>
             <div className="flex w-full flex-col gap-4">
@@ -62,9 +63,10 @@ function Showroom() {
 
         {/* PRODUCTS */}
         <section className="mb-8 flex w-screen max-w-6xl flex-col gap-4">
-          <div className="flex h-fit items-center border-b border-b-secondary/20 py-2">
+          <title className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
+            <Package className="size-6" />
             <h2 className="text-xl font-medium">PRODUCTOS</h2>
-          </div>
+          </title>
           <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
             {productsQuery.data?.map((product) => {
               if (!selectedCategory)
