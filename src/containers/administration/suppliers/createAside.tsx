@@ -1,9 +1,9 @@
 import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
 import { DiscardSupplierChangesModal } from "@/components/modals/administration/suppliers";
+import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { type Category } from "@/functions/categories";
 import { useSupplierStore } from "@/hooks/states/suppliers";
 import type { ServerError, ServerSuccess } from "@/types/types";
-import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -87,33 +87,30 @@ export function SupplierCreateAside() {
   );
 
   return (
-    <section
-      className={cn(
-        create_isOpen
-          ? "h-full w-1/2 border-r border-r-secondary/20 px-4 opacity-100 2xl:w-1/3"
-          : "w-0 overflow-hidden border-r border-r-transparent px-0 opacity-0",
-        "flex flex-col py-4 transition-all duration-300"
-      )}
-    >
-      <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
-        <span className="whitespace-nowrap text-2xl">
-          Crear nuevo proveedor
-        </span>
-        <button
-          onClick={handleCancel}
-          className="btn btn-ghost btn-outline border border-secondary/30"
-        >
-          <PanelLeftClose className="size-6" />
-        </button>
-      </div>
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col items-end gap-4"
+    <Sheet open={create_isOpen}>
+      <SheetContent
+        side="left"
+        className="w-1/3 border-r border-r-secondary/20 bg-base-100"
       >
-        <div className="flex w-full items-center gap-4">
-          <section className="flex w-full flex-col gap-4">
-            {/* <div className="flex flex-col gap-1">
+        <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
+          <span className="whitespace-nowrap text-2xl">
+            Crear nuevo proveedor
+          </span>
+          <button
+            onClick={handleCancel}
+            className="btn btn-ghost btn-outline border border-secondary/30"
+          >
+            <PanelLeftClose className="size-6" />
+          </button>
+        </div>
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col items-end gap-4"
+        >
+          <div className="flex w-full items-center gap-4">
+            <section className="flex w-full flex-col gap-4">
+              {/* <div className="flex flex-col gap-1">
               <label htmlFor="code" className="text-lg text-secondary">
                 Código:
               </label>
@@ -126,50 +123,51 @@ export function SupplierCreateAside() {
               />
               <ErrorSpan message={errors.code?.message} />
             </div> */}
-            <div className="flex flex-col gap-1">
-              <label htmlFor="name" className="text-lg text-secondary">
-                <MandatoryMark /> Nombre:
-              </label>
-              <input
-                id="name"
-                type="text"
-                placeholder="Nuevo nombre"
-                {...register("name")}
-                className="input input-bordered w-full focus:outline-none"
-              />
-              <ErrorSpan message={errors.name?.message} />
-            </div>
+              <div className="flex flex-col gap-1">
+                <label htmlFor="name" className="text-lg text-secondary">
+                  <MandatoryMark /> Nombre:
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="Nuevo nombre"
+                  {...register("name")}
+                  className="input input-bordered w-full focus:outline-none"
+                />
+                <ErrorSpan message={errors.name?.message} />
+              </div>
+            </section>
+          </div>
+
+          <section className="mt-8 flex gap-4">
+            <button
+              type="button"
+              className="btn btn-ghost w-32"
+              onClick={handleCancel}
+            >
+              Cancelar
+            </button>
+            <LoadableButton
+              type="submit"
+              isPending={dataMutation.isPending}
+              className="btn-primary w-32"
+              animation="loading-dots"
+            >
+              Crear
+            </LoadableButton>
           </section>
-        </div>
+        </form>
 
-        <section className="mt-8 flex gap-4">
-          <button
-            type="button"
-            className="btn btn-ghost w-32"
-            onClick={handleCancel}
-          >
-            Cancelar
-          </button>
-          <LoadableButton
-            type="submit"
-            isPending={dataMutation.isPending}
-            className="btn-primary w-32"
-            animation="loading-dots"
-          >
-            Crear
-          </LoadableButton>
-        </section>
-      </form>
-
-      <DiscardSupplierChangesModal
-        isOpen={create_modal_discardChanges_isOpen}
-        onClose={() => create_modal_discardChanges_change(false)}
-        onConfirm={() => {
-          resetInputData();
-          create_close();
-        }}
-        deselectSupplier
-      />
-    </section>
+        <DiscardSupplierChangesModal
+          isOpen={create_modal_discardChanges_isOpen}
+          onClose={() => create_modal_discardChanges_change(false)}
+          onConfirm={() => {
+            resetInputData();
+            create_close();
+          }}
+          deselectSupplier
+        />
+      </SheetContent>
+    </Sheet>
   );
 }

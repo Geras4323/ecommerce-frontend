@@ -2,7 +2,7 @@ import { type Category } from "@/functions/categories";
 import { create } from "zustand";
 
 type CategoryStore = {
-  category: Category | null;
+  selected_category: Category | null;
   category_select: (category: Category | null) => void;
   category_remove: () => void;
 
@@ -22,9 +22,10 @@ type CategoryStore = {
 };
 
 export const useCategoryStore = create<CategoryStore>()((set) => ({
-  category: null,
-  category_select: (category: Category | null) => set({ category: category }),
-  category_remove: () => set({ category: null }),
+  selected_category: null,
+  category_select: (category: Category | null) =>
+    set({ selected_category: category }),
+  category_remove: () => set({ selected_category: null }),
 
   create_isOpen: false,
   create_open: () => set({ create_isOpen: true }),

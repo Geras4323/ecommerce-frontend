@@ -2,7 +2,7 @@ import { type Supplier } from "@/functions/suppliers";
 import { create } from "zustand";
 
 type SupplierStore = {
-  supplier: Supplier | null;
+  selected_supplier: Supplier | null;
   supplier_select: (category: Supplier | null) => void;
   supplier_remove: () => void;
 
@@ -22,9 +22,9 @@ type SupplierStore = {
 };
 
 export const useSupplierStore = create<SupplierStore>()((set) => ({
-  supplier: null,
-  supplier_select: (supplier: Supplier | null) => set({ supplier: supplier }),
-  supplier_remove: () => set({ supplier: null }),
+  selected_supplier: null,
+  supplier_select: (supplier: Supplier | null) => set({ selected_supplier: supplier }),
+  supplier_remove: () => set({ selected_supplier: null }),
 
   create_isOpen: false,
   create_open: () => set({ create_isOpen: true }),

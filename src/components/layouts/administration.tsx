@@ -3,7 +3,7 @@ import type { WithChildren } from "@/types/types";
 import { cn } from "@/utils/lib";
 import {
   type LucideIcon,
-  Boxes,
+  Tag,
   ClipboardList,
   Package,
   UsersRound,
@@ -31,7 +31,7 @@ const sections = [
   {
     name: "Categorías",
     url: "/administration/categories",
-    icon: Boxes,
+    icon: Tag,
     disabled: false,
   },
   {

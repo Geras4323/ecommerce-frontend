@@ -1,6 +1,5 @@
 import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
 import type { ServerError, ServerSuccess } from "@/types/types";
-import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +19,7 @@ import {
   DeleteCategoryModal,
   DiscardCategoryChangesModal,
 } from "@/components/modals/administration/categories";
+import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -28,7 +28,7 @@ const inputSchema = z.object({
 });
 
 export function CategoryDataAside() {
-  const { category, category_select, category_remove, create_isOpen } =
+  const { selected_category, category_select, category_remove } =
     useCategoryStore();
 
   const queryClient = useQueryClient();
@@ -43,11 +43,14 @@ export function CategoryDataAside() {
 
   function checkChange() {
     const values = getValues();
-    return values.code !== category?.code || values.name !== category.name;
+    return (
+      values.code !== selected_category?.code ||
+      values.name !== selected_category.name
+    );
   }
 
   function resetInputData() {
-    reset({ code: category?.code, name: category?.name });
+    reset({ code: selected_category?.code, name: selected_category?.name });
   }
 
   function resetImage() {
@@ -75,8 +78,8 @@ export function CategoryDataAside() {
   } = useForm<Input>({
     resolver: zodResolver(inputSchema),
     values: {
-      code: category?.code ?? "",
-      name: category?.name ?? "",
+      code: selected_category?.code ?? "",
+      name: selected_category?.name ?? "",
     },
   });
 
@@ -94,7 +97,7 @@ export function CategoryDataAside() {
     {
       mutationFn: async (data) => {
         return axios.put(
-          `${vars.serverUrl}/api/v1/categories/${category?.id}`,
+          `${vars.serverUrl}/api/v1/categories/${selected_category?.id}`,
           data,
           { withCredentials: true }
         );
@@ -117,7 +120,7 @@ export function CategoryDataAside() {
   >({
     mutationFn: async () => {
       return axios.post(
-        `${vars.serverUrl}/api/v1/categories/${category?.id}/image`,
+        `${vars.serverUrl}/api/v1/categories/${selected_category?.id}/image`,
         { file: image },
         {
           withCredentials: true,
@@ -131,175 +134,173 @@ export function CategoryDataAside() {
       toast.success("Subido");
       refreshQuery();
       resetImage();
-      if (category) {
-        category_select({ ...category, image: res.data.Response.secure_url });
+      if (selected_category) {
+        category_select({
+          ...selected_category,
+          image: res.data.Response.secure_url,
+        });
       }
       if (checkChange()) category_remove();
     },
   });
 
   return (
-    <section
-      className={cn(
-        category && !create_isOpen
-          ? "h-full w-1/2 border-l border-l-secondary/20 px-4 opacity-100 2xl:w-1/3"
-          : "w-0 overflow-hidden border-l border-l-transparent px-0 opacity-0",
-        "flex flex-col py-4 transition-all duration-300"
-      )}
-    >
-      {/* HEADER */}
-      <div className="mb-8 flex h-12 w-full items-center justify-between gap-4">
-        <div className="flex w-full items-center gap-4 truncate">
-          <button
-            onClick={handleCancel}
-            className="btn btn-ghost btn-outline border border-secondary/30"
-          >
-            <PanelRightClose className="size-6" />
-          </button>
-          <span className="truncate text-2xl">{category?.name}</span>
-        </div>
-        <button
-          onClick={() => setIsDeleteCategoryModalOpen(true)}
-          className="btn btn-error w-12 flex-row flex-nowrap items-center justify-end gap-4 overflow-hidden whitespace-nowrap rounded-md px-3 text-white transition-all hover:w-56"
-        >
-          <span>Eliminar categoría</span>
-          <div className="min-w-6">
-            <AlertCircle className="size-6" />
+    <Sheet open={!!selected_category}>
+      <SheetContent className="w-1/3 border-l border-l-secondary/20 bg-base-100">
+        {/* HEADER */}
+        <div className="mb-8 flex h-fit w-full items-center justify-between gap-4">
+          <div className="flex w-full items-center gap-4 truncate">
+            <button
+              onClick={handleCancel}
+              className="btn btn-outline border border-secondary/30"
+            >
+              <PanelRightClose className="size-6" />
+            </button>
+            <span className="truncate text-2xl">{selected_category?.name}</span>
           </div>
-        </button>
-      </div>
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col items-end gap-4"
-      >
-        <div className="flex w-full items-center gap-4">
-          {/* FIELDS */}
-          <section className="flex w-full flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="code" className="text-lg text-secondary">
-                Código:
-              </label>
-              <input
-                id="code"
-                type="text"
-                {...register("code")}
-                defaultValue={category?.code}
-                className="input input-bordered w-full focus:outline-none"
-              />
-              <ErrorSpan message={errors.code?.message} />
+          <button
+            onClick={() => setIsDeleteCategoryModalOpen(true)}
+            className="btn btn-error w-12 flex-row flex-nowrap items-center justify-end gap-4 overflow-hidden whitespace-nowrap rounded-md px-3 text-white transition-all hover:w-56"
+          >
+            <span>Eliminar categoría</span>
+            <div className="min-w-6">
+              <AlertCircle className="size-6" />
             </div>
-            <div className="flex flex-col gap-1">
-              <label htmlFor="name" className="text-lg text-secondary">
-                <MandatoryMark /> Nombre:
-              </label>
-              <input
-                id="name"
-                type="text"
-                {...register("name")}
-                defaultValue={category?.name}
-                className="input input-bordered w-full focus:outline-none"
-              />
-              <ErrorSpan message={errors.name?.message} />
-            </div>
-          </section>
+          </button>
+        </div>
 
-          {/* IMAGE */}
-          <section className="relative min-w-fit">
-            <div className="flex size-56 items-center justify-center rounded-xl border border-secondary/50">
-              <div className="group relative size-11/12 overflow-hidden rounded-md">
-                {category?.image && (
-                  <button
-                    type="button"
-                    onClick={() => setIsDeleteCategoryImageModalOpen(true)}
-                    className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="size-5" />
-                  </button>
-                )}
-                <label
-                  htmlFor="update_image"
-                  className="absolute left-0 top-0 z-30 flex size-full cursor-pointer items-center justify-center opacity-0 backdrop-blur-sm transition-opacity group-hover:bg-neutral/50 group-hover:opacity-100"
-                >
-                  <Upload className="size-8 animate-bounce text-white" />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col items-end gap-4"
+        >
+          <div className="flex w-full items-center gap-4">
+            {/* FIELDS */}
+            <section className="flex w-full flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label htmlFor="code" className="text-lg text-secondary">
+                  Código:
                 </label>
                 <input
-                  id="update_image"
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => setImage(e.target.files?.[0])}
+                  id="code"
+                  type="text"
+                  {...register("code")}
+                  defaultValue={selected_category?.code}
+                  className="input input-bordered w-full focus:outline-none"
                 />
-                {image && (
+                <ErrorSpan message={errors.code?.message} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label htmlFor="name" className="text-lg text-secondary">
+                  <MandatoryMark /> Nombre:
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  {...register("name")}
+                  defaultValue={selected_category?.name}
+                  className="input input-bordered w-full focus:outline-none"
+                />
+                <ErrorSpan message={errors.name?.message} />
+              </div>
+            </section>
+
+            {/* IMAGE */}
+            <section className="relative min-w-fit">
+              <div className="flex size-56 items-center justify-center rounded-xl border border-secondary/50">
+                <div className="group relative size-11/12 overflow-hidden rounded-md">
+                  {selected_category?.image && (
+                    <button
+                      type="button"
+                      onClick={() => setIsDeleteCategoryImageModalOpen(true)}
+                      className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="size-5" />
+                    </button>
+                  )}
+                  <label
+                    htmlFor="update_image"
+                    className="absolute left-0 top-0 z-30 flex size-full cursor-pointer items-center justify-center opacity-0 backdrop-blur-sm transition-opacity group-hover:bg-neutral/50 group-hover:opacity-100"
+                  >
+                    <Upload className="size-8 animate-bounce text-white" />
+                  </label>
+                  <input
+                    id="update_image"
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => setImage(e.target.files?.[0])}
+                  />
+                  {image && (
+                    <Image
+                      alt="preview"
+                      width={200}
+                      height={200}
+                      src={URL.createObjectURL(image)}
+                      className="absolute size-full rounded-md"
+                    />
+                  )}
                   <Image
-                    alt="preview"
+                    alt={selected_category?.name ?? ""}
+                    src={selected_category?.image ?? NoImage}
                     width={200}
                     height={200}
-                    src={URL.createObjectURL(image)}
-                    className="absolute size-full rounded-md"
+                    className="z-10 size-full select-none rounded-md bg-secondary/10 object-cover"
                   />
-                )}
-                <Image
-                  alt={category?.name ?? ""}
-                  src={category?.image ?? NoImage}
-                  width={200}
-                  height={200}
-                  className="z-10 size-full select-none rounded-md bg-secondary/10 object-cover"
-                />
+                </div>
               </div>
-            </div>
-            {image && (
-              <div className="absolute mt-1 flex w-full items-center justify-center gap-2 text-error">
-                <AlertCircle className="size-4" />
-                <ErrorSpan message="Imagen no guardada" />
-              </div>
-            )}
+              {image && (
+                <div className="absolute mt-1 flex w-full items-center justify-center gap-2 text-error">
+                  <AlertCircle className="size-4" />
+                  <ErrorSpan message="Imagen no guardada" />
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* ACTIONS */}
+          <section className="mt-8 flex gap-4">
+            <button
+              type="button"
+              className="btn btn-ghost w-32"
+              onClick={handleCancel}
+            >
+              Cancelar
+            </button>
+            <LoadableButton
+              type="submit"
+              isPending={dataMutation.isPending || imageMutation.isPending}
+              className="btn-primary w-32"
+              animation="loading-dots"
+            >
+              Guardar
+            </LoadableButton>
           </section>
-        </div>
+        </form>
 
-        {/* ACTIONS */}
-        <section className="mt-8 flex gap-4">
-          <button
-            type="button"
-            className="btn btn-ghost w-32"
-            onClick={handleCancel}
-          >
-            Cancelar
-          </button>
-          <LoadableButton
-            type="submit"
-            isPending={dataMutation.isPending || imageMutation.isPending}
-            className="btn-primary w-32"
-            animation="loading-dots"
-          >
-            Guardar
-          </LoadableButton>
-        </section>
-      </form>
-
-      {category && (
-        <>
-          <DiscardCategoryChangesModal
-            isOpen={isDiscardChangesModalOpen}
-            onClose={() => setIsDiscardChangesModalOpen(false)}
-            onConfirm={() => {
-              resetInputData();
-              resetImage();
-              category_remove();
-            }}
-          />
-          <DeleteCategoryModal
-            isOpen={isDeleteCategoryModalOpen}
-            onClose={() => setIsDeleteCategoryModalOpen(false)}
-            onSuccess={() => category_remove()}
-            category={category}
-          />
-          <DeleteCategoryImageModal
-            isOpen={isDeleteCategoryImageModalOpen}
-            onClose={() => setIsDeleteCategoryImageModalOpen(false)}
-            category={category}
-          />
-        </>
-      )}
-    </section>
+        {selected_category && (
+          <>
+            <DiscardCategoryChangesModal
+              isOpen={isDiscardChangesModalOpen}
+              onClose={() => setIsDiscardChangesModalOpen(false)}
+              onConfirm={() => {
+                resetInputData();
+                resetImage();
+                category_remove();
+              }}
+            />
+            <DeleteCategoryModal
+              isOpen={isDeleteCategoryModalOpen}
+              onClose={() => setIsDeleteCategoryModalOpen(false)}
+              onSuccess={() => category_remove()}
+              category={selected_category}
+            />
+            <DeleteCategoryImageModal
+              isOpen={isDeleteCategoryImageModalOpen}
+              onClose={() => setIsDeleteCategoryImageModalOpen(false)}
+              category={selected_category}
+            />
+          </>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

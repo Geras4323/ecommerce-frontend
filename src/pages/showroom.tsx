@@ -5,7 +5,7 @@ import Image from "next/image";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { type Product, getProducts } from "@/functions/products";
 import { cn } from "@/utils/lib";
-import { Boxes, Minus, Package, Plus, ShoppingCart } from "lucide-react";
+import { Minus, Package, Plus, ShoppingCart, Tag } from "lucide-react";
 import { useShoppingCart } from "@/hooks/cart";
 import type { ServerError } from "@/types/types";
 import Link from "next/link";
@@ -45,7 +45,7 @@ function Showroom() {
         <section className="relative h-auto min-w-80">
           <div className="sticky top-24 flex h-fit w-full flex-col gap-4">
             <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
-              <Boxes className="size-6" />
+              <Tag className="size-6" />
               <h2 className="text-xl font-medium">CATEGORÍAS</h2>
             </div>
             <div className="flex w-full flex-col gap-4">

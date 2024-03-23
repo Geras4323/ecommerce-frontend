@@ -2,7 +2,7 @@ import { type Product } from "@/functions/products";
 import { create } from "zustand";
 
 type ProductStore = {
-  product: Product | null;
+  selected_product: Product | null;
   product_select: (product: Product | null) => void;
   product_remove: () => void;
 
@@ -22,9 +22,9 @@ type ProductStore = {
 };
 
 export const useProductStore = create<ProductStore>()((set) => ({
-  product: null,
-  product_select: (product: Product | null) => set({ product: product }),
-  product_remove: () => set({ product: null }),
+  selected_product: null,
+  product_select: (product: Product | null) => set({ selected_product: product }),
+  product_remove: () => set({ selected_product: null }),
 
   create_isOpen: false,
   create_open: () => set({ create_isOpen: true }),

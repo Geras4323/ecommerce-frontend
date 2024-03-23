@@ -42,7 +42,7 @@ const columns = [
 ];
 
 function Suppliers() {
-  const { supplier, supplier_select, create_isOpen, create_open } =
+  const { selected_supplier, supplier_select, create_isOpen, create_open } =
     useSupplierStore();
 
   const suppliersQuery = useQuery<
@@ -71,31 +71,12 @@ function Suppliers() {
         <SupplierCreateAside />
 
         {/* MAIN TABLE */}
-        <section
-          className={cn(
-            !!supplier || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
-            "relative flex h-full flex-col p-4 transition-all duration-300"
-          )}
-        >
-          <div
-            className={cn(
-              create_isOpen || supplier
-                ? "visible opacity-100"
-                : "invisible opacity-0",
-              "absolute bottom-0 left-0 right-0 top-0 z-10 bg-base-100/50 backdrop-blur-md transition-opacity"
-            )}
-          />
-
+        <section className="relative flex h-full w-full flex-col p-4 transition-all duration-300">
           <div className="mb-8 flex min-h-12 w-full items-center justify-start">
             <button
-              className={cn(
-                create_isOpen
-                  ? "mr-0 w-0 overflow-hidden border-none p-0"
-                  : "mr-8 w-40",
-                "btn btn-primary whitespace-nowrap transition-all duration-300"
-              )}
+              className="btn btn-primary mr-8 whitespace-nowrap transition-all duration-300"
               onClick={create_open}
-              disabled={!!supplier}
+              disabled={!!selected_supplier}
             >
               Crear proveedor
             </button>
@@ -143,14 +124,14 @@ function Suppliers() {
                   <TableRow
                     key={row.id}
                     onClick={() => {
-                      if (supplier || create_isOpen) return;
+                      if (selected_supplier || create_isOpen) return;
 
                       supplier_select(row.original);
                     }}
                     className={cn(
-                      supplier || create_isOpen
+                      selected_supplier || create_isOpen
                         ? `cursor-default ${
-                            row.original.id === supplier?.id &&
+                            row.original.id === selected_supplier?.id &&
                             "bg-secondary/20"
                           }`
                         : "cursor-pointer hover:bg-secondary/20"

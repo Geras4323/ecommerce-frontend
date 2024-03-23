@@ -31,7 +31,7 @@ import { getSuppliers } from "@/functions/suppliers";
 const columnHelper = createColumnHelper<Product>();
 
 function Products() {
-  const { product, product_select, create_isOpen, create_open } =
+  const { selected_product, product_select, create_isOpen, create_open } =
     useProductStore();
 
   const categoriesQuery = useQuery<
@@ -150,31 +150,12 @@ function Products() {
         <ProductCreateAside />
 
         {/* MAIN TABLE */}
-        <section
-          className={cn(
-            !!product || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
-            "relative flex h-full flex-col p-4 transition-all duration-300"
-          )}
-        >
-          <div
-            className={cn(
-              create_isOpen || product
-                ? "visible opacity-100"
-                : "invisible opacity-0",
-              "absolute bottom-0 left-0 right-0 top-0 z-10 bg-base-100/50 backdrop-blur-md transition-opacity"
-            )}
-          />
-
+        <section className="relative flex h-full w-full flex-col p-4 transition-all duration-300">
           <div className="mb-8 flex min-h-12 w-full items-center justify-start">
             <button
-              className={cn(
-                create_isOpen
-                  ? "mr-0 w-0 overflow-hidden border-none p-0"
-                  : "mr-8 w-40",
-                "btn btn-primary whitespace-nowrap transition-all duration-300"
-              )}
+              className="btn btn-primary mr-8 whitespace-nowrap transition-all duration-300"
               onClick={create_open}
-              disabled={!!product}
+              disabled={!!selected_product}
             >
               Crear producto
             </button>
@@ -222,14 +203,15 @@ function Products() {
                   <TableRow
                     key={row.id}
                     onClick={() => {
-                      if (product || create_isOpen) return;
+                      if (selected_product || create_isOpen) return;
 
                       product_select(row.original);
                     }}
                     className={cn(
-                      product || create_isOpen
+                      selected_product || create_isOpen
                         ? `cursor-default ${
-                            row.original.id === product?.id && "bg-secondary/20"
+                            row.original.id === selected_product?.id &&
+                            "bg-secondary/20"
                           }`
                         : "cursor-pointer hover:bg-secondary/20"
                     )}

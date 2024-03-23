@@ -14,7 +14,6 @@ import { cn } from "@/utils/lib";
 import { useQuery } from "@tanstack/react-query";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   useReactTable,
@@ -25,6 +24,7 @@ import NoImage from "../../../public/no_image.png";
 import { CategoryDataAside } from "src/containers/administration/categories/dataAside";
 import { CategoryCreateAside } from "src/containers/administration/categories/createAside";
 import { useCategoryStore } from "@/hooks/states/categories";
+import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 
 const columnHelper = createColumnHelper<Category>();
 
@@ -67,7 +67,7 @@ const columns = [
 ];
 
 function Categories() {
-  const { category, category_select, create_isOpen, create_open } =
+  const { selected_category, category_select, create_isOpen, create_open } =
     useCategoryStore();
 
   const categoriesQuery = useQuery<
@@ -98,29 +98,15 @@ function Categories() {
         {/* MAIN TABLE */}
         <section
           className={cn(
-            !!category || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
+            // !!selected_category || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
             "relative flex h-full flex-col p-4 transition-all duration-300"
           )}
         >
-          <div
-            className={cn(
-              create_isOpen || category
-                ? "visible opacity-100"
-                : "invisible opacity-0",
-              "absolute bottom-0 left-0 right-0 top-0 z-10 bg-base-100/50 backdrop-blur-md transition-opacity"
-            )}
-          />
-
           <div className="mb-8 flex min-h-12 w-full items-center justify-start">
             <button
-              className={cn(
-                create_isOpen
-                  ? "mr-0 w-0 overflow-hidden border-none p-0"
-                  : "mr-8 w-40",
-                "btn btn-primary whitespace-nowrap transition-all duration-300"
-              )}
+              className="btn btn-primary mr-8 whitespace-nowrap transition-all duration-300"
               onClick={create_open}
-              disabled={!!category}
+              disabled={!!selected_category}
             >
               Crear categoría
             </button>
@@ -138,7 +124,40 @@ function Categories() {
             </div>
           </div>
 
-          <Table>
+          {/* CATEGORY LIST */}
+          <div className="flex w-full flex-row flex-wrap gap-3">
+            {categoriesQuery.data?.map((category) => (
+              <div
+                key={category.id}
+                onClick={() => {
+                  if (selected_category || create_isOpen) return;
+
+                  category_select(category);
+                }}
+                className="flex h-24 w-80 min-w-72 cursor-pointer gap-4 overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md transition-colors duration-100 hover:bg-secondary/20"
+              >
+                <div className="min-w-fit">
+                  <Image
+                    alt="categoryImage"
+                    src={category.image ?? ""}
+                    width={200}
+                    height={200}
+                    className="h-full w-24 border-r border-r-secondary/10 bg-secondary/20 object-cover transition-all"
+                  />
+                </div>
+                <div className="flex h-full w-full flex-col items-start justify-center gap-2 truncate">
+                  <span className="truncate text-lg font-semibold text-primary">
+                    {category.name}
+                  </span>
+                  {category.code && (
+                    <span className="text-primary/70">{category.code}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
@@ -203,7 +222,7 @@ function Categories() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table> */}
         </section>
 
         {/* DATA ASIDE */}
