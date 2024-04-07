@@ -82,7 +82,7 @@ export function DeleteCategoryModal({
   const mutation = useMutation({
     mutationFn: async () => {
       const url = `${vars.serverUrl}/api/v1/categories/${category.id}`;
-      return axios.delete(url, { withCredentials: false });
+      return axios.delete(url, { withCredentials: true });
     },
     onSuccess: onSuccess,
   });

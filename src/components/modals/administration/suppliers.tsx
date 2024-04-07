@@ -80,7 +80,7 @@ export function DeleteSupplierModal({
   const mutation = useMutation({
     mutationFn: async () => {
       const url = `${vars.serverUrl}/api/v1/suppliers/${supplier.id}`;
-      return axios.delete(url, { withCredentials: false });
+      return axios.delete(url, { withCredentials: true });
     },
     onSuccess: onSuccess,
   });
