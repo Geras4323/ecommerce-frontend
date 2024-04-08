@@ -246,7 +246,7 @@ function ProductItem({
             <button
               onClick={() => {
                 if (!logged) {
-                  router.push("/login");
+                  router.push("/sign");
                   return;
                 }
                 addToCart.mutate({ productID: product.id, quantity });

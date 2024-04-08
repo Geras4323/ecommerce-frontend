@@ -80,8 +80,9 @@ export const Header = () => {
           <div>
             {router.pathname !== "/" &&
               router.pathname !== "/login" &&
-              router.pathname !== "/signup" && (
-                <Link href="/login" className="btn btn-primary btn-sm">
+              router.pathname !== "/signup" &&
+              router.pathname !== "/sign" && (
+                <Link href="/sign" className="btn btn-primary btn-sm">
                   Iniciar sesión
                 </Link>
               )}

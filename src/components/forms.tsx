@@ -1,10 +1,16 @@
 import type { WithClassName, WithChildren } from "@/types/types";
 import { cn } from "@/utils/lib";
+import { AlertCircle } from "lucide-react";
 import type { MouseEventHandler, ReactNode } from "react";
 
 export function ErrorSpan({ message }: { message?: string }) {
   if (!message) return;
-  return <span className="text-base text-error">{message}</span>;
+  return (
+    <div className="flex items-center gap-1 text-error">
+      <AlertCircle className="mb-0.5 size-4" />
+      <span className="text-base italic">{message}</span>
+    </div>
+  );
 }
 
 export function FormInput({

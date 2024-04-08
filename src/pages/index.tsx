@@ -98,10 +98,10 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="flex w-full flex-col gap-4 [&>*]:hover:shadow-lg">
-                  <Link href="/login" className="btn btn-primary">
+                  <Link href="/sign" className="btn btn-primary">
                     Iniciar sesión
                   </Link>
-                  <Link href="/signup" className="btn btn-outline">
+                  <Link href="/sign?action=signup" className="btn btn-outline">
                     Registrarse
                   </Link>
                   <hr className="border-b border-t-0 border-b-secondary/30" />

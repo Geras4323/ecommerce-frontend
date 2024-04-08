@@ -24,7 +24,6 @@ import NoImage from "../../../public/no_image.png";
 import { CategoryDataAside } from "src/containers/administration/categories/dataAside";
 import { CategoryCreateAside } from "src/containers/administration/categories/createAside";
 import { useCategoryStore } from "@/hooks/states/categories";
-import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 
 const columnHelper = createColumnHelper<Category>();
 

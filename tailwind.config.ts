@@ -6,6 +6,11 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      height: {
+        120: "30rem",
+        128: "32rem",
+        144: "36rem"
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
