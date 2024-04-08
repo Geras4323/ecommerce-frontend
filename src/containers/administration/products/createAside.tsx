@@ -177,9 +177,10 @@ export function ProductCreateAside() {
     <Sheet open={create_isOpen}>
       <SheetContent
         side="left"
-        className="w-1/3 border-r border-r-secondary/20 bg-base-100"
+        className="flex h-full w-1/3 flex-col border-r border-r-secondary/20 bg-base-100"
       >
-        <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
+        {/* HEADER */}
+        <div className="mb-8 flex h-fit w-full items-center justify-end gap-4">
           <span className="whitespace-nowrap text-2xl">
             Crear nuevo producto
           </span>
@@ -193,7 +194,7 @@ export function ProductCreateAside() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex h-full flex-col items-end gap-4 overflow-y-auto"
+          className="flex h-full flex-col items-end gap-4 overflow-y-auto pr-2"
         >
           <div className="grid w-full grid-cols-2 items-center gap-4">
             <div className="col-span-2 flex flex-col gap-1">
