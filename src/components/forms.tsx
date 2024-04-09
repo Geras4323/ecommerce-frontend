@@ -3,12 +3,20 @@ import { cn } from "@/utils/lib";
 import { AlertCircle } from "lucide-react";
 import type { MouseEventHandler, ReactNode } from "react";
 
-export function ErrorSpan({ message }: { message?: string }) {
+export function ErrorSpan({
+  message,
+  className,
+}: { message?: string } & WithClassName) {
   if (!message) return;
   return (
-    <div className="flex items-center gap-1 text-error">
-      <AlertCircle className="mb-0.5 size-4" />
-      <span className="text-base italic">{message}</span>
+    <div
+      className={cn(
+        !!className && className,
+        "flex items-center gap-1 text-base text-error"
+      )}
+    >
+      <AlertCircle className="mb-0.5 size-4 min-w-4" />
+      <span className="italic">{message}</span>
     </div>
   );
 }

@@ -11,6 +11,8 @@ import type { ServerError } from "@/types/types";
 import Link from "next/link";
 import { useSession } from "@/hooks/session";
 import { useRouter } from "next/router";
+import { ErrorSpan } from "@/components/forms";
+import NoImage from "../../public/no_image.png";
 
 function Showroom() {
   const { session } = useSession();
@@ -32,31 +34,36 @@ function Showroom() {
     retry: false,
   });
 
-  if (categoriesQuery.isPending) return <>Categories loading</>;
-  if (categoriesQuery.isError) return <>Categories error</>;
-
-  if (productsQuery.isPending) return <>Products loading</>;
-  if (productsQuery.isError) return <>Products error</>;
-
   return (
     <GeneralLayout title="Showroom" description="Our showroom">
       <div className="mx-auto flex h-fit gap-8 pt-24">
         {/* CATEGORIES */}
-        <section className="relative h-auto min-w-80">
+        <section className="relative h-auto w-80 min-w-80">
           <div className="sticky top-24 flex h-fit w-full flex-col gap-4">
             <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
               <Tag className="size-6" />
               <h2 className="text-xl font-medium">CATEGORÍAS</h2>
             </div>
             <div className="flex w-full flex-col gap-4">
-              {categoriesQuery.data.map((category) => (
-                <CategoryItem
-                  key={category.id}
-                  category={category}
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
+              {categoriesQuery.isPending ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <CategoryItemSkeleton key={i} />
+                ))
+              ) : categoriesQuery.isError ? (
+                <ErrorSpan
+                  message="Ocurrió un error al cargar las categorías"
+                  className="gap-3 text-lg"
                 />
-              ))}
+              ) : (
+                categoriesQuery.data.map((category) => (
+                  <CategoryItem
+                    key={category.id}
+                    category={category}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                  />
+                ))
+              )}
             </div>
           </div>
         </section>
@@ -68,36 +75,38 @@ function Showroom() {
             <h2 className="text-xl font-medium">PRODUCTOS</h2>
           </div>
           <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
-            {productsQuery.data?.map((product) => {
-              if (!selectedCategory)
-                return (
-                  <ProductItem
-                    key={product.id}
-                    product={product}
-                    addToCart={cart.addCartItem}
-                    logged={!!session.data}
-                    inCart={
-                      cart.cartItems.data?.findIndex(
-                        (cI) => cI.productID === product.id
-                      ) !== -1
-                    }
-                  />
-                );
-              if (selectedCategory?.id === product.categoryID)
-                return (
-                  <ProductItem
-                    key={product.id}
-                    product={product}
-                    addToCart={cart.addCartItem}
-                    logged={!!session.data}
-                    inCart={
-                      cart.cartItems.data?.findIndex(
-                        (cI) => cI.productID === product.id
-                      ) !== -1
-                    }
-                  />
-                );
-            })}
+            {productsQuery.isPending ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <ProductItemSkeleton key={i} />
+              ))
+            ) : productsQuery.isError ? (
+              <div className="col-span-2 flex justify-center">
+                <ErrorSpan
+                  message="Ocurrió un error al cargar los productos"
+                  className="text-lg"
+                />
+              </div>
+            ) : (
+              productsQuery.data?.map((product) => {
+                if (
+                  !selectedCategory ||
+                  selectedCategory?.id === product.categoryID
+                )
+                  return (
+                    <ProductItem
+                      key={product.id}
+                      product={product}
+                      addToCart={cart.addCartItem}
+                      logged={!!session.data}
+                      inCart={
+                        cart.cartItems.data?.findIndex(
+                          (cI) => cI.productID === product.id
+                        ) !== -1
+                      }
+                    />
+                  );
+              })
+            )}
           </div>
         </section>
       </div>
@@ -134,14 +143,17 @@ function CategoryItem({
       <div className="min-w-fit">
         <Image
           alt="category"
-          src={category.image ?? ""}
+          src={category.image ?? NoImage}
           width={200}
           height={200}
           className={cn(
+            !category.image
+              ? "scale-90 object-contain opacity-20"
+              : "object-cover",
             category.id === selectedCategory?.id
               ? "saturate-100"
               : "saturate-0",
-            "h-full w-24 border-r border-r-secondary/10 bg-secondary/20 object-cover transition-all"
+            "h-full w-24 border-r border-r-secondary/10 bg-secondary/20 transition-all"
           )}
         />
       </div>
@@ -156,6 +168,21 @@ function CategoryItem({
         >
           {category.name}
         </span>
+      </div>
+    </div>
+  );
+}
+
+function CategoryItemSkeleton() {
+  return (
+    <div className="flex h-16 w-full min-w-72 animate-pulse overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md">
+      {/* Image */}
+      <div className="min-w-fit">
+        <div className="h-full w-24 border-r border-r-secondary/10 bg-secondary/10" />
+      </div>
+      {/* Name */}
+      <div className="flex h-full w-full items-center p-6">
+        <div className="h-6 w-32 rounded-md bg-secondary/10" />
       </div>
     </div>
   );
@@ -187,12 +214,15 @@ function ProductItem({
   return (
     <div className="flex w-full gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 shadow-md">
       <div className="h-52 min-w-52 p-3">
-        <img
+        <Image
           alt="Product Image"
-          className="h-full w-full rounded-lg border border-secondary/10 object-cover"
-          src={product.images[0]?.url ?? ""}
-          // height="200"
-          // width="200"
+          className={cn(
+            !product.images[0] && "scale-90 opacity-20",
+            "h-full w-full rounded-lg border border-secondary/10 object-cover"
+          )}
+          src={product.images[0]?.url ?? NoImage}
+          height="200"
+          width="200"
         />
       </div>
       <div className="flex w-full flex-col justify-between gap-2 p-4 pl-0">
@@ -264,6 +294,34 @@ function ProductItem({
               Ver en el carrito
             </Link>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductItemSkeleton() {
+  return (
+    <div className="flex w-full animate-pulse gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 shadow-md">
+      {/* Image */}
+      <div className="h-52 min-w-52 p-3">
+        <div className="h-full w-full rounded-lg bg-secondary/10" />
+      </div>
+      {/* Data */}
+      <div className="flex w-full flex-col justify-between gap-2 p-4 pl-0">
+        {/* Name & Price */}
+        <div className="flex items-start justify-between gap-6">
+          <div className="h-14 w-52 rounded-md bg-secondary/10" />
+          <div className="h-8 w-20 rounded-md bg-secondary/10" />
+        </div>
+
+        {/* Description */}
+        <div className="h-14 w-full rounded-md bg-secondary/10" />
+
+        {/* Cart & Add */}
+        <div className="flex w-full justify-end gap-4">
+          <div className="h-8 w-full rounded-md bg-secondary/10" />
+          <div className="h-8 w-48 rounded-md bg-secondary/10" />
         </div>
       </div>
     </div>
