@@ -152,7 +152,7 @@ export default function Cart() {
                 <LoadableButton
                   onClick={() => createOrderMutation.mutate()}
                   isPending={createOrderMutation.isPending}
-                  className="btn btn-primary btn-sm ml-1"
+                  className="btn btn-primary btn-sm ml-1 w-48"
                 >
                   <Check className="size-5" />
                   Confirmar pedido
