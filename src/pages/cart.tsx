@@ -16,19 +16,21 @@ import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import axios, { type AxiosError } from "axios";
 import { LoadableButton } from "@/components/forms";
-import { useRouter } from "next/router";
 import { type OrderItem } from "@/functions/orders";
 import { type Session, withAuth } from "@/functions/session";
 import Link from "next/link";
 import { useSession } from "@/hooks/session";
 import { format } from "date-fns";
+import { OrderConfirmationModal } from "@/components/modals/cart";
+import { useState } from "react";
 
 export default function Cart() {
   const { session } = useSession();
   const cart = useShoppingCart();
 
-  const router = useRouter();
   const queryClient = useQueryClient();
+
+  const [confirmedOrder, setConfirmedOrder] = useState<OrderItem | null>(null);
 
   const productsQuery = useQuery({
     queryKey: ["products"],
@@ -65,9 +67,8 @@ export default function Cart() {
           session: session.data,
           order: order.data,
         });
-        return;
       }
-      router.push(`/orders/${order.data.id}`);
+      setConfirmedOrder(order.data);
     },
   });
 
@@ -118,8 +119,6 @@ export default function Cart() {
       });
     },
     onError: (err) => console.log(err),
-    onSettled: (_, __, variables) =>
-      router.push(`/orders/${variables.order.id}`),
   });
 
   return (
@@ -196,6 +195,15 @@ export default function Cart() {
           )}
         </div>
       </section>
+
+      {confirmedOrder && session.data && (
+        <OrderConfirmationModal
+          isOpen={!!confirmedOrder}
+          onClose={() => setConfirmedOrder(null)}
+          order={confirmedOrder}
+          email={session.data.email}
+        />
+      )}
     </GeneralLayout>
   );
 }
