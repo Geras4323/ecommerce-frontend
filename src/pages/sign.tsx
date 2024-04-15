@@ -153,11 +153,16 @@ function Sign() {
 
   return (
     <GeneralLayout title="Iniciar" description="Iniciar sesión o registrarse">
-      <div className="relative mx-auto my-auto grid h-120 w-screen max-w-4xl grid-cols-2 overflow-hidden rounded-xl border border-secondary/20">
+      <div
+        className="relative mx-auto my-auto grid h-120 w-screen max-w-4xl grid-cols-2 overflow-hidden rounded-xl border border-secondary/20"
+        style={{
+          boxShadow: "0 4px 6px rgba(0,0,0, .3), 0 5px 20px rgba(0,0,0, .1)",
+        }}
+      >
         <div
           className={cn(
             isLogging ? "left-0 border-r" : "left-1/2 border-l",
-            "absolute z-50 h-full w-1/2 border-x-secondary/20 bg-base-100 transition-all duration-1000 ease-in-out"
+            "absolute z-50 h-full w-1/2 border-x-secondary/20 bg-secondary/10 transition-all duration-1000 ease-in-out"
           )}
         >
           <div
@@ -184,7 +189,10 @@ function Sign() {
             )}
           >
             <p className="text-secondary">¿Aún no tiene cuenta?</p>
-            <button onClick={switchSide} className="text-primary">
+            <button
+              onClick={switchSide}
+              className="text-primary hover:underline"
+            >
               Registrarse
             </button>
           </div>
@@ -195,7 +203,10 @@ function Sign() {
             )}
           >
             <p className="text-secondary">¿Ya tiene una cuenta?</p>
-            <button onClick={switchSide} className="text-primary">
+            <button
+              onClick={switchSide}
+              className="text-primary hover:underline"
+            >
               Iniciar sesión
             </button>
           </div>
@@ -212,7 +223,7 @@ function Sign() {
             onSubmit={signupNameHandleSubmit(onSignupNameSubmit)}
             className="flex h-full w-full flex-col justify-between gap-8"
           >
-            <h3 className="w-full border-b border-b-secondary/20 pb-1 text-left text-2xl">
+            <h3 className="w-full border-b border-b-secondary/20 pb-1 text-left text-2xl text-primary">
               Registrarse
             </h3>
             <FormInput className="relative">

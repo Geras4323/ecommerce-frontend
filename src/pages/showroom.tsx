@@ -40,9 +40,9 @@ function Showroom() {
         {/* CATEGORIES */}
         <section className="relative h-auto w-80 min-w-80">
           <div className="sticky top-24 flex h-fit w-full flex-col gap-4">
-            <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
+            <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2 text-primary">
               <Tag className="size-6" />
-              <h2 className="text-xl font-medium">CATEGORÍAS</h2>
+              <h2 className="text-xl font-medium tracking-wide">CATEGORÍAS</h2>
             </div>
             <div className="flex w-full flex-col gap-4">
               {categoriesQuery.isPending ? (
@@ -70,9 +70,9 @@ function Showroom() {
 
         {/* PRODUCTS */}
         <section className="mb-8 flex w-screen max-w-6xl flex-col gap-4">
-          <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2">
+          <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2 text-primary">
             <Package className="size-6" />
-            <h2 className="text-xl font-medium">PRODUCTOS</h2>
+            <h2 className="text-xl font-medium tracking-wide">PRODUCTOS</h2>
           </div>
           <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
             {productsQuery.isPending ? (
@@ -289,7 +289,7 @@ function ProductItem({
           ) : (
             <Link
               href="/cart"
-              className="btn btn-outline btn-sm flex min-w-48 items-center gap-3"
+              className="btn btn-outline btn-secondary btn-sm flex min-w-48 items-center gap-3"
             >
               Ver en el carrito
             </Link>

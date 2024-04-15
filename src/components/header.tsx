@@ -1,6 +1,4 @@
-import Image from "next/image";
 import { ThemeSwitcher } from "./themeSwitcher";
-import Logo from "../../public/logoNB.png";
 import Link from "next/link";
 import { useSession } from "@/hooks/session";
 import {
@@ -17,6 +15,10 @@ import { useState } from "react";
 import { cn } from "@/utils/lib";
 import { useShoppingCart } from "@/hooks/cart";
 import { useRouter } from "next/router";
+import { Tangerine } from "next/font/google";
+import { useTheme } from "next-themes";
+
+const tangerine = Tangerine({ weight: ["700"], subsets: ["latin"] });
 
 type Section = {
   title: string;
@@ -56,19 +58,17 @@ export const Header = () => {
   const cart = useShoppingCart();
 
   const router = useRouter();
+  const { theme } = useTheme();
 
   const [isSessionOpen, setIsSessionOpen] = useState(false);
 
   return (
     <header className="fixed z-50 flex h-16 w-full items-center justify-between border-b border-b-secondary/20 bg-base-300/70 px-6 py-2 backdrop-blur">
-      <Link href="/">
-        <Image
-          width={700}
-          height={300}
-          src={Logo}
-          alt="logo"
-          className="-ml-6 w-80"
-        />
+      <Link
+        href="/"
+        className={cn(tangerine.className, "select-none text-4xl text-primary")}
+      >
+        Mis Ideas Pintadas
       </Link>
 
       <div className="flex items-center gap-4">
@@ -107,8 +107,13 @@ export const Header = () => {
                   <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
                 )}
             </PopoverTrigger>
-            <PopoverContent align="end" sideOffset={17} className="">
-              <article className="flex h-fit w-48 flex-col overflow-hidden rounded-b-lg border border-secondary/20 bg-base-100">
+            <PopoverContent align="end" sideOffset={16}>
+              <article
+                className={cn(
+                  theme === "dark" ? "bg-base-300" : "bg-base-100",
+                  "flex h-fit w-48 flex-col overflow-hidden rounded-b-lg border border-secondary/20 shadow-xl"
+                )}
+              >
                 {sections.map((section) => {
                   if (!section.disabled)
                     return (

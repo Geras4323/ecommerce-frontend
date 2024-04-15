@@ -24,7 +24,7 @@ export function Modal({
 }: ModalProps & WithChildren) {
   return (
     <Dialog open={isOpen} onOpenChange={() => !!onClose && onClose}>
-      <DialogContent showXButton={!!onClose} className="pt-2">
+      <DialogContent showXButton={!!onClose}>
         <DialogHeader className="flex flex-col gap-2">
           {title && <DialogTitle>{title}</DialogTitle>}
           {description && <DialogDescription>{description}</DialogDescription>}

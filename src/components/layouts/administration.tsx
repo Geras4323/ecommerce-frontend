@@ -76,7 +76,7 @@ export function AdministrationLayout({
             })}
             <hr className="my-2 border-secondary/20" />
             {sections.map((section, i) => {
-              if (i >= 3)
+              if (i >= 3 && !section.disabled)
                 return (
                   <SectionItem
                     key={section.name}
@@ -108,11 +108,11 @@ const SectionItem = ({
         active && "bg-secondary/20",
         section.disabled
           ? "cursor-default text-secondary"
-          : "cursor-pointer text-primary/80 hover:bg-secondary/20",
+          : "cursor-pointer text-primary hover:bg-secondary/20",
         "flex h-16 w-auto select-none items-center justify-start gap-8 px-6 text-xl transition-all"
       )}
     >
-      <section.icon className="size-8 min-w-fit" />
+      <section.icon className="size-8 min-w-fit text-primary/90" />
       {section.name}
     </Link>
   );

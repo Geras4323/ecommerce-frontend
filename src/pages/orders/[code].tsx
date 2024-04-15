@@ -56,7 +56,7 @@ export default function Order() {
   return (
     <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
       <div className="mx-auto flex h-screen w-screen max-w-5xl flex-col gap-4 pb-24 pt-24">
-        <div className="flex w-full items-center gap-4 border-b border-b-secondary/20">
+        <div className="flex w-full items-center gap-4 border-b border-b-secondary/20 text-primary">
           <CreditCard className="size-6" />
           <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
         </div>
@@ -142,7 +142,7 @@ export default function Order() {
             </div>
 
             {!orderQuery.isPending && (
-              <button className="btn btn-outline">
+              <button className="btn btn-outline btn-secondary">
                 <Paperclip className="size-5" /> Adjuntar comprobante de pago
               </button>
             )}

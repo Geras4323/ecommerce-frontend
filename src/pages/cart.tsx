@@ -126,14 +126,14 @@ export default function Cart() {
       {/* ITEMS */}
       <section className="mx-auto mb-8 flex w-screen max-w-7xl flex-col gap-4 pt-24">
         <div className="flex h-fit items-end justify-between border-b border-b-secondary/20 py-2">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-primary">
             <ShoppingCart className="size-6" />
             <h1 className="text-xl font-medium">CARRITO DE COMPRAS</h1>
           </div>
 
           {cart.cartItems.data?.length !== 0 && (
             <div className="flex items-end gap-4">
-              <span className="text-lg font-medium">TOTAL</span>
+              <span className="text-lg font-medium text-primary">TOTAL</span>
               {cart.cartItems.isPending ? (
                 <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/30" />
               ) : (

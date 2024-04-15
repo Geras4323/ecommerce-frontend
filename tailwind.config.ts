@@ -9,7 +9,7 @@ const config: Config = {
       height: {
         120: "30rem",
         128: "32rem",
-        144: "36rem"
+        144: "36rem",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
@@ -26,6 +26,9 @@ const config: Config = {
           "0%": { transform: "translateY(0%)" },
           "100%": { transform: "translateY(calc(-100% - 12px))" },
         },
+      },
+      boxShadow: {
+        button: "0 3px 3px rgba(0,0,0, .1), 0 5px 10px rgba(0,0,0, .05)",
       },
     },
   },
@@ -54,12 +57,14 @@ const config: Config = {
       {
         light: {
           ...daisyThemes["[data-theme=business]"],
-          primary: "#000000",
-          secondary: "#8f8f8f",
+          primary: "hsl(41, 18%, 20%)",
+          secondary: "hsl(40, 15%, 20%)",
+          "btn-primary": "hsl(41, 18%, 20%)",
+          "btn-secondary": "hsl(41, 18%, 20%)",
           accent: "#67CBA0",
           neutral: "#000",
-          "base-100": "#FFFFFF",
-          "base-300": "#f8f8f8",
+          "base-100": "hsl(39, 15%, 90%)",
+          "base-300": "hsl(39, 25%, 85%)",
           info: "#0070f3",
           success: "#50e3c2",
           warning: "#f5a623",
