@@ -11,7 +11,7 @@ import type { ServerError } from "@/types/types";
 import Link from "next/link";
 import { useSession } from "@/hooks/session";
 import { useRouter } from "next/router";
-import { ErrorSpan } from "@/components/forms";
+import { ErrorSpan, LoadableButton } from "@/components/forms";
 import NoImage from "../../public/no_image.png";
 
 function Showroom() {
@@ -273,7 +273,7 @@ function ProductItem({
           )}
 
           {!inCart || !logged ? (
-            <button
+            <LoadableButton
               onClick={() => {
                 if (!logged) {
                   router.push("/sign");
@@ -282,10 +282,11 @@ function ProductItem({
                 addToCart.mutate({ productID: product.id, quantity });
               }}
               className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
+              isPending={addToCart.isPending}
             >
               <ShoppingCart className="size-5" />
               Añadir al carrito
-            </button>
+            </LoadableButton>
           ) : (
             <Link
               href="/cart"
