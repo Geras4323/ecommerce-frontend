@@ -26,8 +26,9 @@ import {
   Upload,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
+import { ReactSortable } from "react-sortablejs";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -59,7 +60,17 @@ export function ProductCreateAside() {
     create_modal_discardChanges_change,
   } = useProductStore();
 
-  const [image, setImage] = useState<File>();
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [tempFiles, setTempFiles] = useState<{ id: number; data: File }[]>([]);
+
+  useEffect(() => {
+    setTempFiles(
+      uploadedFiles.map((file, i) => ({
+        id: i,
+        data: file,
+      }))
+    );
+  }, [uploadedFiles]);
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -98,7 +109,7 @@ export function ProductCreateAside() {
   }
 
   function resetImage() {
-    setImage(undefined);
+    setUploadedFiles([]);
   }
 
   function refreshQuery() {
@@ -106,7 +117,7 @@ export function ProductCreateAside() {
   }
 
   function handleCancel() {
-    if (!image && !checkChange()) {
+    if (uploadedFiles.length === 0 && !checkChange()) {
       create_close();
       return;
     }
@@ -140,8 +151,8 @@ export function ProductCreateAside() {
       return axios.post(url, data, { withCredentials: true });
     },
     onSuccess: (res) => {
-      if (image) {
-        imageMutation.mutate(res.data.id);
+      if (uploadedFiles.length !== 0) {
+        imagesMutation.mutate(res.data.id);
         return;
       }
       toast.success("Producto creado exitosamente");
@@ -151,11 +162,14 @@ export function ProductCreateAside() {
     },
   });
 
-  const imageMutation = useMutation<any, ServerError, number>({
+  const imagesMutation = useMutation<any, ServerError, number>({
     mutationFn: async (prodID) => {
+      const images = new FormData();
+      tempFiles.forEach((file) => images.append("images", file.data));
+
       return axios.post(
-        `${vars.serverUrl}/api/v1/products/${prodID}/image`,
-        { file: image },
+        `${vars.serverUrl}/api/v1/products/${prodID}/images`,
+        images,
         {
           withCredentials: true,
           headers: {
@@ -177,7 +191,7 @@ export function ProductCreateAside() {
     <Sheet open={create_isOpen}>
       <SheetContent
         side="left"
-        className="flex h-full w-1/3 flex-col border-r border-r-secondary/20 bg-base-100"
+        className="flex h-full w-1/3 min-w-screen-sm flex-col border-r border-r-secondary/20 bg-base-100"
       >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-end gap-4">
@@ -330,51 +344,53 @@ export function ProductCreateAside() {
           </div>
 
           <div className="col-span-2 flex w-full flex-col gap-1">
-            <label className="text-lg text-secondary">Imágen:</label>
-            <section className="flex min-w-fit flex-row gap-4">
-              <div className="flex size-48 min-w-48 items-center justify-center rounded-xl border border-secondary/50">
-                <div className="group relative size-11/12 overflow-hidden rounded-md">
-                  {image && (
-                    <button
-                      type="button"
-                      onClick={() => setImage(undefined)}
-                      className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="size-5" />
-                    </button>
+            <label className="text-lg text-secondary">Imágenes:</label>
+            <section className="flex min-w-fit flex-wrap gap-4">
+              <div className="flex size-24 min-w-24 items-center justify-center rounded-xl border border-secondary/50">
+                <label
+                  htmlFor="new_image"
+                  className={cn(
+                    "z-10 flex size-full cursor-pointer items-center justify-center"
                   )}
-                  <label
-                    htmlFor="new_image"
-                    className={cn(
-                      image ? "opacity-0" : "opacity-100",
-                      "absolute left-0 top-0 z-10 flex size-full cursor-pointer items-center justify-center bg-secondary/20 backdrop-blur-sm transition-opacity group-hover:opacity-100"
-                    )}
-                  >
-                    <Upload className="size-8 animate-bounce text-white" />
-                  </label>
-                  <input
-                    id="new_image"
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => setImage(e.target.files?.[0])}
-                  />
-                  {image && (
+                >
+                  <Upload className="size-8 animate-bounce text-white" />
+                </label>
+                <input
+                  id="new_image"
+                  type="file"
+                  className="hidden"
+                  multiple
+                  onChange={(e) => {
+                    if (!e.target.files) return;
+                    setUploadedFiles((prev) => [
+                      ...prev,
+                      ...(e.target.files as FileList),
+                    ]);
+                  }}
+                />
+              </div>
+              <ReactSortable
+                animation={150}
+                list={tempFiles}
+                setList={setTempFiles}
+                className="flex flex-wrap gap-4"
+                direction="horizontal"
+              >
+                {tempFiles.map((file, i) => (
+                  <div key={i}>
                     <Image
-                      alt="preview"
+                      src={URL.createObjectURL(file.data)}
                       width={200}
                       height={200}
-                      src={URL.createObjectURL(image)}
-                      className="absolute size-full rounded-md"
+                      alt={file.data.name}
+                      className={cn(
+                        i === 0 && "border-2",
+                        "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
+                      )}
                     />
-                  )}
-                </div>
-              </div>
-              {image && (
-                <div className="flex items-center justify-center gap-2 text-error">
-                  <AlertCircle className="size-4" />
-                  <ErrorSpan message="Imagen no guardada" />
-                </div>
-              )}
+                  </div>
+                ))}
+              </ReactSortable>
             </section>
           </div>
 
@@ -388,7 +404,7 @@ export function ProductCreateAside() {
             </button>
             <LoadableButton
               type="submit"
-              isPending={dataMutation.isPending || imageMutation.isPending}
+              isPending={dataMutation.isPending || imagesMutation.isPending}
               className="btn-primary w-32"
               animation="loading-dots"
             >
@@ -410,4 +426,28 @@ export function ProductCreateAside() {
       </SheetContent>
     </Sheet>
   );
+}
+
+{
+  /* {image && (
+        <button
+          type="button"
+          onClick={() => setImage(undefined)}
+          className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
+        >
+          <Trash2 className="size-5" />
+        </button>
+      )} */
+}
+
+{
+  /* {image && (
+        <Image
+          alt="preview"
+          width={200}
+          height={200}
+          src={URL.createObjectURL(image)}
+          className="absolute size-full rounded-md"
+        />
+      )} */
 }
