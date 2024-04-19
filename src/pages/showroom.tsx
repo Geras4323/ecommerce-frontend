@@ -5,7 +5,15 @@ import Image from "next/image";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { type Product, getProducts } from "@/functions/products";
 import { cn } from "@/utils/lib";
-import { Minus, Package, Plus, ShoppingCart, Tag } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Minus,
+  Package,
+  Plus,
+  ShoppingCart,
+  Tag,
+} from "lucide-react";
 import { useShoppingCart } from "@/hooks/cart";
 import type { ServerError } from "@/types/types";
 import Link from "next/link";
@@ -13,10 +21,19 @@ import { useSession } from "@/hooks/session";
 import { useRouter } from "next/router";
 import { ErrorSpan, LoadableButton } from "@/components/forms";
 import NoImage from "../../public/no_image.png";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/shadcn/carousel";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 
 function Showroom() {
   const { session } = useSession();
   const cart = useShoppingCart();
+  const mq = useMediaQueries();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
 
@@ -103,6 +120,7 @@ function Showroom() {
                           (cI) => cI.productID === product.id
                         ) !== -1
                       }
+                      mediaQuery={mq}
                     />
                   );
               })
@@ -193,6 +211,7 @@ function ProductItem({
   logged,
   inCart,
   addToCart,
+  mediaQuery,
 }: {
   product: Product;
   logged: boolean;
@@ -206,26 +225,46 @@ function ProductItem({
     },
     unknown
   >;
+  mediaQuery: number | undefined;
 }) {
   const router = useRouter();
 
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <div className="flex w-full gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 shadow-md">
-      <div className="h-52 min-w-52 p-3">
-        <Image
-          alt="Product Image"
-          className={cn(
-            !product.images[0] && "scale-90 opacity-20",
-            "h-full w-full rounded-lg border border-secondary/10 object-cover"
-          )}
-          src={product.images[0]?.url ?? NoImage}
-          height="200"
-          width="200"
-        />
-      </div>
-      <div className="flex w-full flex-col justify-between gap-2 p-4 pl-0">
+    <div className="flex h-52 w-full gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 p-3 shadow-md">
+      <Carousel
+        opts={{
+          axis: "x",
+          watchDrag: mediaQuery && mediaQuery >= mqs.xxl ? false : true,
+          duration: 20,
+        }}
+        className="aspect-square h-full"
+      >
+        <CarouselContent className="-ml-2 h-full">
+          {product.images.map((image) => (
+            <CarouselItem key={image.id} className="pl-2">
+              <Image
+                alt="Product Image"
+                className={cn(
+                  // !product.images[0] && "scale-90 opacity-20",
+                  "h-full w-full rounded-lg border border-secondary/10 object-cover"
+                )}
+                src={image.url ?? NoImage}
+                height="200"
+                width="200"
+              />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="absolute bottom-2 left-2 z-10 flex size-7 items-center justify-center rounded-lg bg-base-100 disabled:opacity-30">
+          <ChevronLeft className="size-5" />
+        </CarouselPrevious>
+        <CarouselNext className="absolute bottom-2 right-2 z-10 flex size-7 items-center justify-center rounded-lg bg-base-100 disabled:opacity-30">
+          <ChevronRight className="size-5" />
+        </CarouselNext>
+      </Carousel>
+      <div className="flex w-full flex-col justify-between gap-2">
         <div className="flex items-start justify-between gap-6">
           <span className="text-lg font-semibold text-primary/80">
             {product.name}
