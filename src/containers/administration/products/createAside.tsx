@@ -421,7 +421,7 @@ export function ProductCreateAside() {
             resetImage();
             create_close();
           }}
-          deselectProduct
+          // deselectProduct
         />
       </SheetContent>
     </Sheet>

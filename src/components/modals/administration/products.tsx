@@ -1,7 +1,7 @@
 import { LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import { type Product } from "@/functions/products";
-import { useProductStore } from "@/hooks/states/products";
+// import { useProductStore } from "@/hooks/states/products";
 import type { CloudinaryError, CloudinarySuccess } from "@/types/cloudinary";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
@@ -12,23 +12,23 @@ import { toast } from "sonner";
 export function DiscardProductChangesModal({
   isOpen,
   onClose: onCloseProp,
-  onConfirm,
-  deselectProduct,
-}: {
+  onConfirm: onConfirmProp,
+}: // deselectProduct,
+{
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  deselectProduct?: boolean;
+  // deselectProduct?: boolean;
 }) {
-  const { product_remove } = useProductStore();
+  // const { product_remove } = useProductStore();
 
   function onClose() {
-    if (deselectProduct) product_remove();
+    // if (deselectProduct) product_remove();
     onCloseProp();
   }
 
-  function handleConfirm() {
-    onConfirm();
+  function onConfirm() {
+    onConfirmProp();
     onCloseProp();
   }
 
@@ -47,7 +47,7 @@ export function DiscardProductChangesModal({
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar
         </button>
-        <button className="btn btn-primary w-28" onClick={handleConfirm}>
+        <button className="btn btn-primary w-28" onClick={onConfirm}>
           Confirmar
         </button>
       </div>
@@ -124,8 +124,6 @@ export function DeleteProductImageModal({
   onClose: () => void;
   product: Product;
 }) {
-  const { product_select } = useProductStore();
-
   const queryClient = useQueryClient();
 
   function onClose() {
@@ -144,7 +142,7 @@ export function DeleteProductImageModal({
       return axios.delete(url, { withCredentials: true });
     },
     onSuccess: () => {
-      product_select({ ...product, images: [] });
+      // product_select({ ...product, images: [] });
       onClose();
     },
     onError: (err) => {

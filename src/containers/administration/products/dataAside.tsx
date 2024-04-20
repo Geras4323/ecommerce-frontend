@@ -12,12 +12,11 @@ import {
   Upload,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import NoImage from "../../../../public/no_image.png";
-import { useProductStore } from "@/hooks/states/products";
 import {
   DeleteProductImageModal,
   DeleteProductModal,
@@ -35,6 +34,9 @@ import { getSuppliers } from "@/functions/suppliers";
 import { type Product } from "@/functions/products";
 import { type CloudinarySuccess } from "@/types/cloudinary";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
+import { ReactSortable } from "react-sortablejs";
+import { cn } from "@/utils/lib";
+import { type ProductImage } from "@/functions/images";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -54,17 +56,24 @@ const inputSchema = z.object({
   description: z.string().min(10, { message: "Mínimo 10 caracteres" }),
 });
 
-export function ProductDataAside() {
-  const { selected_product, product_select, product_remove } =
-    useProductStore();
-
+export function ProductDataAside({
+  product,
+  setProduct,
+}: {
+  product: Product;
+  setProduct: Dispatch<SetStateAction<Product | null>>;
+}) {
   const queryClient = useQueryClient();
 
-  const [image, setImage] = useState<File>();
+  const [existentFiles, setExistentFiles] = useState<ProductImage[]>(
+    product.images
+  );
+  const [closing, setClosing] = useState(false);
+
   const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] =
     useState(false);
-  const [isDeleteProductImageModalOpen, setIsDeleteProductImageModalOpen] =
-    useState(false);
+  // const [isDeleteProductImageModalOpen, setIsDeleteProductImageModalOpen] =
+  //   useState(false);
   const [isDiscardChangesModalOpen, setIsDiscardChangesModalOpen] =
     useState(false);
 
@@ -91,21 +100,30 @@ export function ProductDataAside() {
   function checkChange() {
     const values = getValues();
     return (
-      values.name !== selected_product?.name ||
-      values.code !== selected_product?.code ||
-      values.description !== selected_product?.description ||
-      Number(values.price) !== selected_product?.price ||
-      Number(values.categoryID) !== selected_product?.categoryID ||
-      Number(values.supplierID) !== selected_product?.supplierID
+      values.name !== product.name ||
+      values.code !== product.code ||
+      values.description !== product.description ||
+      Number(values.price).toLocaleString("es-AR") !==
+        product.price.toLocaleString("es-AR") ||
+      Number(values.categoryID) !== product.categoryID ||
+      Number(values.supplierID) !== product.supplierID
     );
   }
 
-  function resetInputData() {
-    reset({ code: selected_product?.code, name: selected_product?.name });
+  function closeAside() {
+    setClosing(true);
+    setTimeout(() => {
+      setProduct(null);
+    }, 200);
   }
 
-  function resetImage() {
-    setImage(undefined);
+  function resetInputData() {
+    reset({ code: product.code, name: product.name });
+  }
+
+  function resetImages() {
+    setExistentFiles([]);
+    // setTempFiles([]);
   }
 
   function refreshQuery() {
@@ -113,8 +131,10 @@ export function ProductDataAside() {
   }
 
   function handleCancel() {
-    if (!image && !checkChange()) {
-      product_remove();
+    // if (tempFiles.length === 0 && !checkChange()) {
+    if (!checkChange()) {
+      setExistentFiles([]);
+      closeAside();
       return;
     }
     setIsDiscardChangesModalOpen(true);
@@ -130,52 +150,61 @@ export function ProductDataAside() {
   } = useForm<Input>({
     resolver: zodResolver(inputSchema),
     values: {
-      code: selected_product?.code ?? "",
-      name: selected_product?.name ?? "",
-      description: selected_product?.description ?? "",
-      price: `${selected_product?.price}` ?? `${-1}`,
-      categoryID: `${selected_product?.categoryID}` ?? `${-1}`,
-      supplierID: `${selected_product?.supplierID}` ?? `${-1}`,
+      code: product.code ?? "",
+      name: product.name ?? "",
+      description: product.description ?? "",
+      price: `${product.price}` ?? `${-1}`,
+      categoryID: `${product.categoryID}` ?? `${-1}`,
+      supplierID: `${product.supplierID}` ?? `${-1}`,
     },
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
-    if (checkChange() || image) {
+    // if (checkChange() || tempFiles.length !== 0) {
+    if (checkChange()) {
       if (checkChange()) dataMutation.mutate(data);
-      if (image) imageMutation.mutate();
+      // if (tempFiles.length !== 0) imagesMutation.mutate();
+      // if (true) imagesMutation.mutate();
       return;
     }
     resetInputData();
-    product_remove();
+    closeAside();
   };
 
   const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
     mutationFn: async (data) => {
       return axios.put(
-        `${vars.serverUrl}/api/v1/products/${selected_product?.id}`,
+        `${vars.serverUrl}/api/v1/products/${product.id}`,
         data,
         { withCredentials: true }
       );
     },
-    onSuccess: (p) => {
-      product_select(p.data); // update product in aside
+    onSuccess: (res) => {
+      setProduct(res.data); // update product in aside
       toast.success("Actualizado");
-      if (!image) {
+      // if (tempFiles.length === 0) {
+      //   refreshQuery();
+      //   product_remove();
+      // }
+      if (true) {
         refreshQuery();
-        product_remove();
+        closeAside();
       }
     },
   });
 
-  const imageMutation = useMutation<
+  const imagesMutation = useMutation<
     ServerSuccess<{ id: number; cloud: CloudinarySuccess }>,
     ServerError,
     void
   >({
     mutationFn: async () => {
+      const images = new FormData();
+      // tempFiles.forEach((file) => images.append("images", file.data));
+
       return axios.post(
-        `${vars.serverUrl}/api/v1/products/${selected_product?.id}/image`,
-        { file: image },
+        `${vars.serverUrl}/api/v1/products/${product.id}/image`,
+        images,
         {
           withCredentials: true,
           headers: {
@@ -184,28 +213,18 @@ export function ProductDataAside() {
         }
       );
     },
-    onSuccess: (res) => {
+    onSuccess: () => {
       toast.success("Subido");
       refreshQuery();
-      resetImage();
-      if (selected_product)
-        product_select({
-          ...selected_product,
-          images: [
-            {
-              id: res.data.id,
-              url: res.data.cloud.Response.secure_url,
-              createdAt: "",
-            },
-          ],
-        });
-      if (checkChange()) product_remove();
+      resetImages();
+      queryClient.invalidateQueries({ queryKey: ["product"] });
+      // if (checkChange()) product_remove();
     },
   });
 
   return (
-    <Sheet open={!!selected_product}>
-      <SheetContent className="flex h-full w-1/3 flex-col border-l border-l-secondary/20 bg-base-100">
+    <Sheet open={!!product && !closing}>
+      <SheetContent className="flex h-full w-1/3 min-w-screen-sm flex-col border-l border-l-secondary/20 bg-base-100">
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-between gap-4">
           <div className="flex w-full items-center gap-4 truncate">
@@ -215,7 +234,7 @@ export function ProductDataAside() {
             >
               <PanelRightClose className="size-6" />
             </button>
-            <span className="truncate text-2xl">{selected_product?.name}</span>
+            <span className="truncate text-2xl">{product.name}</span>
           </div>
           <button
             onClick={() => setIsDeleteProductModalOpen(true)}
@@ -279,80 +298,76 @@ export function ProductDataAside() {
               <ErrorSpan message={errors.code?.message} />
             </div>
 
-            {selected_product && (
-              <>
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="category" className="text-lg text-secondary">
-                    <MandatoryMark /> Categoría:
-                  </label>
-                  <Controller
-                    name="categoryID"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        defaultValue={`${selected_product.categoryID}`}
-                        onValueChange={(v) => field.onChange(v)}
-                      >
-                        <SelectTrigger className="input input-bordered w-full border outline-none">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categoriesQuery.data?.map((category) => (
-                            <SelectOption
-                              key={category.id}
-                              value={`${category.id}`}
-                            >
-                              {category.name}
-                            </SelectOption>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  <ErrorSpan message={errors.categoryID?.message} />
-                </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="category" className="text-lg text-secondary">
+                <MandatoryMark /> Categoría:
+              </label>
+              <Controller
+                name="categoryID"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    defaultValue={`${product.categoryID}`}
+                    onValueChange={(v) => field.onChange(v)}
+                  >
+                    <SelectTrigger className="input input-bordered w-full border outline-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoriesQuery.data?.map((category) => (
+                        <SelectOption
+                          key={category.id}
+                          value={`${category.id}`}
+                        >
+                          {category.name}
+                        </SelectOption>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <ErrorSpan message={errors.categoryID?.message} />
+            </div>
 
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="supplier" className="text-lg text-secondary">
-                    Proveedor:
-                  </label>
-                  <Controller
-                    name="supplierID"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        defaultValue={
-                          selected_product.supplierID
-                            ? `${selected_product.supplierID}`
-                            : "no_supplier"
-                        }
-                        onValueChange={(v) => field.onChange(v)}
-                      >
-                        <SelectTrigger className="input input-bordered w-full border outline-none">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectOption value="no_supplier">
-                            <span className="italic text-secondary">
-                              Sin proveedor
-                            </span>
-                          </SelectOption>
-                          {suppliersQuery.data?.map((supplier) => (
-                            <SelectOption
-                              key={supplier.id}
-                              value={`${supplier.id}`}
-                            >
-                              {supplier.name}
-                            </SelectOption>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  <ErrorSpan message={errors.supplierID?.message} />
-                </div>
-              </>
-            )}
+            <div className="flex flex-col gap-1">
+              <label htmlFor="supplier" className="text-lg text-secondary">
+                Proveedor:
+              </label>
+              <Controller
+                name="supplierID"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    defaultValue={
+                      product.supplierID
+                        ? `${product.supplierID}`
+                        : "no_supplier"
+                    }
+                    onValueChange={(v) => field.onChange(v)}
+                  >
+                    <SelectTrigger className="input input-bordered w-full border outline-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectOption value="no_supplier">
+                        <span className="italic text-secondary">
+                          Sin proveedor
+                        </span>
+                      </SelectOption>
+                      {suppliersQuery.data?.map((supplier) => (
+                        <SelectOption
+                          key={supplier.id}
+                          value={`${supplier.id}`}
+                        >
+                          {supplier.name}
+                        </SelectOption>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <ErrorSpan message={errors.supplierID?.message} />
+            </div>
 
             <div className="col-span-2 flex flex-col gap-1">
               <label htmlFor="description" className="text-lg text-secondary">
@@ -368,55 +383,66 @@ export function ProductDataAside() {
             </div>
 
             <div className="col-span-2 flex flex-col gap-1">
-              <label className="text-lg text-secondary">Imágen:</label>
+              <label className="text-lg text-secondary">Imágenes:</label>
               <section className="flex min-w-fit flex-row gap-4">
-                <div className="flex size-48 min-w-48 items-center justify-center rounded-xl border border-secondary/50">
-                  <div className="group relative size-11/12 overflow-hidden rounded-md">
-                    {selected_product?.images?.[0] && (
-                      <button
-                        type="button"
-                        onClick={() => setIsDeleteProductImageModalOpen(true)}
-                        className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 className="size-5" />
-                      </button>
-                    )}
-                    <label
-                      htmlFor="update_image"
-                      className="absolute left-0 top-0 z-30 flex size-full cursor-pointer items-center justify-center opacity-0 backdrop-blur-sm transition-opacity group-hover:bg-neutral/50 group-hover:opacity-100"
-                    >
-                      <Upload className="size-8 animate-bounce text-white" />
-                    </label>
-                    <input
-                      id="update_image"
-                      type="file"
-                      className="hidden"
-                      onChange={(e) => setImage(e.target.files?.[0])}
-                    />
-                    {image && (
+                <div className="flex size-24 min-w-24 items-center justify-center rounded-xl border border-secondary/50">
+                  <label
+                    htmlFor="update_image"
+                    className="flex size-full cursor-pointer items-center justify-center"
+                  >
+                    <Upload className="size-8 animate-bounce text-white" />
+                  </label>
+                  <input
+                    id="update_image"
+                    type="file"
+                    className="hidden"
+                    multiple
+                    // onChange={(e) =>
+                    //   setUploadedFiles((prev) => [
+                    //     ...prev,
+                    //     ...(e.target.files as FileList),
+                    //   ])
+                    // }
+                  />
+                </div>
+                {!!existentFiles && (
+                  <ReactSortable
+                    animation={150}
+                    list={existentFiles}
+                    setList={setExistentFiles}
+                    className="flex flex-wrap gap-4"
+                    direction="horizontal"
+                  >
+                    {existentFiles.map((image, i) => (
+                      <div key={i}>
+                        <Image
+                          src={image.url}
+                          width={200}
+                          height={200}
+                          alt={image.url}
+                          className={cn(
+                            i === 0 && "border-2",
+                            "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
+                          )}
+                        />
+                      </div>
+                    ))}
+                  </ReactSortable>
+                )}
+                {/* {tempFiles.map((file, i) => (
+                    <div key={i}>
                       <Image
-                        alt="preview"
+                        src={URL.createObjectURL(file.data)}
                         width={200}
                         height={200}
-                        src={URL.createObjectURL(image)}
-                        className="absolute size-full rounded-md"
+                        alt={file.data.name}
+                        className={cn(
+                          i === 0 && "border-2",
+                          "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
+                        )}
                       />
-                    )}
-                    <Image
-                      alt={selected_product?.name ?? ""}
-                      src={selected_product?.images?.[0]?.url ?? NoImage}
-                      width={200}
-                      height={200}
-                      className="z-10 size-full select-none rounded-md bg-secondary/10 object-cover"
-                    />
-                  </div>
-                </div>
-                {image && (
-                  <div className="flex items-center justify-center gap-2 text-error">
-                    <AlertCircle className="size-4" />
-                    <ErrorSpan message="Imagen no guardada" />
-                  </div>
-                )}
+                    </div>
+                  ))} */}
               </section>
             </div>
 
@@ -481,7 +507,7 @@ export function ProductDataAside() {
             </button>
             <LoadableButton
               type="submit"
-              isPending={dataMutation.isPending || imageMutation.isPending}
+              isPending={dataMutation.isPending || imagesMutation.isPending}
               className="btn-primary w-32"
               animation="loading-dots"
             >
@@ -490,28 +516,28 @@ export function ProductDataAside() {
           </section>
         </form>
 
-        {selected_product && (
+        {product && (
           <>
             <DiscardProductChangesModal
               isOpen={isDiscardChangesModalOpen}
               onClose={() => setIsDiscardChangesModalOpen(false)}
               onConfirm={() => {
                 resetInputData();
-                resetImage();
-                product_remove();
+                resetImages();
+                closeAside();
               }}
             />
             <DeleteProductModal
               isOpen={isDeleteProductModalOpen}
               onClose={() => setIsDeleteProductModalOpen(false)}
-              onSuccess={() => product_remove()}
-              product={selected_product}
+              onSuccess={() => closeAside()}
+              product={product}
             />
-            <DeleteProductImageModal
+            {/* <DeleteProductImageModal
               isOpen={isDeleteProductImageModalOpen}
               onClose={() => setIsDeleteProductImageModalOpen(false)}
               product={selected_product}
-            />
+            /> */}
           </>
         )}
       </SheetContent>

@@ -3,7 +3,7 @@ import { vars } from "@/utils/vars";
 import axios from "axios";
 import { z } from "zod";
 
-export type ImageSchema = z.infer<typeof imageSchema>;
+export type ProductImage = z.infer<typeof imageSchema>;
 export const imageSchema = z
   .object({
     url: z.string(),

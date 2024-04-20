@@ -27,12 +27,14 @@ import { ProductCreateAside } from "src/containers/administration/products/creat
 import { ProductDataAside } from "src/containers/administration/products/dataAside";
 import { getCategories } from "@/functions/categories";
 import { getSuppliers } from "@/functions/suppliers";
+import { useState } from "react";
 
 const columnHelper = createColumnHelper<Product>();
 
 function Products() {
-  const { selected_product, product_select, create_isOpen, create_open } =
-    useProductStore();
+  const { create_isOpen, create_open } = useProductStore();
+
+  const [product, setProduct] = useState<Product | null>(null);
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -155,7 +157,7 @@ function Products() {
             <button
               className="btn btn-primary mr-8 whitespace-nowrap transition-all duration-300"
               onClick={create_open}
-              disabled={!!selected_product}
+              disabled={!!product}
             >
               Crear producto
             </button>
@@ -203,15 +205,14 @@ function Products() {
                   <TableRow
                     key={row.id}
                     onClick={() => {
-                      if (selected_product || create_isOpen) return;
+                      if (!!product || create_isOpen) return;
 
-                      product_select(row.original);
+                      setProduct(row.original);
                     }}
                     className={cn(
-                      selected_product || create_isOpen
+                      !!product || create_isOpen
                         ? `cursor-default ${
-                            row.original.id === selected_product?.id &&
-                            "bg-secondary/20"
+                            row.original.id === product?.id && "bg-secondary/20"
                           }`
                         : "cursor-pointer hover:bg-secondary/20"
                     )}
@@ -242,7 +243,9 @@ function Products() {
         </section>
 
         {/* DATA ASIDE */}
-        <ProductDataAside />
+        {product && (
+          <ProductDataAside product={product} setProduct={setProduct} />
+        )}
       </div>
     </AdministrationLayout>
   );
