@@ -208,7 +208,7 @@ export function ProductCreateAside() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex h-full flex-col items-end gap-4 overflow-y-auto pr-2"
+          className="flex h-full flex-col items-end gap-4 overflow-y-auto px-2"
         >
           <div className="grid w-full grid-cols-2 items-center gap-4">
             <div className="col-span-2 flex flex-col gap-1">

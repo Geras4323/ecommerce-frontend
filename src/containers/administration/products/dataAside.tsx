@@ -97,7 +97,7 @@ export function ProductDataAside({
     retry: false,
   });
 
-  function checkChange() {
+  function inputsChanged() {
     const values = getValues();
     return (
       values.name !== product.name ||
@@ -108,6 +108,10 @@ export function ProductDataAside({
       Number(values.categoryID) !== product.categoryID ||
       Number(values.supplierID) !== product.supplierID
     );
+  }
+
+  function imagesChanged() {
+    return !existentFiles.every((file, i) => file === product.images[i]);
   }
 
   function closeAside() {
@@ -131,8 +135,7 @@ export function ProductDataAside({
   }
 
   function handleCancel() {
-    // if (tempFiles.length === 0 && !checkChange()) {
-    if (!checkChange()) {
+    if (!inputsChanged() && !imagesChanged()) {
       setExistentFiles([]);
       closeAside();
       return;
@@ -160,15 +163,15 @@ export function ProductDataAside({
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
-    // if (checkChange() || tempFiles.length !== 0) {
-    if (checkChange()) {
-      if (checkChange()) dataMutation.mutate(data);
-      // if (tempFiles.length !== 0) imagesMutation.mutate();
-      // if (true) imagesMutation.mutate();
-      return;
-    }
-    resetInputData();
-    closeAside();
+    if (imagesChanged()) imagesMutation.mutate();
+    // if (checkChange()) {
+    //   if (checkChange()) dataMutation.mutate(data);
+    //   // if (tempFiles.length !== 0) imagesMutation.mutate();
+    //   // if (true) imagesMutation.mutate();
+    //   return;
+    // }
+    // resetInputData();
+    // closeAside();
   };
 
   const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
@@ -194,30 +197,35 @@ export function ProductDataAside({
   });
 
   const imagesMutation = useMutation<
-    ServerSuccess<{ id: number; cloud: CloudinarySuccess }>,
+    ServerSuccess<
+      {
+        id: number;
+        position: number;
+      }[]
+    >,
     ServerError,
     void
   >({
     mutationFn: async () => {
-      const images = new FormData();
-      // tempFiles.forEach((file) => images.append("images", file.data));
+      const images = existentFiles.map((file, i) => ({
+        id: file.id,
+        position: i,
+      }));
 
-      return axios.post(
-        `${vars.serverUrl}/api/v1/products/${product.id}/image`,
+      console.log(images);
+
+      // return axios.patch("/hola");
+
+      return axios.patch(
+        `${vars.serverUrl}/api/v1/products/${product.id}/images`,
         images,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { withCredentials: true }
       );
     },
-    onSuccess: () => {
-      toast.success("Subido");
+    onSuccess: (res) => {
+      toast.success("Actualizado");
       refreshQuery();
-      resetImages();
-      queryClient.invalidateQueries({ queryKey: ["product"] });
+      // resetImages();
       // if (checkChange()) product_remove();
     },
   });
@@ -429,72 +437,8 @@ export function ProductDataAside({
                     ))}
                   </ReactSortable>
                 )}
-                {/* {tempFiles.map((file, i) => (
-                    <div key={i}>
-                      <Image
-                        src={URL.createObjectURL(file.data)}
-                        width={200}
-                        height={200}
-                        alt={file.data.name}
-                        className={cn(
-                          i === 0 && "border-2",
-                          "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
-                        )}
-                      />
-                    </div>
-                  ))} */}
               </section>
             </div>
-
-            {/* <div className="col-span-2 flex flex-col gap-1">
-            <label htmlFor="description" className="text-lg text-secondary">
-              Imágenes:
-            </label>
-            <div className="flex min-h-36 w-full gap-4">
-              <label
-                htmlFor="new_images"
-                className="flex h-36 min-w-36 cursor-pointer items-center justify-center rounded-lg bg-secondary/20"
-              >
-                <Upload className="size-8 animate-bounce text-white" />
-              </label>
-              <input
-                id="new_images"
-                name="files"
-                type="file"
-                className="hidden"
-                multiple
-                onChange={(e) => {
-                  if (!e.target.files) return;
-                  setImages(e.target.files);
-                }}
-              />
-
-              <div className="flex min-h-36 w-full gap-4 overflow-hidden overflow-x-auto rounded-lg">
-                {images &&
-                  Array.from(images).map((image, i) => (
-                    <Image
-                      key={image.name}
-                      alt={`toUpload ${i}`}
-                      src={URL.createObjectURL(image)}
-                      width={200}
-                      height={200}
-                      className="h-full w-36 flex-shrink-0 rounded-lg bg-secondary/10 opacity-50"
-                    />
-                  ))}
-
-                {selected_product?.images.map((image, i) => (
-                  <Image
-                    key={image.id}
-                    alt={`image ${i}`}
-                    src={image.url}
-                    width={200}
-                    height={200}
-                    className="h-full w-36 flex-shrink-0 rounded-lg bg-secondary/10"
-                  />
-                ))}
-              </div>
-            </div>
-          </div> */}
           </div>
 
           <section className="flex gap-4">

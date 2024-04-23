@@ -20,7 +20,7 @@ import {
 } from "@tanstack/react-table";
 import { Search } from "lucide-react";
 import Image from "next/image";
-import NoImage from "../../../public/no_image.png";
+import NoImage from "../../../../public/no_image.png";
 import { getProducts, type Product } from "@/functions/products";
 import { useProductStore } from "@/hooks/states/products";
 import { ProductCreateAside } from "src/containers/administration/products/createAside";
@@ -28,10 +28,13 @@ import { ProductDataAside } from "src/containers/administration/products/dataAsi
 import { getCategories } from "@/functions/categories";
 import { getSuppliers } from "@/functions/suppliers";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 const columnHelper = createColumnHelper<Product>();
 
 function Products() {
+  const router = useRouter();
+
   const { create_isOpen, create_open } = useProductStore();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -204,11 +207,14 @@ function Products() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    onClick={() => {
-                      if (!!product || create_isOpen) return;
+                    // onClick={() => {
+                    //   if (!!product || create_isOpen) return;
 
-                      setProduct(row.original);
-                    }}
+                    //   setProduct(row.original);
+                    // }}
+                    onClick={() =>
+                      router.push(`/administration/products/${row.original.id}`)
+                    }
                     className={cn(
                       !!product || create_isOpen
                         ? `cursor-default ${

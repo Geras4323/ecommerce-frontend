@@ -7,6 +7,7 @@ export type ProductImage = z.infer<typeof imageSchema>;
 export const imageSchema = z
   .object({
     url: z.string(),
+    position: z.number(),
   })
   .and(databaseEntrySchema);
 
