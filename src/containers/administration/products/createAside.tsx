@@ -18,19 +18,14 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import {
-  AlertCircle,
-  DollarSign,
-  PanelLeftClose,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { DollarSign, PanelLeftClose, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
 import { ReactSortable } from "react-sortablejs";
 import { toast } from "sonner";
 import { z } from "zod";
+import imageCompression from "browser-image-compression";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -165,7 +160,14 @@ export function ProductCreateAside() {
   const imagesMutation = useMutation<any, ServerError, number>({
     mutationFn: async (prodID) => {
       const images = new FormData();
-      tempFiles.forEach((file) => images.append("images", file.data));
+      for (let i = 0; i < tempFiles.length; i++) {
+        const element = tempFiles[i];
+        if (!element) return;
+        const compressedFile = await imageCompression(element.data, {
+          maxSizeMB: 0.5,
+        });
+        images.append("images", compressedFile);
+      }
 
       return axios.post(
         `${vars.serverUrl}/api/v1/products/${prodID}/images`,
@@ -384,7 +386,7 @@ export function ProductCreateAside() {
                       height={200}
                       alt={file.data.name}
                       className={cn(
-                        i === 0 && "border-2",
+                        i === 0 && "border-2 border-primary",
                         "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
                       )}
                     />

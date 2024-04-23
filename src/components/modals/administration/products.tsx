@@ -2,8 +2,6 @@ import { LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import { type Product } from "@/functions/products";
 // import { useProductStore } from "@/hooks/states/products";
-import type { CloudinaryError, CloudinarySuccess } from "@/types/cloudinary";
-import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -95,70 +93,6 @@ export function DeleteProductModal({
       description={
         <span>
           ¿Está seguro de que desea eliminar el producto <b>{product.name}</b>?
-        </span>
-      }
-    >
-      <div className="flex h-auto w-full items-center justify-end gap-2">
-        <button className="btn btn-ghost w-28" onClick={onClose}>
-          Cancelar
-        </button>
-        <LoadableButton
-          className="btn btn-primary w-28"
-          onClick={() => mutation.mutate()}
-          isPending={mutation.isPending}
-          animation="loading-dots"
-        >
-          Confirmar
-        </LoadableButton>
-      </div>
-    </Modal>
-  );
-}
-
-export function DeleteProductImageModal({
-  isOpen,
-  onClose: onCloseProp,
-  product,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  product: Product;
-}) {
-  const queryClient = useQueryClient();
-
-  function onClose() {
-    toast.success("Foto eliminada exitosamente");
-    queryClient.invalidateQueries({ queryKey: ["products"] });
-    onCloseProp();
-  }
-
-  const mutation = useMutation<
-    ServerSuccess<CloudinarySuccess>,
-    ServerError<CloudinaryError>,
-    void
-  >({
-    mutationFn: async () => {
-      const url = `${vars.serverUrl}/api/v1/products/${product.id}/image`;
-      return axios.delete(url, { withCredentials: true });
-    },
-    onSuccess: () => {
-      // product_select({ ...product, images: [] });
-      onClose();
-    },
-    onError: (err) => {
-      console.log(err.response?.data.Response.message);
-    },
-  });
-
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Eliminar imagen"
-      description={
-        <span>
-          ¿Está seguro de que desea eliminar la imagen del producto{" "}
-          <b>{product.name}</b>?
         </span>
       }
     >

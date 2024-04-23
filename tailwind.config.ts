@@ -15,6 +15,9 @@ const config: Config = {
         "screen-sm": "640px",
         "screen-lg": "1024px",
       },
+      maxHeight: {
+        104: "26rem",
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

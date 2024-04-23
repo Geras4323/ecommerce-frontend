@@ -29,6 +29,7 @@ import { cn } from "@/utils/lib";
 import { type ProductImage } from "@/functions/images";
 import { GeneralLayout } from "@/layouts/GeneralLayout";
 import { useRouter } from "next/router";
+import imageCompression from "browser-image-compression";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -56,10 +57,10 @@ export default function ProductData() {
     (ProductImage & { isDeleted: boolean })[]
   >([]);
 
+  const [tempFiles, setTempFiles] = useState<File[]>([]);
+
   const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] =
     useState(false);
-  // const [isDeleteProductImageModalOpen, setIsDeleteProductImageModalOpen] =
-  //   useState(false);
   const [isDiscardChangesModalOpen, setIsDiscardChangesModalOpen] =
     useState(false);
 
@@ -78,7 +79,6 @@ export default function ProductData() {
   });
 
   useEffect(() => {
-    console.log("change");
     if (!productQuery.isPending && productQuery.isSuccess) {
       const temp = productQuery.data.images.map((image) => ({
         ...image,
@@ -108,7 +108,15 @@ export default function ProductData() {
     retry: false,
   });
 
-  function alternateImageDeletion(imageToDeleteID: number) {
+  function removeUploadedImage(index: number) {
+    setTempFiles((prev) => {
+      const temp = structuredClone(prev);
+      temp.splice(index, 1);
+      return temp;
+    });
+  }
+
+  function alternateExistentImageDeletion(imageToDeleteID: number) {
     setExistentFiles((prev) => {
       const imgIndex = prev.findIndex((img) => img.id === imageToDeleteID);
       if (imgIndex === -1) return prev;
@@ -132,19 +140,16 @@ export default function ProductData() {
     );
   }
 
-  function imagesChanged() {
+  function existentImagesChanged() {
+    console.log("existent: ", existentFiles);
+    console.log(productQuery.data?.images);
     return !existentFiles.every(
       (file, i) => file === productQuery.data?.images[i]
     );
   }
 
-  function resetInputData() {
-    reset({ code: productQuery.data?.code, name: productQuery.data?.name });
-  }
-
-  function resetImages() {
-    setExistentFiles([]);
-    // setTempFiles([]);
+  function uplodadedImagesChanged() {
+    return tempFiles.length !== 0;
   }
 
   function refreshQuery() {
@@ -152,15 +157,19 @@ export default function ProductData() {
   }
 
   function handleCancel() {
-    if (!inputsChanged() && !imagesChanged()) {
+    if (
+      !inputsChanged() &&
+      !existentImagesChanged() &&
+      !uplodadedImagesChanged()
+    ) {
       setExistentFiles([]);
-      return;
+      router.push("/administration/products");
     }
+    if (existentImagesChanged()) console.log("si");
     setIsDiscardChangesModalOpen(true);
   }
 
   const {
-    reset,
     register,
     handleSubmit,
     formState: { errors },
@@ -178,11 +187,6 @@ export default function ProductData() {
     },
   });
 
-  const onSubmit: SubmitHandler<Input> = (data) => {
-    if (inputsChanged()) dataMutation.mutate(data);
-    if (imagesChanged()) imagesMutation.mutate();
-  };
-
   const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
     mutationFn: async (data) => {
       return axios.put(`${vars.serverUrl}/api/v1/products/${productID}`, data, {
@@ -199,7 +203,7 @@ export default function ProductData() {
     },
   });
 
-  const imagesMutation = useMutation<
+  const updateImagesMutation = useMutation<
     ServerSuccess<
       {
         id: number;
@@ -225,10 +229,45 @@ export default function ProductData() {
     onSuccess: () => {
       toast.success("Actualizado");
       refreshQuery();
-      // resetImages();
-      // if (checkChange()) product_remove();
     },
   });
+
+  const uploadImagesMutation = useMutation<any, ServerError>({
+    mutationFn: async () => {
+      const images = new FormData();
+
+      for (let i = 0; i < tempFiles.length; i++) {
+        const element = tempFiles[i];
+        if (!element) return;
+        const compressedFile = await imageCompression(element, {
+          maxSizeMB: 0.5,
+        });
+        images.append("images", compressedFile);
+      }
+
+      return axios.post(
+        `${vars.serverUrl}/api/v1/products/${productID}/images`,
+        images,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      toast.success("Subido");
+      setTempFiles([]);
+      refreshQuery();
+    },
+  });
+
+  const onSubmit: SubmitHandler<Input> = (data) => {
+    if (inputsChanged()) dataMutation.mutate(data);
+    if (existentImagesChanged()) updateImagesMutation.mutate();
+    if (uplodadedImagesChanged()) uploadImagesMutation.mutate();
+  };
 
   if (productQuery.isPending) return <>loading</>;
   if (productQuery.isError) return <>error</>;
@@ -397,7 +436,7 @@ export default function ProductData() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex w-80 flex-col gap-1">
                 <label className="text-lg text-secondary">Imágenes:</label>
                 <section className="flex min-w-fit flex-col gap-4">
                   <div className="flex h-12 items-center justify-center rounded-lg border border-secondary/30 bg-base-300/50">
@@ -412,53 +451,83 @@ export default function ProductData() {
                       type="file"
                       className="hidden"
                       multiple
-                      // onChange={(e) =>
-                      //   setUploadedFiles((prev) => [
-                      //     ...prev,
-                      //     ...(e.target.files as FileList),
-                      //   ])
-                      // }
+                      onChange={(e) => {
+                        if (!e.target.files) return;
+                        setTempFiles((prev) => [
+                          ...prev,
+                          ...(e.target.files as FileList),
+                        ]);
+                      }}
                     />
                   </div>
-                  {!!existentFiles && (
-                    <ReactSortable
-                      animation={150}
-                      list={existentFiles}
-                      setList={setExistentFiles}
-                      className="grid grid-cols-3 flex-wrap gap-4"
-                      direction="horizontal"
-                    >
-                      {existentFiles.map((image, i) => (
-                        <div key={image.id} className="group relative">
+
+                  <div className="flex max-h-104 flex-col gap-4 overflow-y-auto">
+                    <div className="grid grid-cols-3 gap-4">
+                      {tempFiles.map((file, i) => (
+                        <div key={i} className="group relative">
                           <Image
-                            src={image.url}
+                            src={URL.createObjectURL(file)}
                             width={200}
                             height={200}
-                            alt={image.url}
-                            className={cn(
-                              image.isDeleted && "opacity-30",
-                              i === 0 && "border-2 border-primary",
-                              "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
-                            )}
-                            unoptimized
+                            alt={`${i}`}
+                            className="size-24 select-none rounded-xl opacity-50"
+                            draggable={false}
                           />
                           <div className="pointer-events-none absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-base-300 font-semibold text-primary opacity-80">
-                            {i + 1}
+                            <Upload className="size-3.5" />
                           </div>
                           <div
-                            onClick={() => alternateImageDeletion(image.id)}
+                            onClick={() => removeUploadedImage(i)}
                             className="absolute bottom-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md bg-error font-semibold text-primary opacity-0 transition-opacity duration-100 group-hover:opacity-90"
                           >
-                            {image.isDeleted ? (
-                              <X className="size-3" />
-                            ) : (
-                              <Trash2 className="size-3" />
-                            )}
+                            <Trash2 className="size-3" />
                           </div>
                         </div>
                       ))}
-                    </ReactSortable>
-                  )}
+                    </div>
+
+                    {!!existentFiles && (
+                      <ReactSortable
+                        animation={150}
+                        list={existentFiles}
+                        setList={setExistentFiles}
+                        className="grid grid-cols-3 gap-4"
+                        direction="horizontal"
+                      >
+                        {existentFiles.map((image, i) => (
+                          <div key={image.id} className="group relative">
+                            <Image
+                              src={image.url}
+                              width={200}
+                              height={200}
+                              alt={image.url}
+                              className={cn(
+                                image.isDeleted && "opacity-30",
+                                i === 0 && "border-2 border-primary",
+                                "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
+                              )}
+                              unoptimized
+                            />
+                            <div className="pointer-events-none absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-base-300 font-semibold text-primary opacity-80">
+                              {i + 1}
+                            </div>
+                            <div
+                              onClick={() =>
+                                alternateExistentImageDeletion(image.id)
+                              }
+                              className="absolute bottom-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md bg-error font-semibold text-primary opacity-0 transition-opacity duration-100 group-hover:opacity-90"
+                            >
+                              {image.isDeleted ? (
+                                <X className="size-3" />
+                              ) : (
+                                <Trash2 className="size-3" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </ReactSortable>
+                    )}
+                  </div>
                 </section>
               </div>
             </div>
@@ -473,7 +542,11 @@ export default function ProductData() {
               </button>
               <LoadableButton
                 type="submit"
-                isPending={dataMutation.isPending || imagesMutation.isPending}
+                isPending={
+                  dataMutation.isPending ||
+                  updateImagesMutation.isPending ||
+                  uploadImagesMutation.isPending
+                }
                 className="btn-primary w-32"
                 animation="loading-dots"
               >
@@ -487,21 +560,19 @@ export default function ProductData() {
               isOpen={isDiscardChangesModalOpen}
               onClose={() => setIsDiscardChangesModalOpen(false)}
               onConfirm={() => {
-                resetInputData();
-                resetImages();
+                setExistentFiles([]);
+                router.push("/administration/products/");
               }}
             />
             <DeleteProductModal
               isOpen={isDeleteProductModalOpen}
               onClose={() => setIsDeleteProductModalOpen(false)}
-              onSuccess={() => null}
+              onSuccess={() => {
+                setExistentFiles([]);
+                router.push("/administration/products/");
+              }}
               product={productQuery.data}
             />
-            {/* <DeleteProductImageModal
-              isOpen={isDeleteProductImageModalOpen}
-              onClose={() => setIsDeleteProductImageModalOpen(false)}
-              product={selected_product}
-            /> */}
           </>
         </div>
       </GeneralLayout>
