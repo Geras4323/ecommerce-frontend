@@ -90,8 +90,8 @@ export function SupplierDataAside() {
         );
       },
       onSuccess: (c) => {
+        toast.success("Proveedor actualizado");
         supplier_select(c.data);
-        toast.success("Actualizado");
         refreshQuery();
         supplier_remove();
       },

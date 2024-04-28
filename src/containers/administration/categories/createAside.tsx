@@ -117,7 +117,7 @@ export function CategoryCreateAside() {
       );
     },
     onSuccess: () => {
-      toast.success("Subido");
+      toast.success("Imagen subida");
       resetInputData();
       refreshQuery();
       resetImage();

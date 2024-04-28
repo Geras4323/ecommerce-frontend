@@ -181,7 +181,7 @@ export function ProductCreateAside() {
       );
     },
     onSuccess: () => {
-      toast.success("Subido");
+      toast.success("Imágenes subidas");
       resetInputData();
       refreshQuery();
       resetImage();

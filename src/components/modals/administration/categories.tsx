@@ -130,7 +130,7 @@ export function DeleteCategoryImageModal({
   const queryClient = useQueryClient();
 
   function onClose() {
-    toast.success("Foto eliminada exitosamente");
+    toast.success("Imagen eliminada exitosamente");
     queryClient.invalidateQueries({ queryKey: ["categories"] });
     onCloseProp();
   }

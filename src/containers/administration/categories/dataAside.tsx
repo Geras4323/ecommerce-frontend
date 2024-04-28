@@ -103,8 +103,8 @@ export function CategoryDataAside() {
         );
       },
       onSuccess: (c) => {
+        toast.success("Categoría actualizada");
         category_select(c.data);
-        toast.success("Actualizado");
         if (!image) {
           refreshQuery();
           category_remove();
@@ -131,7 +131,7 @@ export function CategoryDataAside() {
       );
     },
     onSuccess: (res) => {
-      toast.success("Subido");
+      toast.success("Imagen subida");
       refreshQuery();
       resetImage();
       if (selected_category) {

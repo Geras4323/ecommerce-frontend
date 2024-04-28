@@ -194,11 +194,7 @@ export default function ProductData() {
       });
     },
     onSuccess: () => {
-      toast.success("Actualizado");
-      // if (tempFiles.length === 0) {
-      //   refreshQuery();
-      //   product_remove();
-      // }
+      toast.success("Producto actualizado");
       refreshQuery();
     },
   });
@@ -227,7 +223,7 @@ export default function ProductData() {
       );
     },
     onSuccess: () => {
-      toast.success("Actualizado");
+      toast.success("Imágenes actualizadas");
       refreshQuery();
     },
   });
@@ -257,7 +253,7 @@ export default function ProductData() {
       );
     },
     onSuccess: () => {
-      toast.success("Subido");
+      toast.success("Imágenes subidas");
       setTempFiles([]);
       refreshQuery();
     },
@@ -290,6 +286,7 @@ export default function ProductData() {
                 </span>
               </div>
               <button
+                type="button"
                 onClick={() => setIsDeleteProductModalOpen(true)}
                 className="btn btn-error w-12 flex-row flex-nowrap items-center justify-end gap-4 overflow-hidden whitespace-nowrap rounded-md px-3 text-white transition-all hover:w-56"
               >
