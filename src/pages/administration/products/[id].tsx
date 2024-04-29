@@ -30,6 +30,7 @@ import { type ProductImage } from "@/functions/images";
 import { GeneralLayout } from "@/layouts/GeneralLayout";
 import { useRouter } from "next/router";
 import imageCompression from "browser-image-compression";
+import _ from "lodash";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -143,8 +144,8 @@ export default function ProductData() {
   function existentImagesChanged() {
     console.log("existent: ", existentFiles);
     console.log(productQuery.data?.images);
-    return !existentFiles.every(
-      (file, i) => file === productQuery.data?.images[i]
+    return !existentFiles.every((file, i) =>
+      _.isEqual(file, { ...productQuery.data?.images[i], isDeleted: false })
     );
   }
 
@@ -164,6 +165,7 @@ export default function ProductData() {
     ) {
       setExistentFiles([]);
       router.push("/administration/products");
+      return;
     }
     if (existentImagesChanged()) console.log("si");
     setIsDiscardChangesModalOpen(true);
@@ -557,7 +559,6 @@ export default function ProductData() {
               isOpen={isDiscardChangesModalOpen}
               onClose={() => setIsDiscardChangesModalOpen(false)}
               onConfirm={() => {
-                setExistentFiles([]);
                 router.push("/administration/products/");
               }}
             />
