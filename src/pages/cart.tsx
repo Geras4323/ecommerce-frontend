@@ -80,7 +80,7 @@ export default function Cart() {
     mutationFn: async (data) => {
       const products: { name?: string; value: string; inline: boolean }[] = [];
 
-      data.order.orderProducts.map((item) => {
+      data.order.orderProducts?.map((item) => {
         return products.push({
           name: productsQuery.data?.find((p) => p.id === item.productID)?.name,
           value: `x ${item.quantity}`,

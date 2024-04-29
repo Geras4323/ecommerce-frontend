@@ -1,13 +1,17 @@
 import { GeneralLayout } from "@/layouts/GeneralLayout";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "@/functions/products";
 import {
   CalendarDaysIcon,
+  ClipboardCheck,
   CreditCard,
   DollarSign,
   Hash,
-  Info,
-  Paperclip,
+  Mail,
+  PackageOpen,
+  Phone,
+  Truck,
+  User2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
@@ -17,12 +21,42 @@ import { withAuth } from "@/functions/session";
 import { type ServerError } from "@/types/types";
 import { type Day, days } from "@/utils/miscellaneous";
 import { LoadingSingleOrderItem, SingleOrderItem } from "@/components/orders";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { vars } from "@/utils/vars";
+
+type State = keyof States;
+export type States = {
+  confirmed: number;
+  payed: number;
+  sent: number;
+  delivered: number;
+};
 
 export default function Order() {
   const params = useParams();
+  const queryClient = useQueryClient();
 
   const codeID = z.string().catch("").parse(params?.code);
   const isValidCode = !isNaN(parseInt(codeID));
+
+  const [orderState, setOrderState] = useState<States>({
+    confirmed: 0,
+    payed: 0,
+    sent: 0,
+    delivered: 0,
+  });
+
+  function alternateState(state: State) {
+    setOrderState((prev) => {
+      const newState = { ...prev, [state]: prev[state] === 1 ? 0 : 1 };
+
+      const newStateNumber = Number(`0b${Object.values(newState).join("")}`);
+      updateOrderStateMutation.mutate(newStateNumber);
+
+      return newState;
+    });
+  }
 
   const productsQuery = useQuery({
     queryKey: ["products"],
@@ -39,6 +73,34 @@ export default function Order() {
     queryFn: () => getOrder(parseInt(codeID)),
     enabled: !!isValidCode,
     retry: false,
+  });
+
+  useEffect(() => {
+    if (orderQuery.isSuccess) {
+      const dbStates = orderQuery.data.state
+        .toString(2)
+        .padStart(4, "0")
+        .split("");
+
+      setOrderState((prev) => {
+        const tempOrders = Object.entries(structuredClone(prev));
+        dbStates.forEach((v, i) => {
+          tempOrders[i]![1] = parseInt(v);
+        });
+        return Object.fromEntries(tempOrders) as States;
+      });
+    }
+  }, [orderQuery.isSuccess, orderQuery.data]);
+
+  const updateOrderStateMutation = useMutation<void, ServerError, number>({
+    mutationFn: async (state) => {
+      return axios.patch(
+        `${vars.serverUrl}/api/v1/orders/${orderQuery.data?.id}/state`,
+        { state },
+        { withCredentials: true }
+      );
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["order"] }),
   });
 
   return (
@@ -76,6 +138,7 @@ export default function Order() {
           </article>
 
           <article className="flex h-full w-2/5 flex-col gap-4 border-l border-l-secondary/20 pl-4">
+            {/* ORDER INFO */}
             <div className="flex items-center gap-2">
               <Hash className="size-5 text-secondary" />
               <span className="text-lg text-secondary">Pedido Nro</span>
@@ -114,8 +177,6 @@ export default function Order() {
               )}
             </div>
 
-            <hr className="border-b border-t-0 border-b-secondary/20" />
-
             <div className="flex items-center gap-2">
               <DollarSign className="size-5 text-secondary" />
               <span className="text-lg text-secondary">Total a abonar:</span>
@@ -133,18 +194,92 @@ export default function Order() {
               )}
             </div>
 
-            {!orderQuery.isPending && (
-              <button className="btn btn-outline btn-secondary">
-                <Paperclip className="size-5" /> Adjuntar comprobante de pago
-              </button>
-            )}
+            <hr className="border-b border-t-0 border-b-secondary/20" />
+
+            {/* USER INFO */}
+            <div className="flex items-center gap-2">
+              <User2 className="size-5 text-secondary" />
+              <span className="text-lg text-secondary">A nombre de</span>
+              <span className="text-lg text-primary">
+                {orderQuery.data?.user.name} {orderQuery.data?.user.surname}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Mail className="size-5 text-secondary" />
+              <span className="text-lg text-secondary">Email:</span>
+              <span className="text-lg text-primary">
+                {orderQuery.data?.user.email}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Phone className="size-5 text-secondary" />
+              <span className="text-lg text-secondary">Teléfono: </span>
+              <span className="text-lg text-primary">
+                {orderQuery.data?.user.phone ?? "-"}
+              </span>
+            </div>
 
             <hr className="border-b border-t-0 border-b-secondary/20" />
 
-            <div className="flex gap-2 text-info">
-              <Info className="size-5" />
-              Nos pondremos en contacto a la brevedad
+            {/* STATE INFO */}
+            <div className="grid select-none grid-cols-2 gap-3">
+              <div
+                className="flex w-fit cursor-pointer items-center gap-2"
+                onClick={() => alternateState("confirmed")}
+              >
+                <input
+                  type="checkbox"
+                  className="checkbox-primary checkbox"
+                  checked={!!orderState.confirmed}
+                  readOnly
+                />
+                <span>Confirmado</span>
+                <ClipboardCheck className="size-5" />
+              </div>
+              <div
+                className="flex w-fit cursor-pointer items-center gap-2"
+                onClick={() => alternateState("payed")}
+              >
+                <input
+                  type="checkbox"
+                  className="checkbox-primary checkbox"
+                  checked={!!orderState.payed}
+                  readOnly
+                />
+                <span>Pagado</span>
+                <CreditCard className="size-5" />
+              </div>
+              <div
+                className="flex w-fit cursor-pointer items-center gap-2"
+                onClick={() => alternateState("sent")}
+              >
+                <input
+                  type="checkbox"
+                  className="checkbox-primary checkbox"
+                  checked={!!orderState.sent}
+                  readOnly
+                />
+                <span>Enviado</span>
+                <Truck className="size-5" />
+              </div>
+              <div
+                className="flex w-fit cursor-pointer items-center gap-2"
+                onClick={() => alternateState("delivered")}
+              >
+                <input
+                  type="checkbox"
+                  className="checkbox-primary checkbox"
+                  checked={!!orderState.delivered}
+                  readOnly
+                />
+                <span>Entregado</span>
+                <PackageOpen className="size-5" />
+              </div>
             </div>
+
+            <hr className="border-b border-t-0 border-b-secondary/20" />
           </article>
         </section>
       </div>
