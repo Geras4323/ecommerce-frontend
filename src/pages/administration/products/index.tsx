@@ -76,6 +76,7 @@ function Products() {
             width={100}
             height={100}
             className="size-24 rounded-md object-cover"
+            unoptimized
           />
         </div>
       ),

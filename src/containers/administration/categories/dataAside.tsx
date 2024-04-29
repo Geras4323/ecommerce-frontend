@@ -236,6 +236,7 @@ export function CategoryDataAside() {
                       height={200}
                       src={URL.createObjectURL(image)}
                       className="absolute size-full rounded-md"
+                      unoptimized
                     />
                   )}
                   <Image
@@ -244,6 +245,7 @@ export function CategoryDataAside() {
                     width={200}
                     height={200}
                     className="z-10 size-full select-none rounded-md bg-secondary/10 object-cover"
+                    unoptimized
                   />
                 </div>
               </div>

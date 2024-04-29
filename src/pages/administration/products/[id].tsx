@@ -471,6 +471,7 @@ export default function ProductData() {
                             alt={`${i}`}
                             className="size-24 select-none rounded-xl opacity-50"
                             draggable={false}
+                            unoptimized
                           />
                           <div className="pointer-events-none absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-base-300 font-semibold text-primary opacity-80">
                             <Upload className="size-3.5" />

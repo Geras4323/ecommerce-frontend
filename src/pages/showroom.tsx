@@ -173,6 +173,7 @@ function CategoryItem({
               : "saturate-0",
             "h-full w-24 border-r border-r-secondary/10 bg-secondary/20 transition-all"
           )}
+          unoptimized
         />
       </div>
       <div className="flex h-full w-full items-center truncate p-6">
@@ -253,6 +254,7 @@ function ProductItem({
                 src={image.url ?? NoImage}
                 height="200"
                 width="200"
+                unoptimized
               />
             </CarouselItem>
           ))}

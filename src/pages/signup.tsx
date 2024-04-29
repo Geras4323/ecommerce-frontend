@@ -57,6 +57,7 @@ export default function Signup() {
           src={Logo}
           alt="logo"
           className="col-span-2 -ml-1 w-full max-w-md place-self-center"
+          unoptimized
         />
 
         <FormInput>

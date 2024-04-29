@@ -61,6 +61,7 @@ function Login() {
             src={Logo}
             alt="logo"
             className="-ml-1 w-full max-w-md"
+            unoptimized
           />
 
           <FormInput>
