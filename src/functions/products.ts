@@ -22,3 +22,9 @@ export async function getProducts() {
   const res = await axios.get(url, { withCredentials: true });
   return productSchema.array().parse(res.data);
 }
+
+export async function getProduct(productID: number) {
+  const url = `${vars.serverUrl}/api/v1/products/${productID}`;
+  const res = await axios.get(url, { withCredentials: true });
+  return productSchema.parse(res.data);
+}

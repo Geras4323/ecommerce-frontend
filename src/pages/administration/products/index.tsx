@@ -20,19 +20,20 @@ import {
 } from "@tanstack/react-table";
 import { Search } from "lucide-react";
 import Image from "next/image";
-import NoImage from "../../../public/no_image.png";
+import NoImage from "../../../../public/no_image.png";
 import { getProducts, type Product } from "@/functions/products";
 import { useProductStore } from "@/hooks/states/products";
 import { ProductCreateAside } from "src/containers/administration/products/createAside";
-import { ProductDataAside } from "src/containers/administration/products/dataAside";
 import { getCategories } from "@/functions/categories";
 import { getSuppliers } from "@/functions/suppliers";
+import { useRouter } from "next/router";
 
 const columnHelper = createColumnHelper<Product>();
 
 function Products() {
-  const { selected_product, product_select, create_isOpen, create_open } =
-    useProductStore();
+  const router = useRouter();
+
+  const { create_isOpen, create_open } = useProductStore();
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -155,7 +156,6 @@ function Products() {
             <button
               className="btn btn-primary mr-8 whitespace-nowrap transition-all duration-300"
               onClick={create_open}
-              disabled={!!selected_product}
             >
               Crear producto
             </button>
@@ -202,17 +202,12 @@ function Products() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    onClick={() => {
-                      if (selected_product || create_isOpen) return;
-
-                      product_select(row.original);
-                    }}
+                    onClick={() =>
+                      router.push(`/administration/products/${row.original.id}`)
+                    }
                     className={cn(
-                      selected_product || create_isOpen
-                        ? `cursor-default ${
-                            row.original.id === selected_product?.id &&
-                            "bg-secondary/20"
-                          }`
+                      create_isOpen
+                        ? "cursor-default"
                         : "cursor-pointer hover:bg-secondary/20"
                     )}
                   >
@@ -240,9 +235,6 @@ function Products() {
             </TableBody>
           </Table>
         </section>
-
-        {/* DATA ASIDE */}
-        <ProductDataAside />
       </div>
     </AdministrationLayout>
   );
