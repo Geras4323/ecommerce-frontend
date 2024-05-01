@@ -101,7 +101,7 @@ export function OrdersItem({
         </article>
       </section>
 
-      {!!item.user && (
+      {fromAdmin && !!item.user && (
         <section className="flex w-full flex-col justify-between gap-4 border-y border-y-secondary/20 py-4">
           <div className="flex w-1/2 items-center gap-2">
             <User2 className="size-5 text-secondary" />
@@ -127,45 +127,52 @@ export function OrdersItem({
         </section>
       )}
 
-      <div className="flex w-full justify-between">
-        <div className="flex gap-3">
-          <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
-            <ClipboardCheck className="size-5" />
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox checkbox-sm"
-              checked={!!orderState.confirmed}
-              readOnly
-            />
+      <div
+        className={cn(
+          !!fromAdmin ? "justify-between" : "justify-end",
+          "flex w-full"
+        )}
+      >
+        {!!fromAdmin && (
+          <div className="flex gap-3">
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <ClipboardCheck className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-primary checkbox checkbox-sm"
+                checked={!!orderState.confirmed}
+                readOnly
+              />
+            </div>
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <CreditCard className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-primary checkbox checkbox-sm"
+                checked={!!orderState.payed}
+                readOnly
+              />
+            </div>
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <Truck className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-primary checkbox checkbox-sm"
+                checked={!!orderState.sent}
+                readOnly
+              />
+            </div>
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <PackageOpen className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-primary checkbox checkbox-sm"
+                checked={!!orderState.delivered}
+                readOnly
+              />
+            </div>
           </div>
-          <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
-            <CreditCard className="size-5" />
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox checkbox-sm"
-              checked={!!orderState.payed}
-              readOnly
-            />
-          </div>
-          <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
-            <Truck className="size-5" />
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox checkbox-sm"
-              checked={!!orderState.sent}
-              readOnly
-            />
-          </div>
-          <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
-            <PackageOpen className="size-5" />
-            <input
-              type="checkbox"
-              className="checkbox-primary checkbox checkbox-sm"
-              checked={!!orderState.delivered}
-              readOnly
-            />
-          </div>
-        </div>
+        )}
 
         <Link
           href={
@@ -221,9 +228,11 @@ export function LoadingOrdersItem() {
 export function SingleOrderItem({
   item,
   product,
+  showDescription = true,
 }: {
   item: OrderProduct;
   product: Product;
+  showDescription?: boolean;
 }) {
   const price = item.quantity * product.price;
 
@@ -243,11 +252,13 @@ export function SingleOrderItem({
         />
         <div className="flex flex-col gap-2">
           <span className="text-primary">{product.name}</span>
-          <div className="flex flex-col gap-0.5 text-secondary">
-            {product.description.split("\n").map((t, i) => {
-              if (i < 2) return <p key={i}>{t}</p>;
-            })}
-          </div>
+          {showDescription && (
+            <div className="flex flex-col gap-0.5 text-sm text-secondary">
+              {product.description.split("\n").map((t, i) => {
+                if (i < 2) return <p key={i}>{t}</p>;
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -278,7 +289,7 @@ export function SingleOrderItem({
 
 export function LoadingSingleOrderItem() {
   return (
-    <div className="flex h-28 w-full animate-pulse justify-between gap-6 rounded-xl border-2 border-secondary/20 p-4">
+    <div className="flex h-28 w-full animate-pulse justify-between gap-6 overflow-hidden rounded-xl border-2 border-secondary/20 p-4">
       <div className="flex flex-row gap-4">
         {/* Image */}
         <div className="size-16 rounded-full bg-secondary/20" />

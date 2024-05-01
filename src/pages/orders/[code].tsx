@@ -1,10 +1,14 @@
 import { GeneralLayout } from "@/layouts/GeneralLayout";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "@/functions/products";
 import {
   CalendarDaysIcon,
+  Clock,
   CreditCard,
   DollarSign,
+  File,
+  FilePieChart,
+  FileUp,
   Hash,
   Info,
   Paperclip,
@@ -14,15 +18,31 @@ import { useParams } from "next/navigation";
 import { getOrder } from "@/functions/orders";
 import { z } from "zod";
 import { withAuth } from "@/functions/session";
-import { type ServerError } from "@/types/types";
+import type { ServerSuccess, ServerError } from "@/types/types";
 import { type Day, days } from "@/utils/miscellaneous";
 import { LoadingSingleOrderItem, SingleOrderItem } from "@/components/orders";
+import { useState } from "react";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import { type CloudinarySuccess } from "@/types/cloudinary";
+import { vars } from "@/utils/vars";
+import axios from "axios";
+import { LoadableButton } from "@/components/forms";
+import { type Payment } from "@/functions/payments";
+import { cn } from "@/utils/lib";
 
 export default function Order() {
   const params = useParams();
+  const queryClient = useQueryClient();
 
-  const codeID = z.string().catch("").parse(params?.code);
-  const isValidCode = !isNaN(parseInt(codeID));
+  const orderID = z.string().catch("").parse(params?.code);
+  const isValidCode = !isNaN(parseInt(orderID));
+
+  const [uploadedVoucher, setUploadedVoucher] = useState<File>();
 
   const productsQuery = useQuery({
     queryKey: ["products"],
@@ -35,18 +55,44 @@ export default function Order() {
     Awaited<ReturnType<typeof getOrder>>,
     ServerError<string>
   >({
-    queryKey: ["order", codeID],
-    queryFn: () => getOrder(parseInt(codeID)),
+    queryKey: ["order", orderID],
+    queryFn: () => getOrder(parseInt(orderID)),
     enabled: !!isValidCode,
     retry: false,
+  });
+
+  const mutation = useMutation<ServerSuccess<CloudinarySuccess>, ServerError>({
+    mutationFn: () => {
+      const url = `${vars.serverUrl}/api/v1/payments/${orderID}`;
+      return axios.post(
+        url,
+        { file: uploadedVoucher },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      setUploadedVoucher(undefined);
+      queryClient.invalidateQueries({ queryKey: ["order"] });
+    },
   });
 
   return (
     <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
       <div className="mx-auto flex h-screen w-screen max-w-5xl flex-col gap-4 pb-24 pt-24">
-        <div className="flex w-full items-center gap-4 border-b border-b-secondary/20 text-primary">
-          <CreditCard className="size-6" />
-          <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
+        <div className="flex w-full items-baseline justify-between gap-4 border-b border-b-secondary/20 text-primary">
+          <div className="flex items-center gap-4">
+            <CreditCard className="size-6" />
+            <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
+          </div>
+          <div className="flex gap-2 text-info">
+            <Info className="size-5" />
+            Nos pondremos en contacto a la brevedad
+          </div>
         </div>
         <section className="flex h-full w-full flex-row gap-4">
           <article className="flex h-full w-3/5 flex-col gap-4 overflow-y-auto">
@@ -134,17 +180,76 @@ export default function Order() {
             </div>
 
             {!orderQuery.isPending && (
-              <button className="btn btn-outline btn-secondary">
-                <Paperclip className="size-5" /> Adjuntar comprobante de pago
-              </button>
+              <div className="flex w-full flex-col gap-4">
+                <input
+                  id="voucher"
+                  type="file"
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files) setUploadedVoucher(e.target.files[0]);
+                  }}
+                />
+                <label
+                  htmlFor="voucher"
+                  className="btn btn-outline btn-secondary w-full"
+                >
+                  <Paperclip className="size-5" /> Adjuntar comprobante de pago
+                </label>
+
+                {uploadedVoucher && (
+                  <div className="my-1.5 flex items-center justify-between gap-4">
+                    <Tooltip>
+                      <TooltipTrigger className="cursor-default truncate text-lg">
+                        {uploadedVoucher.name}
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="bottom"
+                        align="start"
+                        className="w-fit rounded-md border border-secondary/30 bg-base-100 px-2 py-1"
+                      >
+                        <TooltipArrow className="fill-secondary" />
+                        {uploadedVoucher.name}
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <LoadableButton
+                      isPending={mutation.isPending}
+                      onClick={() => mutation.mutate()}
+                      className="btn btn-primary btn-sm w-52"
+                      animation="loading-dots"
+                    >
+                      <FileUp className="size-5" />
+                      <span>Subir comprobante</span>
+                    </LoadableButton>
+                  </div>
+                )}
+
+                {orderQuery.data?.payments.length !== 0 && (
+                  <div className="flex flex-col gap-2 border-t border-t-secondary/20 pt-3">
+                    <span className="flex items-center gap-2 text-lg text-secondary">
+                      <File className="size-5" />
+                      Comprobantes adjuntos
+                    </span>
+                    <div
+                      className={cn(
+                        uploadedVoucher
+                          ? "max-h-48 2xl:max-h-104"
+                          : "max-h-60 2xl:max-h-104",
+                        "flex flex-col gap-2 overflow-y-auto"
+                      )}
+                    >
+                      {orderQuery.data?.payments.map((payment, i) => (
+                        <PaymentVoucher
+                          key={payment.id}
+                          payment={payment}
+                          number={i}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
-
-            <hr className="border-b border-t-0 border-b-secondary/20" />
-
-            <div className="flex gap-2 text-info">
-              <Info className="size-5" />
-              Nos pondremos en contacto a la brevedad
-            </div>
           </article>
         </section>
       </div>
@@ -153,3 +258,54 @@ export default function Order() {
 }
 
 export const getServerSideProps = withAuth("noAdmin");
+
+export function PaymentVoucher({
+  payment,
+  number,
+}: {
+  payment: Payment;
+  number: number;
+}) {
+  return (
+    <div className="relative flex h-fit w-full items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 py-2 pl-11 pr-4">
+      <span className="absolute left-1 top-1 flex items-center gap-0.5 text-sm text-secondary">
+        <Hash className="size-3" />
+        {number + 1}
+      </span>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <CalendarDaysIcon className="size-4 text-secondary" />
+          {format(new Date(payment.createdAt), "dd-MM-yyyy")}
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock className="size-4 text-secondary" />
+          {format(new Date(payment.createdAt), "HH:mm")}
+        </div>
+      </div>
+      <a
+        href={payment.url}
+        target="_blank"
+        className="btn btn-outline btn-secondary btn-sm"
+      >
+        <FilePieChart className="size-5" />
+        Ver comprobante
+      </a>
+    </div>
+  );
+}
+
+export function PaymentVoucherSkeleton() {
+  return (
+    <div className="relative flex h-fit w-full animate-pulse items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 py-2 pl-11 pr-4">
+      {/* Number */}
+      <div className="absolute left-1 top-1 size-5 rounded-md bg-secondary/20" />
+      {/* Data */}
+      <div className="flex flex-col gap-1">
+        <div className="h-6 w-28 rounded-md bg-secondary/20" />
+        <div className="h-6 w-20 rounded-md bg-secondary/20" />
+      </div>
+      <div className="h-8 w-44 rounded-md bg-secondary/20" />
+    </div>
+  );
+}

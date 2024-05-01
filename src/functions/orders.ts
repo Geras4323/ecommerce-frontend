@@ -3,6 +3,7 @@ import { vars } from "@/utils/vars";
 import axios from "axios";
 import { z } from "zod";
 import { sessionSchema } from "./session";
+import { paymentSchema } from "./payments";
 
 export type OrderProduct = z.infer<typeof orderProductSchema>;
 export const orderProductSchema = z
@@ -41,6 +42,7 @@ export const orderSchema = baseOrderSchema.and(
   z.object({
     orderProducts: orderProductSchema.array(),
     user: sessionSchema,
+    payments: paymentSchema.array(),
   })
 );
 
