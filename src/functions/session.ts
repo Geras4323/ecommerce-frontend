@@ -20,7 +20,6 @@ export const sessionSchema = z.object({
   surname: z.string(),
   phone: z.string().nullable(),
   role: z.enum(["admin", "customer"]),
-  orders: z.any().nullable(),
 });
 
 export async function getSession(sessionCookie?: string) {

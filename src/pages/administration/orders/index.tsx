@@ -1,25 +1,36 @@
-import { LoadingOrdersItem, OrdersItem } from "@/components/orders";
-import { getMyOrders } from "@/functions/orders";
+import { AdministrationLayout } from "@/components/layouts/administration";
+import { getOrders } from "@/functions/orders";
 import { withAuth } from "@/functions/session";
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import type { ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
-import { Undo2, WalletCards } from "lucide-react";
 import Link from "next/link";
+import { Undo2, WalletCards } from "lucide-react";
+import { useEffect } from "react";
+import { LoadingOrdersItem, OrdersItem } from "@/components/orders";
 
-export default function Orders() {
-  const ordersQuery = useQuery({
+function Orders() {
+  const ordersQuery = useQuery<
+    Awaited<ReturnType<typeof getOrders>>,
+    ServerError
+  >({
     queryKey: ["orders"],
-    queryFn: getMyOrders,
+    queryFn: getOrders,
+    refetchOnWindowFocus: true,
     retry: false,
   });
 
+  useEffect(() => {
+    if (ordersQuery.isError) console.log(ordersQuery.error);
+  }, [ordersQuery.isError, ordersQuery.error]);
+
   return (
-    <GeneralLayout title="Pedidos" description="Pedidos">
-      <div className="mx-auto flex h-screen w-screen max-w-3xl flex-col gap-4 py-24">
+    <AdministrationLayout active="Pedidos">
+      <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-4 p-4">
         <div className="flex w-full items-center gap-4 border-b border-b-secondary/20">
           <WalletCards className="size-6" />
           <h1 className="py-2 text-xl font-medium">PEDIDOS</h1>
         </div>
+
         <section className="flex h-full w-full flex-col gap-4 overflow-y-auto">
           {ordersQuery.isPending ? (
             Array.from({ length: 3 }).map((_, i) => (
@@ -39,13 +50,14 @@ export default function Orders() {
             </div>
           ) : (
             ordersQuery.data?.map((item) => (
-              <OrdersItem key={item.id} item={item} />
+              <OrdersItem key={item.id} item={item} fromAdmin />
             ))
           )}
         </section>
       </div>
-    </GeneralLayout>
+    </AdministrationLayout>
   );
 }
 
-export const getServerSideProps = withAuth("noAdmin");
+export const getServerSideProps = withAuth("admin");
+export default Orders;
