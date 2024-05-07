@@ -81,7 +81,8 @@ export const Header = () => {
             {router.pathname !== "/" &&
               router.pathname !== "/login" &&
               router.pathname !== "/signup" &&
-              router.pathname !== "/sign" && (
+              router.pathname !== "/sign" &&
+              router.pathname !== "/sign/verifyEmail/[token]" && (
                 <Link href="/sign" className="btn btn-primary btn-sm">
                   Iniciar sesión
                 </Link>
