@@ -20,6 +20,7 @@ export const sessionSchema = z.object({
   surname: z.string(),
   phone: z.string().nullable(),
   role: z.enum(["admin", "customer"]),
+  verified: z.boolean(),
 });
 
 export async function getSession(sessionCookie?: string) {
@@ -93,4 +94,29 @@ export const leaveIfLoggedIn: GetServerSideProps = async (c) => {
   if (!session) return { props: {} };
 
   return session.role === "admin" ? redirect("/") : redirect("showroom");
+};
+
+export const leaveIfVerified: GetServerSideProps = async (c) => {
+  const queryClient = new QueryClient();
+  const sessionCookie = c.req.cookies.ec_session;
+
+  const redirect = (destination: string) => ({
+    redirect: {
+      permanent: false,
+      destination: destination,
+    },
+  });
+
+  if (!sessionCookie) return { props: {} };
+
+  const session = await queryClient
+    .fetchQuery<Session, ServerError, Session>({
+      queryKey: ["session"],
+      queryFn: () => getSession(sessionCookie),
+    })
+    .catch(() => undefined);
+
+  if (!session) return { props: {} };
+
+  return session.verified ? redirect("/") : { props: {} };
 };

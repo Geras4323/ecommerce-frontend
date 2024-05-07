@@ -10,7 +10,6 @@ export function useSession() {
   const session = useQuery({
     queryKey: ["session"],
     queryFn: () => getSession(),
-    staleTime: 30 * 1000,
     retry: false,
   });
 

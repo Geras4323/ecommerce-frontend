@@ -115,6 +115,7 @@ function Showroom() {
                       product={product}
                       addToCart={cart.addCartItem}
                       logged={!!session.data}
+                      verified={!!session.data?.verified}
                       inCart={
                         cart.cartItems.data?.findIndex(
                           (cI) => cI.productID === product.id
@@ -210,12 +211,14 @@ function CategoryItemSkeleton() {
 function ProductItem({
   product,
   logged,
+  verified,
   inCart,
   addToCart,
   mediaQuery,
 }: {
   product: Product;
   logged: boolean;
+  verified: boolean;
   inCart: boolean;
   addToCart: UseMutationResult<
     any,
@@ -318,6 +321,10 @@ function ProductItem({
               onClick={() => {
                 if (!logged) {
                   router.push("/sign");
+                  return;
+                }
+                if (!verified) {
+                  router.push("/sign/verifyEmail");
                   return;
                 }
                 addToCart.mutate({ productID: product.id, quantity });
