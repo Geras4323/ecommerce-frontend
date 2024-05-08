@@ -10,7 +10,7 @@ export const GeneralLayout = ({
   return (
     <>
       <Head>
-        <title>{`SwiftHarbour | ${title}`}</title>
+        <title>{`Mis Ideas Pintadas | ${title}`}</title>
         <meta name="description" content={description} />
       </Head>
       <Header />
