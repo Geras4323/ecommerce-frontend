@@ -65,7 +65,7 @@ const config: Config = {
         light: {
           ...daisyThemes["[data-theme=business]"],
           primary: "hsl(41, 18%, 20%)",
-          secondary: "hsl(40, 15%, 20%)",
+          secondary: "hsl(40, 20%, 50%)",
           "btn-primary": "hsl(41, 18%, 20%)",
           "btn-secondary": "hsl(41, 18%, 20%)",
           accent: "#67CBA0",

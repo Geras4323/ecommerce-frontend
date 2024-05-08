@@ -22,6 +22,7 @@ const tangerine = Tangerine({ weight: ["700"], subsets: ["latin"] });
 
 type Section = {
   title: string;
+  description: string;
   Svg: LucideIcon;
   url: string;
   disabled: boolean;
@@ -29,24 +30,28 @@ type Section = {
 const sections = [
   {
     title: "Mis datos",
+    description: "Ver información de mi cuenta",
     Svg: User2,
     url: "/account",
     disabled: true,
   },
   {
     title: "Showroom",
+    description: "Los productos disponibles",
     Svg: Package,
     url: "/showroom",
     disabled: false,
   },
   {
     title: "Mi carrito",
+    description: "Confirma tus pedidos",
     Svg: ShoppingCartIcon,
     url: "/cart",
     disabled: false,
   },
   {
     title: "Mis pedidos",
+    description: "Todos los pedidos que hiciste",
     Svg: WalletCards,
     url: "/orders",
     disabled: false,
@@ -108,11 +113,11 @@ export const Header = () => {
                   <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
                 )}
             </PopoverTrigger>
-            <PopoverContent align="end" sideOffset={16}>
+            <PopoverContent align="end" sideOffset={17}>
               <article
                 className={cn(
                   theme === "dark" ? "bg-base-300" : "bg-base-100",
-                  "flex h-fit w-48 flex-col overflow-hidden rounded-b-lg border border-secondary/20 shadow-xl"
+                  "grid h-fit w-80 grid-cols-1 gap-6 overflow-hidden rounded-b-lg border border-t-0 border-secondary/20 p-4 shadow-xl"
                 )}
               >
                 {sections.map((section) => {
@@ -121,29 +126,34 @@ export const Header = () => {
                       <Link
                         key={section.title}
                         href={section.url}
-                        className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
+                        className="flex h-fit cursor-pointer items-start gap-3 text-base text-primary/80 transition-all hover:text-primary/90"
                       >
-                        <div className="relative">
-                          <section.Svg className="size-5" />
+                        <div className="relative mt-0.5">
+                          <section.Svg className="size-6" />
                           {section.title === "Mi carrito" &&
                             cart.cartItems.data?.length !== 0 && (
                               <div className="absolute -right-2 -top-1 size-2 rounded-full bg-error" />
                             )}
                         </div>
-                        <span>{section.title}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-lg">{section.title}</span>
+                          <span className="text-sm text-secondary">
+                            {section.description}
+                          </span>
+                        </div>
                       </Link>
                     );
                 })}
 
-                <hr className="border-b-0 border-t border-t-secondary/20" />
-
-                <button
-                  onClick={() => logoutMutation.mutate()}
-                  className="flex h-14 cursor-pointer items-center justify-between gap-3 p-4 text-base text-primary/70 transition-all hover:bg-secondary/20 hover:text-primary"
-                >
-                  <LogOut className="size-5" />
-                  <span>Cerrar sesión</span>
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => logoutMutation.mutate()}
+                    className="btn btn-ghost btn-sm flex w-44 gap-3 self-end"
+                  >
+                    <LogOut className="size-5" />
+                    <span>Cerrar sesión</span>
+                  </button>
+                </div>
               </article>
             </PopoverContent>
           </Popover>
