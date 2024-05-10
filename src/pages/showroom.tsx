@@ -29,6 +29,13 @@ import {
   CarouselPrevious,
 } from "@/components/shadcn/carousel";
 import { mqs, useMediaQueries } from "@/hooks/screen";
+import {
+  Select,
+  SelectContent,
+  SelectOption,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/select";
 
 function Showroom() {
   const { session } = useSession();
@@ -53,15 +60,58 @@ function Showroom() {
 
   return (
     <GeneralLayout title="Showroom" description="Our showroom">
-      <div className="mx-auto flex h-fit gap-8 pt-24">
+      <div className="mx-auto flex h-fit flex-col gap-8 px-4 pt-24 lg:flex-row">
         {/* CATEGORIES */}
-        <section className="relative h-auto w-80 min-w-80">
+        <section className="relative h-auto w-full min-w-80 lg:w-80">
           <div className="sticky top-24 flex h-fit w-full flex-col gap-4">
             <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2 text-primary">
               <Tag className="size-6" />
               <h2 className="text-xl font-medium tracking-wide">CATEGORÍAS</h2>
             </div>
-            <div className="flex w-full flex-col gap-4">
+
+            <div className="block lg:hidden">
+              <Select
+                onValueChange={(v) =>
+                  setSelectedCategory(() => {
+                    if (v === "all") return undefined;
+                    return categoriesQuery.data?.find((cat) => cat.name === v);
+                  })
+                }
+                value={selectedCategory?.name ?? "all"}
+              >
+                <SelectTrigger className="flex h-12 w-full min-w-72 cursor-pointer overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md transition-colors duration-100 hover:bg-secondary/20 focus:outline-none data-[state=open]:rounded-b-none">
+                  <SelectValue defaultValue="all" />
+                </SelectTrigger>
+                <SelectContent className="w-[calc(100%-2px)] data-[state=open]:rounded-t-none">
+                  <SelectOption value="all" className="h-11">
+                    Todas las categorías
+                  </SelectOption>
+                  {categoriesQuery.data?.map((category) => (
+                    <SelectOption key={category.id} value={category.name}>
+                      <div className="flex items-center gap-3">
+                        <Image
+                          alt={category.name}
+                          src={category.image ?? ""}
+                          className={cn(
+                            category.id === selectedCategory?.id
+                              ? "saturate-100"
+                              : "saturate-0",
+                            "size-8 rounded-md object-cover"
+                          )}
+                          width={40}
+                          height={40}
+                          unoptimized
+                        />
+                        {category.name}
+                      </div>
+                    </SelectOption>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* PC */}
+            <div className="hidden w-full flex-col gap-3 lg:flex">
               {categoriesQuery.isPending ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <CategoryItemSkeleton key={i} />
@@ -86,12 +136,12 @@ function Showroom() {
         </section>
 
         {/* PRODUCTS */}
-        <section className="mb-8 flex w-screen max-w-6xl flex-col gap-4">
+        <section className="mb-8 flex w-full flex-col gap-4 md:max-w-2xl lg:max-w-xl xl:max-w-2xl 2xl:max-w-6xl">
           <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2 text-primary">
             <Package className="size-6" />
             <h2 className="text-xl font-medium tracking-wide">PRODUCTOS</h2>
           </div>
-          <div className="grid h-auto w-full grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="grid h-auto w-full grid-cols-1 gap-4 2xl:grid-cols-2">
             {productsQuery.isPending ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <ProductItemSkeleton key={i} />
@@ -236,23 +286,24 @@ function ProductItem({
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <div className="flex h-52 w-full gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 p-3 shadow-md">
+    <div className="flex h-fit w-full flex-col gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 p-3 shadow-md md:h-52 md:flex-row">
       <Carousel
         opts={{
           axis: "x",
           watchDrag: mediaQuery && mediaQuery >= mqs.xxl ? false : true,
           duration: 20,
+          align: "center",
         }}
-        className="aspect-square h-full"
+        className="mb-2 h-52 self-center md:mb-0 md:aspect-square md:h-full"
       >
         <CarouselContent className="-ml-2 h-full">
           {product.images.map((image) => (
-            <CarouselItem key={image.id} className="pl-2">
+            <CarouselItem key={image.id} className="pl-2 md:basis-full">
               <Image
                 alt="Product Image"
                 className={cn(
                   // !product.images[0] && "scale-90 opacity-20",
-                  "h-full w-full rounded-lg border border-secondary/10 object-cover"
+                  "h-full w-52 rounded-lg border border-secondary/10 object-cover md:w-full"
                 )}
                 src={image.url ?? NoImage}
                 height="200"
@@ -262,14 +313,15 @@ function ProductItem({
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="absolute bottom-2 left-2 z-10 flex size-7 items-center justify-center rounded-lg bg-base-100 disabled:opacity-30">
+        <CarouselPrevious className="absolute bottom-2 left-2 z-10 flex size-7 items-center justify-center rounded-lg bg-base-100 transition-opacity disabled:pointer-events-none disabled:opacity-0">
           <ChevronLeft className="size-5" />
         </CarouselPrevious>
-        <CarouselNext className="absolute bottom-2 right-2 z-10 flex size-7 items-center justify-center rounded-lg bg-base-100 disabled:opacity-30">
+        <CarouselNext className="absolute bottom-2 right-2 z-10 flex size-7 items-center justify-center rounded-lg bg-base-100 transition-opacity disabled:pointer-events-none disabled:opacity-0">
           <ChevronRight className="size-5" />
         </CarouselNext>
       </Carousel>
-      <div className="flex w-full flex-col justify-between gap-2">
+
+      <div className="flex w-full flex-col justify-between gap-4 md:gap-2">
         <div className="flex items-start justify-between gap-6">
           <span className="text-lg font-semibold text-primary/80">
             {product.name}

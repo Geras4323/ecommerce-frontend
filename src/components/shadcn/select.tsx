@@ -16,14 +16,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex w-full items-center justify-between bg-base-100 px-3 py-2 text-sm",
+      "flex w-full items-center justify-between bg-base-100 px-4 py-2",
       !!className && className
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="size-8 text-secondary" />
+      <ChevronDown className="size-6 text-secondary" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -38,7 +38,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         !!className && className,
-        "relative z-50 rounded-lg border border-secondary/40 bg-base-100 shadow-md"
+        "relative z-50 rounded-lg border border-secondary/20 bg-base-100 shadow-md"
       )}
       position={position}
       {...props}
