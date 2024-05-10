@@ -18,6 +18,10 @@ const config: Config = {
       maxHeight: {
         104: "26rem",
       },
+      screens: {
+        xxs: "480px",
+        xs: "560px",
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
