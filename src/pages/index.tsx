@@ -72,13 +72,13 @@ export default function Home() {
             <h1
               className={cn(
                 tangerine.className,
-                "mb-12 select-none text-8xl text-primary"
+                "mb-12 select-none text-6xl text-primary lg:text-7xl xl:text-8xl"
               )}
             >
               Mis Ideas Pintadas
             </h1>
 
-            <div className="flex w-full max-w-sm flex-col">
+            <div className="flex w-full max-w-sm flex-col px-8 sm:px-0">
               {session.data ? (
                 <div className="flex w-full flex-col gap-4">
                   {session.data.role === "admin" && (

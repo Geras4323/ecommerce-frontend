@@ -68,10 +68,13 @@ export const Header = () => {
   const [isSessionOpen, setIsSessionOpen] = useState(false);
 
   return (
-    <header className="fixed z-50 flex h-16 w-full items-center justify-between border-b border-b-secondary/20 bg-base-300/70 px-6 py-2 backdrop-blur">
+    <header className="fixed z-50 flex h-16 w-full items-center justify-end border-b border-b-secondary/20 bg-base-300/70 px-6 py-2 backdrop-blur sm:justify-between">
       <Link
         href="/"
-        className={cn(tangerine.className, "select-none text-4xl text-primary")}
+        className={cn(
+          tangerine.className,
+          "hidden select-none text-4xl text-primary sm:block"
+        )}
       >
         Mis Ideas Pintadas
       </Link>
