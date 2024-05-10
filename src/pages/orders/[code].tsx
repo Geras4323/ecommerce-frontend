@@ -3,8 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "@/functions/products";
 import {
   CalendarDaysIcon,
+  ChevronLeft,
   Clock,
-  CreditCard,
   DollarSign,
   File,
   FilePieChart,
@@ -34,6 +34,8 @@ import axios from "axios";
 import { LoadableButton } from "@/components/forms";
 import { type Payment } from "@/functions/payments";
 import { cn } from "@/utils/lib";
+import { getCategories } from "@/functions/categories";
+import Link from "next/link";
 
 export default function Order() {
   const params = useParams();
@@ -47,6 +49,16 @@ export default function Order() {
   const productsQuery = useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
+
+  const categoriesQuery = useQuery<
+    Awaited<ReturnType<typeof getCategories>>,
+    ServerError
+  >({
+    queryKey: ["categories"],
+    queryFn: getCategories,
     refetchOnWindowFocus: true,
     retry: false,
   });
@@ -83,19 +95,22 @@ export default function Order() {
 
   return (
     <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
-      <div className="mx-auto flex h-screen w-screen max-w-5xl flex-col gap-4 pb-24 pt-24">
+      <div className="mx-auto flex h-screen w-screen max-w-screen-sm flex-col gap-4 px-4 pb-24 pt-24 lg:max-w-5xl">
         <div className="flex w-full items-baseline justify-between gap-4 border-b border-b-secondary/20 text-primary">
           <div className="flex items-center gap-4">
-            <CreditCard className="size-6" />
+            <Link href="/orders" className="btn btn-ghost btn-sm">
+              <ChevronLeft className="size-5" />
+            </Link>
             <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
           </div>
-          <div className="flex gap-2 text-info">
+          <div className="hidden gap-2 text-info lg:flex">
             <Info className="size-5" />
             Nos pondremos en contacto a la brevedad
           </div>
         </div>
-        <section className="flex h-full w-full flex-row gap-4">
-          <article className="flex h-full w-3/5 flex-col gap-4 overflow-y-auto">
+
+        <section className="flex h-full w-full flex-col gap-4 lg:flex-row">
+          <article className="order-2 flex h-full w-full flex-col gap-4 overflow-y-auto lg:order-1 lg:w-3/5">
             {productsQuery.isPending || orderQuery.isPending ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <LoadingSingleOrderItem key={i} />
@@ -115,13 +130,18 @@ export default function Order() {
                       key={item.id}
                       item={item}
                       product={product}
+                      category={
+                        categoriesQuery.data?.find(
+                          (category) => category.id === product.categoryID
+                        )?.name
+                      }
                     />
                   );
               })
             )}
           </article>
 
-          <article className="flex h-full w-2/5 flex-col gap-4 border-l border-l-secondary/20 pl-4">
+          <article className="order-1 flex h-fit w-full flex-col gap-4 rounded-lg border-secondary/20 bg-secondary/5 p-4 pb-4 shadow-md lg:order-2 lg:h-full lg:w-2/5 lg:rounded-none lg:border-l lg:bg-transparent lg:pb-0 lg:pl-4 lg:shadow-none">
             <div className="flex items-center gap-2">
               <Hash className="size-5 text-secondary" />
               <span className="text-lg text-secondary">Pedido Nro</span>

@@ -53,17 +53,17 @@ export function OrdersItem({
 
   return (
     <div className="flex w-full flex-col items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 p-4">
-      <section className="flex w-full items-center justify-between gap-6">
-        <article className="flex h-full w-1/2 flex-col gap-4">
+      <section className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row sm:gap-6">
+        <article className="flex h-full w-full flex-col gap-4 sm:w-1/2">
           <div className="flex items-center gap-2">
-            <Hash className="size-5 text-secondary" />
+            <Hash className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Pedido Nro</span>
             <span className="text-xl font-medium text-primary">{item.id}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <CalendarDaysIcon className="size-5 text-secondary" />
-            <span className="text-lg text-secondary">Iniciado el</span>
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <CalendarDaysIcon className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">Hecho el</span>
             {item.createdAt && (
               <>
                 <span className="text-primary">
@@ -77,9 +77,9 @@ export function OrdersItem({
           </div>
         </article>
 
-        <article className="flex h-full w-1/2 flex-col gap-4">
+        <article className="flex h-full w-full flex-col gap-4 sm:w-1/2">
           <div className="flex items-center gap-2">
-            <DollarSign className="size-5 text-secondary" />
+            <DollarSign className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Monto:</span>
             {item.total && (
               <div className="flex items-end gap-1">
@@ -92,7 +92,7 @@ export function OrdersItem({
           </div>
 
           <div className="flex items-center gap-2">
-            <Package className="size-5 text-secondary" />
+            <Package className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Contiene</span>
             <span className="text-lg text-primary">
               {item.products} {item.products === 1 ? "producto" : "productos"}
@@ -103,8 +103,8 @@ export function OrdersItem({
 
       {fromAdmin && !!item.user && (
         <section className="flex w-full flex-col justify-between gap-4 border-y border-y-secondary/20 py-4">
-          <div className="flex w-1/2 items-center gap-2">
-            <User2 className="size-5 text-secondary" />
+          <div className="flex w-full items-center gap-2">
+            <User2 className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">A nombre de</span>
             <span className="text-lg text-primary">
               {item.user.name} {item.user.surname}
@@ -112,13 +112,13 @@ export function OrdersItem({
           </div>
 
           <div className="flex w-full items-center gap-2">
-            <Mail className="size-5 text-secondary" />
+            <Mail className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Email:</span>
             <span className="text-lg text-primary">{item.user.email}</span>
           </div>
 
           <div className="flex w-1/2 items-center gap-2">
-            <Phone className="size-5 text-secondary" />
+            <Phone className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Teléfono: </span>
             <span className="text-lg text-primary">
               {item.user.phone ?? "-"}
@@ -228,17 +228,19 @@ export function LoadingOrdersItem() {
 export function SingleOrderItem({
   item,
   product,
+  category,
   showDescription = true,
 }: {
   item: OrderProduct;
   product: Product;
+  category?: string;
   showDescription?: boolean;
 }) {
   const price = item.quantity * product.price;
 
   return (
-    <div className="flex h-28 w-full justify-between gap-6 rounded-xl border-2 border-secondary/20 p-4">
-      <div className="flex flex-row gap-4">
+    <div className="flex h-40 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 xs:h-28 xs:flex-row xs:gap-6">
+      <div className="flex flex-row gap-6">
         <Image
           alt="product"
           width={50}
@@ -246,7 +248,7 @@ export function SingleOrderItem({
           src={product.images[0]?.url ?? NoImage}
           className={cn(
             !product.images[0]?.url && "opacity-50 blur-[1px]",
-            "size-16 rounded-full border border-secondary/30"
+            "size-16 min-w-16 rounded-full border border-secondary/30"
           )}
           unoptimized
         />
@@ -254,23 +256,21 @@ export function SingleOrderItem({
           <span className="text-primary">{product.name}</span>
           {showDescription && (
             <div className="flex flex-col gap-0.5 text-sm text-secondary">
-              {product.description.split("\n").map((t, i) => {
-                if (i < 2) return <p key={i}>{t}</p>;
-              })}
+              {category}
             </div>
           )}
         </div>
       </div>
 
-      <div className="flex h-full flex-col justify-center gap-2">
-        <div className="flex w-full items-end justify-center gap-1 text-center">
+      <div className="flex h-full flex-row justify-end gap-2 xs:flex-col xs:justify-center xs:gap-2">
+        <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center xs:order-1 xs:border-none">
           <span className="text-lg text-primary/70">$</span>
           <span className="text-xl text-primary">
             {price.toLocaleString("es-AR")}
           </span>
         </div>
 
-        <div className="flex h-8 w-24 items-end justify-center gap-2 rounded-lg">
+        <div className="order-1 flex h-8 w-24 items-end justify-center gap-2 rounded-lg xs:order-2">
           <div className="flex items-end gap-0.5">
             <span className="text-xl text-primary">{item.quantity}</span>
             <span className="text-base text-primary/70">x</span>
