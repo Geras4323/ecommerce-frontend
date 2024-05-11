@@ -1,5 +1,5 @@
 import { type Session } from "@/functions/session";
-import type { ServerError, ServerSuccess } from "@/types/types";
+import type { ServerError, ServerSuccess, WithClassName } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { ErrorSpan, FormInput, LoadableButton } from "../forms";
-import { Undo } from "lucide-react";
+import { Redo2, Undo } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
@@ -30,23 +30,30 @@ const passwordsInputSchema = z
     path: ["confirmPassword"],
   });
 
-export function SignupForm({ isLogging }: { isLogging: boolean }) {
+export function SignupForm({
+  isLogging,
+  switchSide: switchSideProp,
+  className,
+}: { isLogging: boolean; switchSide?: () => void } & WithClassName) {
   const { theme } = useTheme();
 
+  const [stage, setStage] = useState<"name" | "password">("name");
   const [signNameData, setSignNameData] = useState<NameInputs>();
 
   const {
     register: nameRegister,
     handleSubmit: handleNameSubmit,
     formState: { errors: nameErrors },
-    // reset: nameReset,
+    reset: nameReset,
     getValues: getNameValues,
   } = useForm<NameInputs>({
     resolver: zodResolver(nameInputSchema),
   });
 
-  const onNameSubmit: SubmitHandler<NameInputs> = (data) =>
+  const onNameSubmit: SubmitHandler<NameInputs> = (data) => {
+    setStage("password");
     setSignNameData(data);
+  };
 
   const {
     register: passwordRegister,
@@ -69,6 +76,7 @@ export function SignupForm({ isLogging }: { isLogging: boolean }) {
       const url = `${vars.serverUrl}/api/v1/auth/signup`;
       return axios.post(url, data, { withCredentials: true });
     },
+    onError: () => setStage("name"),
   });
 
   const onPasswordSubmit: SubmitHandler<PasswordsInputs> = (data) => {
@@ -97,16 +105,22 @@ export function SignupForm({ isLogging }: { isLogging: boolean }) {
     }
   });
 
+  function switchSide() {
+    nameReset();
+    mutation.reset();
+    switchSideProp && switchSideProp();
+  }
+
   if (mutation.isSuccess)
     return (
-      <div className="absolute flex h-screen w-screen items-center justify-center">
+      <div className="absolute flex h-screen w-screen items-center justify-center px-4 text-base">
         <div
           className={cn(
             theme === "dark" ? "border-l-info" : "border-l-primary",
             "flex h-fit w-full max-w-xl flex-col items-center gap-2 rounded-lg border border-l-4 border-secondary/20 bg-base-100 p-4 shadow-lg"
           )}
         >
-          <span className="text-2xl">Verificación de email</span>
+          <span className="text-2xl text-primary">Verificación de email</span>
 
           <p className="w-full text-center text-secondary">
             Le enviamos un mail de verificación a{" "}
@@ -128,111 +142,129 @@ export function SignupForm({ isLogging }: { isLogging: boolean }) {
     <div
       className={cn(
         isLogging ? "opacity-0" : "opacity-100",
-        "relative h-full w-full p-12 transition-opacity duration-1000"
+        "relative h-full w-full p-12 transition-opacity duration-1000",
+        "border border-secondary/20 shadow-lg",
+        !!className && className
       )}
     >
       <form
         onSubmit={handleNameSubmit(onNameSubmit)}
         className="flex h-full w-full flex-col justify-between gap-8"
       >
-        <h3 className="w-full border-b border-b-secondary/20 pb-1 text-left text-2xl text-primary">
-          Registrarse
-        </h3>
-        <FormInput className="relative">
-          <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-            <label className="text-primary/60">Nombre</label>
-          </div>
-          <input
-            {...nameRegister("name")}
-            type="text"
-            className={cn(
-              !!nameErrors.name ? "border-error" : "border-secondary/30",
-              "h-12 rounded-md border bg-base-100 px-4 shadow-inner transition-colors focus:outline-none"
-            )}
-          />
-          <div
-            className={cn(
-              !!nameErrors.name && "opacity-100",
-              "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
-            )}
+        <div className="flex w-full flex-row gap-4 border-b border-b-secondary/20">
+          <h3 className="w-full pb-1 text-left text-xl tracking-wide text-primary">
+            CREAR CUENTA
+          </h3>
+
+          <button
+            type="button"
+            onClick={switchSide}
+            className="flex items-center gap-1.5 whitespace-nowrap text-base text-secondary underline underline-offset-4 md:hidden"
           >
-            <ErrorSpan message={nameErrors.name?.message} />
-          </div>
-        </FormInput>
+            <Redo2 className="size-4" />
+            Iniciar Sesión
+          </button>
+        </div>
 
-        <FormInput className="relative">
-          <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-            <label className="text-primary/60">Apellido</label>
-          </div>
-          <input
-            {...nameRegister("surname")}
-            type="text"
-            className={cn(
-              !!nameErrors.surname ? "border-error" : "border-secondary/30",
-              "h-12 rounded-md border bg-base-100 px-4 shadow-inner transition-colors focus:outline-none"
-            )}
-          />
-          <div
-            className={cn(
-              !!nameErrors.surname && "opacity-100",
-              "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
-            )}
-          >
-            <ErrorSpan message={nameErrors.surname?.message} />
-          </div>
-        </FormInput>
+        <div className="flex w-full flex-col gap-8">
+          <FormInput className="relative">
+            <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
+              <label className="text-primary/60">Nombre</label>
+            </div>
+            <input
+              {...nameRegister("name")}
+              type="text"
+              className={cn(
+                !!nameErrors.name ? "border-error" : "border-secondary/30",
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
+              )}
+            />
+            <div
+              className={cn(
+                !!nameErrors.name && "opacity-100",
+                "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
+              )}
+            >
+              <ErrorSpan message={nameErrors.name?.message} />
+            </div>
+          </FormInput>
 
-        <FormInput className="relative">
-          <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-            <label className="text-primary/60">Email</label>
-          </div>
-          <input
-            {...nameRegister("email")}
-            type="text"
-            className={cn(
-              !!nameErrors.email ? "border-error" : "border-secondary/30",
-              "h-12 rounded-md border bg-base-100 px-4 shadow-inner transition-colors focus:outline-none"
-            )}
-          />
-          <div
-            className={cn(
-              !!nameErrors.email && "opacity-100",
-              "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
-            )}
-          >
-            <ErrorSpan message={nameErrors.email?.message} />
-          </div>
-        </FormInput>
+          <FormInput className="relative">
+            <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
+              <label className="text-primary/60">Apellido</label>
+            </div>
+            <input
+              {...nameRegister("surname")}
+              type="text"
+              className={cn(
+                !!nameErrors.surname ? "border-error" : "border-secondary/30",
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
+              )}
+            />
+            <div
+              className={cn(
+                !!nameErrors.surname && "opacity-100",
+                "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
+              )}
+            >
+              <ErrorSpan message={nameErrors.surname?.message} />
+            </div>
+          </FormInput>
 
-        {mutation.isError && (
-          <div className="flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-medium text-primary">
-            Ese email ya está en uso
-          </div>
-        )}
+          <FormInput className="relative">
+            <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
+              <label className="text-primary/60">Email</label>
+            </div>
+            <input
+              {...nameRegister("email")}
+              type="text"
+              className={cn(
+                !!nameErrors.email ? "border-error" : "border-secondary/30",
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
+              )}
+            />
+            <div
+              className={cn(
+                !!nameErrors.email && "opacity-100",
+                "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
+              )}
+            >
+              <ErrorSpan message={nameErrors.email?.message} />
+            </div>
+          </FormInput>
+        </div>
 
-        <button type="submit" className="btn btn-primary w-full">
-          Siguiente
-        </button>
+        <div className="flex w-full flex-col gap-4">
+          {mutation.isError && (
+            <div className="flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 text-base font-medium text-primary">
+              Ese email ya está en uso
+            </div>
+          )}
+
+          <button type="submit" className="btn btn-primary w-full">
+            Siguiente
+          </button>
+        </div>
       </form>
 
       <form
         onSubmit={passwordHandleSubmit(onPasswordSubmit)}
         className={cn(
-          signNameData
+          stage === "password"
             ? "bottom-0 opacity-100"
             : "pointer-events-none bottom-16 opacity-0",
           "absolute left-0 right-0 flex h-full flex-col items-center justify-between bg-base-100 p-12 transition-all duration-500 ease-in-out"
         )}
       >
-        <h3 className="flex w-full items-center gap-3 border-b border-b-secondary/20 pb-1 text-left text-2xl">
+        <h3 className="flex w-full items-center gap-3 border-b border-b-secondary/20 pb-1 text-left text-xl tracking-wide text-primary">
           <Undo
             className="size-6 cursor-pointer"
             onClick={() => {
               passwordReset();
-              setSignNameData(undefined);
+              setStage("name");
             }}
           />
-          Seguridad
+          SEGURIDAD
         </h3>
 
         <div className="flex w-full flex-col gap-8">
@@ -247,7 +279,7 @@ export function SignupForm({ isLogging }: { isLogging: boolean }) {
                 !!passwordErrors.password
                   ? "border-error"
                   : "border-secondary/30",
-                "h-12 rounded-md border bg-base-100 px-4 shadow-inner transition-colors focus:outline-none"
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
               )}
             />
             <div
@@ -272,7 +304,7 @@ export function SignupForm({ isLogging }: { isLogging: boolean }) {
                 !!passwordErrors.confirmPassword
                   ? "border-error"
                   : "border-secondary/30",
-                "h-12 rounded-md border bg-base-100 px-4 shadow-inner transition-colors focus:outline-none"
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
               )}
             />
             <div

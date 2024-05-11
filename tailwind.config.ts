@@ -69,7 +69,7 @@ const config: Config = {
         light: {
           ...daisyThemes["[data-theme=business]"],
           primary: "hsl(41, 18%, 20%)",
-          secondary: "hsl(40, 20%, 50%)",
+          secondary: "hsl(40, 20%, 40%)",
           "btn-primary": "hsl(41, 18%, 20%)",
           "btn-secondary": "hsl(41, 18%, 20%)",
           accent: "#67CBA0",
@@ -88,6 +88,10 @@ const config: Config = {
       },
     ],
   },
-  plugins: [require("daisyui"), require("tailwindcss-animate")],
+  plugins: [
+    require("daisyui"),
+    require("tailwindcss-animate"),
+    require("tailwindcss-3d"),
+  ],
 };
 export default config;
