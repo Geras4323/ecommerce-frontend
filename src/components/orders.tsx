@@ -139,7 +139,7 @@ export function OrdersItem({
               <ClipboardCheck className="size-5" />
               <input
                 type="checkbox"
-                className="checkbox-primary checkbox checkbox-sm"
+                className="checkbox-primary checkbox checkbox-sm shadow-inner"
                 checked={!!orderState.confirmed}
                 readOnly
               />
@@ -148,7 +148,7 @@ export function OrdersItem({
               <CreditCard className="size-5" />
               <input
                 type="checkbox"
-                className="checkbox-primary checkbox checkbox-sm"
+                className="checkbox-primary checkbox checkbox-sm shadow-inner"
                 checked={!!orderState.payed}
                 readOnly
               />
@@ -157,7 +157,7 @@ export function OrdersItem({
               <Truck className="size-5" />
               <input
                 type="checkbox"
-                className="checkbox-primary checkbox checkbox-sm"
+                className="checkbox-primary checkbox checkbox-sm shadow-inner"
                 checked={!!orderState.sent}
                 readOnly
               />
@@ -166,7 +166,7 @@ export function OrdersItem({
               <PackageOpen className="size-5" />
               <input
                 type="checkbox"
-                className="checkbox-primary checkbox checkbox-sm"
+                className="checkbox-primary checkbox checkbox-sm shadow-inner"
                 checked={!!orderState.delivered}
                 readOnly
               />

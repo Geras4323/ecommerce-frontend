@@ -93,7 +93,7 @@ export function LoginForm({
             type="text"
             className={cn(
               !!errors.email ? "border-error" : "border-secondary/30",
-              "h-12 rounded-md border bg-base-100 px-4 text-base shadow-inner transition-colors focus:outline-none"
+              "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
             )}
           />
           <div
@@ -115,7 +115,7 @@ export function LoginForm({
             type="password"
             className={cn(
               !!errors.password ? "border-error" : "border-secondary/30",
-              "h-12 rounded-md border bg-base-100 px-4 text-base shadow-inner transition-colors focus:outline-none"
+              "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
             )}
           />
           <div

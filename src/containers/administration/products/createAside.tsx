@@ -193,7 +193,7 @@ export function ProductCreateAside() {
     <Sheet open={create_isOpen}>
       <SheetContent
         side="left"
-        className="flex h-full w-1/3 min-w-screen-sm flex-col border-r border-r-secondary/20 bg-base-100"
+        className="flex h-full w-full flex-col border-r border-r-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
       >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-end gap-4">
@@ -261,7 +261,7 @@ export function ProductCreateAside() {
 
             {create_isOpen && (
               <>
-                <div className="flex flex-col gap-1">
+                <div className="col-span-2 flex flex-col gap-1 xs:col-span-1">
                   <label htmlFor="category" className="text-lg text-secondary">
                     <MandatoryMark /> Categoría:
                   </label>
@@ -292,7 +292,7 @@ export function ProductCreateAside() {
                   <ErrorSpan message={errors.categoryID?.message} />
                 </div>
 
-                <div className="flex h-full flex-col justify-start gap-1">
+                <div className="col-span-2 flex h-full flex-col justify-start gap-1 xs:col-span-1">
                   <label htmlFor="supplier" className="text-lg text-secondary">
                     Proveedor:
                   </label>
@@ -339,7 +339,7 @@ export function ProductCreateAside() {
                 id="description"
                 placeholder="Nueva descripción"
                 {...register("description")}
-                className="input input-bordered h-48 max-h-96 min-h-16 w-full py-4"
+                className="input input-bordered h-32 max-h-96 min-h-16 w-full py-4 xs:h-48"
               />
               <ErrorSpan message={errors.description?.message} />
             </div>

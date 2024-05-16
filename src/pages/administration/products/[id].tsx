@@ -4,7 +4,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { DollarSign, Trash2, Upload, X } from "lucide-react";
+import { ChevronLeft, DollarSign, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
@@ -31,6 +31,7 @@ import { GeneralLayout } from "@/layouts/GeneralLayout";
 import { useRouter } from "next/router";
 import imageCompression from "browser-image-compression";
 import _ from "lodash";
+import Link from "next/link";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -283,6 +284,12 @@ export default function ProductData() {
           >
             <div className="flex h-fit w-full items-center justify-between gap-4">
               <div className="flex w-full items-center gap-4 truncate">
+                <Link
+                  href="/administration/products"
+                  className="btn btn-ghost btn-sm"
+                >
+                  <ChevronLeft className="size-5" />
+                </Link>
                 <span className="truncate text-2xl">
                   {productQuery.data.name}
                 </span>
