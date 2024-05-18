@@ -108,12 +108,12 @@ function Products() {
 
   return (
     <AdministrationLayout active="Productos">
-      <div className="flex h-full w-full">
+      <div className="flex w-full">
         {/* CREATE */}
         <ProductCreateAside />
 
         {/* MAIN TABLE */}
-        <section className="relative h-full w-full flex-col p-4 transition-all duration-300">
+        <section className="relative w-full flex-col p-4 transition-all duration-300">
           <div className="mx-auto mb-4 flex min-h-12 w-full max-w-screen-md flex-col items-end justify-center gap-4 border-b border-secondary/30 pb-4 xl:w-full xl:max-w-screen-2xl">
             <div className="flex items-center gap-4">
               <Dropdown>
@@ -150,7 +150,7 @@ function Products() {
                       )
                     }
                   >
-                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 focus:outline-none">
+                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
                       <span
                         className={cn(
                           "flex items-center gap-3",
@@ -189,7 +189,7 @@ function Products() {
                       )
                     }
                   >
-                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 focus:outline-none">
+                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
                       <span
                         className={cn(
                           "flex items-center gap-3",
@@ -301,6 +301,9 @@ function Item({
     <Link
       href={`/administration/products/${product.id}`}
       className="flex h-fit w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-secondary/10 shadow-md hover:bg-secondary/15 hover:shadow-lg sm:flex-row 2xl:h-44 2xl:min-h-44"
+      style={{
+        boxShadow: "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
+      }}
     >
       <div className="sm:w-2/5">
         <Image

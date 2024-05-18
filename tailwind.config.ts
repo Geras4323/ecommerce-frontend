@@ -40,7 +40,10 @@ const config: Config = {
       },
       boxShadow: {
         button: "0 3px 3px rgba(0,0,0, .1), 0 5px 10px rgba(0,0,0, .05)",
-        inner: "inset 0 2px 4px 0 rgb(0 0 0 / 0.15)",
+        inner: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)",
+        "inner-sm": "inset 0 2px 4px 0 rgb(0 0 0 / 0.10)",
+        "inner-md": "inset 0 2px 4px 0 rgb(0 0 0 / 0.15)",
+        "inner-lg": "inset 0 2px 4px 0 rgb(0 0 0 / 0.20)",
       },
     },
   },

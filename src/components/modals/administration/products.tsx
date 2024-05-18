@@ -1,7 +1,6 @@
 import { LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import { type Product } from "@/functions/products";
-// import { useProductStore } from "@/hooks/states/products";
 import { vars } from "@/utils/vars";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -11,17 +10,12 @@ export function DiscardProductChangesModal({
   isOpen,
   onClose: onCloseProp,
   onConfirm: onConfirmProp,
-}: // deselectProduct,
-{
+}: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  // deselectProduct?: boolean;
 }) {
-  // const { product_remove } = useProductStore();
-
   function onClose() {
-    // if (deselectProduct) product_remove();
     onCloseProp();
   }
 

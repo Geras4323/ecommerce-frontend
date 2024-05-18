@@ -18,7 +18,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { DollarSign, PanelLeftClose, Upload } from "lucide-react";
+import { PanelLeftClose, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
@@ -197,24 +197,25 @@ export function ProductCreateAside() {
       >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-end gap-4">
-          <span className="whitespace-nowrap text-2xl">
+          <span className="whitespace-nowrap text-xl md:text-2xl">
             Crear nuevo producto
           </span>
           <button
             onClick={handleCancel}
-            className="btn btn-ghost btn-outline border border-secondary/30"
+            className="btn btn-ghost btn-outline border border-secondary/30 shadow-sm"
           >
             <PanelLeftClose className="size-6" />
           </button>
         </div>
 
+        {/* DATA */}
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex h-full flex-col items-end gap-4 overflow-y-auto px-2"
         >
           <div className="grid w-full grid-cols-2 items-center gap-4">
             <div className="col-span-2 flex flex-col gap-1">
-              <label htmlFor="name" className="text-lg text-secondary">
+              <label htmlFor="name" className="text-md text-primary sm:text-lg">
                 <MandatoryMark /> Nombre:
               </label>
               <input
@@ -222,31 +223,32 @@ export function ProductCreateAside() {
                 type="text"
                 placeholder="Nuevo nombre"
                 {...register("name")}
-                className="input input-bordered w-full"
+                className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
               />
               <ErrorSpan message={errors.name?.message} />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor="price" className="text-lg text-secondary">
+              <label
+                htmlFor="price"
+                className="text-md text-primary sm:text-lg"
+              >
                 <MandatoryMark /> Precio:
               </label>
-              <div className="input flex items-center justify-start border border-secondary/30 p-0">
-                <div className="flex h-full w-12 items-center justify-center">
-                  <DollarSign className="size-6 text-secondary" />
-                </div>
+              <div className="flex h-12 items-center justify-start gap-3 rounded-lg border border-[var(--fallback-bc,oklch(var(--bc)/0.2))] px-4 shadow-inner-sm outline-none">
+                <span className="text-xl text-secondary">$</span>
                 <input
                   type="text"
                   placeholder="..."
                   {...register("price")}
-                  className="h-full w-full bg-transparent pr-3"
+                  className="h-full w-full bg-transparent pr-3 focus:outline-none"
                 />
               </div>
               <ErrorSpan message={errors.price?.message} />
             </div>
 
             <div className="flex h-full flex-col justify-start gap-1">
-              <label htmlFor="code" className="text-lg text-secondary">
+              <label htmlFor="code" className="text-md text-primary sm:text-lg">
                 Código:
               </label>
               <input
@@ -254,7 +256,7 @@ export function ProductCreateAside() {
                 type="text"
                 placeholder="Nuevo código"
                 {...register("code")}
-                className="input input-bordered w-full"
+                className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
               />
               <ErrorSpan message={errors.code?.message} />
             </div>
@@ -262,7 +264,10 @@ export function ProductCreateAside() {
             {create_isOpen && (
               <>
                 <div className="col-span-2 flex flex-col gap-1 xs:col-span-1">
-                  <label htmlFor="category" className="text-lg text-secondary">
+                  <label
+                    htmlFor="category"
+                    className="text-md text-primary sm:text-lg"
+                  >
                     <MandatoryMark /> Categoría:
                   </label>
                   <Controller
@@ -273,7 +278,7 @@ export function ProductCreateAside() {
                         // defaultValue="no_category"
                         onValueChange={(v) => field.onChange(v)}
                       >
-                        <SelectTrigger className="input input-bordered w-full border outline-none">
+                        <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                           <SelectValue placeholder="Seleccionar categoría" />
                         </SelectTrigger>
                         <SelectContent>
@@ -293,7 +298,10 @@ export function ProductCreateAside() {
                 </div>
 
                 <div className="col-span-2 flex h-full flex-col justify-start gap-1 xs:col-span-1">
-                  <label htmlFor="supplier" className="text-lg text-secondary">
+                  <label
+                    htmlFor="supplier"
+                    className="text-md text-primary sm:text-lg"
+                  >
                     Proveedor:
                   </label>
                   <Controller
@@ -304,7 +312,7 @@ export function ProductCreateAside() {
                         defaultValue="no_supplier"
                         onValueChange={(v) => field.onChange(v)}
                       >
-                        <SelectTrigger className="input input-bordered w-full border outline-none">
+                        <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                           {/* <SelectValue placeholder="Seleccionar proveedor" /> */}
                           <SelectValue />
                         </SelectTrigger>
@@ -332,30 +340,34 @@ export function ProductCreateAside() {
             )}
 
             <div className="col-span-2 flex flex-col gap-1">
-              <label htmlFor="description" className="text-lg text-secondary">
+              <label
+                htmlFor="description"
+                className="text-md text-primary sm:text-lg"
+              >
                 <MandatoryMark /> Descripción:
               </label>
               <textarea
                 id="description"
                 placeholder="Nueva descripción"
                 {...register("description")}
-                className="input input-bordered h-32 max-h-96 min-h-16 w-full py-4 xs:h-48"
+                className="input input-bordered h-32 max-h-96 min-h-16 w-full py-4 shadow-inner-sm focus:shadow-inner-sm focus:outline-none xs:h-48"
               />
               <ErrorSpan message={errors.description?.message} />
             </div>
           </div>
 
+          {/* IMAGES */}
           <div className="col-span-2 flex w-full flex-col gap-1">
-            <label className="text-lg text-secondary">Imágenes:</label>
+            <label className="text-md text-primary sm:text-lg">Imágenes:</label>
             <section className="flex min-w-fit flex-wrap gap-4">
-              <div className="flex size-24 min-w-24 items-center justify-center rounded-xl border border-secondary/50">
+              <div className="flex size-24 min-w-24 items-center justify-center rounded-xl border border-secondary/50 bg-base-300/50 text-primary/80 hover:text-primary hover:shadow-md">
                 <label
                   htmlFor="new_image"
                   className={cn(
                     "z-10 flex size-full cursor-pointer items-center justify-center"
                   )}
                 >
-                  <Upload className="size-8 animate-bounce text-white" />
+                  <Upload className="size-8 animate-bounce" />
                 </label>
                 <input
                   id="new_image"
@@ -429,28 +441,4 @@ export function ProductCreateAside() {
       </SheetContent>
     </Sheet>
   );
-}
-
-{
-  /* {image && (
-        <button
-          type="button"
-          onClick={() => setImage(undefined)}
-          className="btn btn-error btn-sm absolute bottom-2 right-2 z-40 size-10 p-0 text-white opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 className="size-5" />
-        </button>
-      )} */
-}
-
-{
-  /* {image && (
-        <Image
-          alt="preview"
-          width={200}
-          height={200}
-          src={URL.createObjectURL(image)}
-          className="absolute size-full rounded-md"
-        />
-      )} */
 }
