@@ -12,7 +12,7 @@ export function ErrorSpan({
     <div
       className={cn(
         !!className && className,
-        "flex items-center gap-1 text-base text-error"
+        "flex items-center gap-2 text-base text-error"
       )}
     >
       <AlertCircle className="mb-0.5 size-4 min-w-4" />

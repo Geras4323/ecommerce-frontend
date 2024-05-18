@@ -146,17 +146,19 @@ export function CategoryDataAside() {
 
   return (
     <Sheet open={!!selected_category}>
-      <SheetContent className="w-1/3 border-l border-l-secondary/20 bg-base-100">
+      <SheetContent className="w-full border-l border-l-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm">
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-between gap-4">
           <div className="flex w-full items-center gap-4 truncate">
             <button
               onClick={handleCancel}
-              className="btn btn-outline border border-secondary/30"
+              className="btn btn-outline border border-secondary/30 shadow-sm"
             >
               <PanelRightClose className="size-6" />
             </button>
-            <span className="truncate text-2xl">{selected_category?.name}</span>
+            <span className="truncate whitespace-nowrap text-xl md:text-2xl">
+              {selected_category?.name}
+            </span>
           </div>
           <button
             onClick={() => setIsDeleteCategoryModalOpen(true)}
@@ -174,23 +176,13 @@ export function CategoryDataAside() {
           className="flex flex-col items-end gap-4"
         >
           <div className="flex w-full items-center gap-4">
-            {/* FIELDS */}
+            {/* DATA */}
             <section className="flex w-full flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label htmlFor="code" className="text-lg text-secondary">
-                  Código:
-                </label>
-                <input
-                  id="code"
-                  type="text"
-                  {...register("code")}
-                  defaultValue={selected_category?.code}
-                  className="input input-bordered w-full focus:outline-none"
-                />
-                <ErrorSpan message={errors.code?.message} />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label htmlFor="name" className="text-lg text-secondary">
+                <label
+                  htmlFor="name"
+                  className="text-md text-primary sm:text-lg"
+                >
                   <MandatoryMark /> Nombre:
                 </label>
                 <input
@@ -198,15 +190,31 @@ export function CategoryDataAside() {
                   type="text"
                   {...register("name")}
                   defaultValue={selected_category?.name}
-                  className="input input-bordered w-full focus:outline-none"
+                  className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
                 />
                 <ErrorSpan message={errors.name?.message} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="code"
+                  className="text-md text-primary sm:text-lg"
+                >
+                  Código:
+                </label>
+                <input
+                  id="code"
+                  type="text"
+                  {...register("code")}
+                  defaultValue={selected_category?.code}
+                  className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
+                />
+                <ErrorSpan message={errors.code?.message} />
               </div>
             </section>
 
             {/* IMAGE */}
             <section className="relative min-w-fit">
-              <div className="flex size-56 items-center justify-center rounded-xl border border-secondary/50">
+              <div className="flex size-40 items-center justify-center rounded-xl border border-secondary/50 hover:shadow-md sm:size-56">
                 <div className="group relative size-11/12 overflow-hidden rounded-md">
                   {selected_category?.image && (
                     <button
@@ -219,9 +227,9 @@ export function CategoryDataAside() {
                   )}
                   <label
                     htmlFor="update_image"
-                    className="absolute left-0 top-0 z-30 flex size-full cursor-pointer items-center justify-center opacity-0 backdrop-blur-sm transition-opacity group-hover:bg-neutral/50 group-hover:opacity-100"
+                    className="absolute left-0 top-0 z-30 flex size-full cursor-pointer items-center justify-center text-primary/80 opacity-0 backdrop-blur-sm transition-opacity hover:text-primary group-hover:bg-neutral/50 group-hover:opacity-100"
                   >
-                    <Upload className="size-8 animate-bounce text-white" />
+                    <Upload className="size-8 animate-bounce" />
                   </label>
                   <input
                     id="update_image"
