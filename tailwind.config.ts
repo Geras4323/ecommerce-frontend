@@ -12,6 +12,8 @@ const config: Config = {
         144: "36rem",
       },
       minWidth: {
+        "screen-xxs": "480px",
+        "screen-xs": "560px",
         "screen-sm": "640px",
         "screen-lg": "1024px",
       },

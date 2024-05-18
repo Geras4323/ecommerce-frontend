@@ -4,7 +4,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { AlertCircle, PanelRightClose } from "lucide-react";
+import { AlertCircle, PanelLeftClose } from "lucide-react";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -100,17 +100,22 @@ export function SupplierDataAside() {
 
   return (
     <Sheet open={!!selected_supplier}>
-      <SheetContent className="w-1/3 border-l border-l-secondary/20 bg-base-100">
+      <SheetContent
+        side="left"
+        className="w-full border-r border-r-secondary/20 bg-base-100 xs:w-1/3 xs:min-w-screen-xxs"
+      >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-between gap-4">
           <div className="flex w-full items-center gap-4 truncate">
             <button
               onClick={handleCancel}
-              className="btn btn-outline border border-secondary/30"
+              className="btn btn-outline border border-secondary/30 shadow-sm"
             >
-              <PanelRightClose className="size-6" />
+              <PanelLeftClose className="size-6" />
             </button>
-            <span className="truncate text-2xl">{selected_supplier?.name}</span>
+            <span className="truncate whitespace-nowrap text-xl md:text-2xl">
+              {selected_supplier?.name}
+            </span>
           </div>
           <button
             onClick={() => setIsDeleteCategoryModalOpen(true)}
@@ -131,7 +136,7 @@ export function SupplierDataAside() {
             {/* FIELDS */}
             <section className="flex w-full flex-col gap-4">
               {/* <div className="flex flex-col gap-1">
-              <label htmlFor="code" className="text-lg text-secondary">
+              <label htmlFor="code" className="text-md text-primary sm:text-lg">
                 Código:
               </label>
               <input
@@ -144,7 +149,10 @@ export function SupplierDataAside() {
               <ErrorSpan message={errors.code?.message} />
             </div> */}
               <div className="flex flex-col gap-1">
-                <label htmlFor="name" className="text-lg text-secondary">
+                <label
+                  htmlFor="name"
+                  className="text-md text-primary sm:text-lg"
+                >
                   <MandatoryMark /> Nombre:
                 </label>
                 <input
@@ -152,7 +160,7 @@ export function SupplierDataAside() {
                   type="text"
                   {...register("name")}
                   defaultValue={selected_supplier?.name}
-                  className="input input-bordered w-full focus:outline-none"
+                  className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
                 />
                 <ErrorSpan message={errors.name?.message} />
               </div>

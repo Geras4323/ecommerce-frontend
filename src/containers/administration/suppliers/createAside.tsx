@@ -8,7 +8,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { PanelLeftClose } from "lucide-react";
+import { PanelRightClose } from "lucide-react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -89,18 +89,18 @@ export function SupplierCreateAside() {
   return (
     <Sheet open={create_isOpen}>
       <SheetContent
-        side="left"
-        className="w-1/3 border-r border-r-secondary/20 bg-base-100"
+        side="right"
+        className="w-full border-l border-l-secondary/20 bg-base-100 xs:w-1/3 xs:min-w-screen-xxs"
       >
         <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
-          <span className="whitespace-nowrap text-2xl">
+          <span className="whitespace-nowrap text-xl md:text-2xl">
             Crear nuevo proveedor
           </span>
           <button
             onClick={handleCancel}
-            className="btn btn-ghost btn-outline border border-secondary/30"
+            className="btn btn-ghost btn-outline border border-secondary/30 shadow-sm"
           >
-            <PanelLeftClose className="size-6" />
+            <PanelRightClose className="size-6" />
           </button>
         </div>
 
@@ -124,7 +124,10 @@ export function SupplierCreateAside() {
               <ErrorSpan message={errors.code?.message} />
             </div> */}
               <div className="flex flex-col gap-1">
-                <label htmlFor="name" className="text-lg text-secondary">
+                <label
+                  htmlFor="name"
+                  className="text-md text-primary sm:text-lg"
+                >
                   <MandatoryMark /> Nombre:
                 </label>
                 <input
@@ -132,7 +135,7 @@ export function SupplierCreateAside() {
                   type="text"
                   placeholder="Nuevo nombre"
                   {...register("name")}
-                  className="input input-bordered w-full focus:outline-none"
+                  className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
                 />
                 <ErrorSpan message={errors.name?.message} />
               </div>
