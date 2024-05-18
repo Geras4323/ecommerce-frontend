@@ -128,8 +128,8 @@ export function CategoryCreateAside() {
   return (
     <Sheet open={create_isOpen}>
       <SheetContent
-        side="left"
-        className="w-full border-r border-r-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
+        side="right"
+        className="w-full border-l border-l-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
       >
         <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
           <span className="whitespace-nowrap text-xl md:text-2xl">

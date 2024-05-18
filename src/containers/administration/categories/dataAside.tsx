@@ -146,7 +146,10 @@ export function CategoryDataAside() {
 
   return (
     <Sheet open={!!selected_category}>
-      <SheetContent className="w-full border-l border-l-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm">
+      <SheetContent
+        side="left"
+        className="w-full border-r border-r-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
+      >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-between gap-4">
           <div className="flex w-full items-center gap-4 truncate">

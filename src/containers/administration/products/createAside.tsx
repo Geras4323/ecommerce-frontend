@@ -192,8 +192,8 @@ export function ProductCreateAside() {
   return (
     <Sheet open={create_isOpen}>
       <SheetContent
-        side="left"
-        className="flex h-full w-full flex-col border-r border-r-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
+        side="right"
+        className="flex h-full w-full flex-col border-l border-l-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
       >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-end gap-4">
