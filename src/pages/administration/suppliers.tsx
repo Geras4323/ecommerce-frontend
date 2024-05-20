@@ -70,7 +70,7 @@ function Suppliers() {
 
         {/* MAIN TABLE */}
         <section className="relative flex h-full w-full flex-col p-4 transition-all duration-300">
-          <div className="mb-4 flex min-h-12 w-full items-center justify-end gap-4 border-b border-secondary/30 pb-4">
+          <div className="mb-4 flex h-fit w-full items-center justify-end gap-4 border-b border-secondary/30 pb-4">
             <div className="input input-bordered flex items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
               <Search className="size-5 text-secondary" />
               <input

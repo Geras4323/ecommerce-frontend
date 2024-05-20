@@ -2,7 +2,6 @@ import { AdministrationLayout } from "@/components/layouts/administration";
 import { getCategories } from "@/functions/categories";
 import { withAuth } from "@/functions/session";
 import type { ServerError } from "@/types/types";
-import { cn } from "@/utils/lib";
 import { useQuery } from "@tanstack/react-query";
 import { Barcode, Search } from "lucide-react";
 import Image from "next/image";
@@ -34,13 +33,8 @@ function Categories() {
         <CategoryCreateAside />
 
         {/* MAIN TABLE */}
-        <section
-          className={cn(
-            // !!selected_category || create_isOpen ? "w-1/2 2xl:w-2/3" : "w-full",
-            "relative mx-auto flex h-full w-full max-w-screen-2xl flex-col p-4 transition-all duration-300"
-          )}
-        >
-          <div className="mb-4 flex min-h-12 w-full items-center justify-end gap-4 border-b border-secondary/30 pb-4">
+        <section className="relative mx-auto flex h-full w-full max-w-screen-2xl flex-col p-4 transition-all duration-300">
+          <div className="mb-4 flex h-fit w-full items-center justify-end gap-4 border-b border-secondary/30 pb-4">
             <div className="input input-bordered flex items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
               <Search className="size-5 text-secondary" />
               <input

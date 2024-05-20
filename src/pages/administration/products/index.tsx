@@ -114,7 +114,7 @@ function Products() {
 
         {/* MAIN TABLE */}
         <section className="relative w-full flex-col p-4 transition-all duration-300">
-          <div className="mx-auto mb-4 flex min-h-12 w-full max-w-screen-md flex-col items-end justify-center gap-4 border-b border-secondary/30 pb-4 xl:w-full xl:max-w-screen-2xl">
+          <div className="mx-auto mb-4 flex h-fit w-full max-w-screen-md flex-col items-end justify-center gap-4 border-b border-secondary/30 pb-4 xl:w-full xl:max-w-screen-2xl">
             <div className="flex items-center gap-4">
               <Dropdown>
                 <DropdownTrigger className="btn btn-outline btn-primary focus:outline-none">
