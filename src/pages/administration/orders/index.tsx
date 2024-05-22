@@ -6,7 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Undo2, WalletCards } from "lucide-react";
 import { useEffect } from "react";
-import { LoadingOrdersItem, OrdersItem } from "@/components/orders";
+import {
+  OrdersItemSkeleton,
+  OrdersItem,
+} from "@/components/administration/orders";
 
 function Orders() {
   const ordersQuery = useQuery<
@@ -34,7 +37,7 @@ function Orders() {
         <section className="flex h-full w-full flex-col gap-4 overflow-y-auto">
           {ordersQuery.isPending ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <LoadingOrdersItem key={i} />
+              <OrdersItemSkeleton key={i} fromAdmin />
             ))
           ) : ordersQuery.isError ? (
             <div className="flex h-16 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">

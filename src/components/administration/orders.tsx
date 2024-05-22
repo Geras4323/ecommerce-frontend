@@ -21,9 +21,117 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import NoImage from "../../public/no_image.png";
+import NoImage from "../../../public/no_image.png";
 import { useEffect, useState } from "react";
 import { type OrderStates } from "src/pages/administration/orders/[code]";
+
+export function OrdersItemSkeleton({
+  fromAdmin = false,
+}: {
+  fromAdmin?: boolean;
+}) {
+  return (
+    <div className="flex w-full flex-col items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 p-4">
+      <section className="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-6">
+        <article className="flex h-full w-full flex-col gap-4 md:w-1/2">
+          <div className="flex items-center gap-2">
+            <Hash className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">Pedido Nro</span>
+            <div className="mb-1 h-6 w-16 animate-pulse rounded-md bg-secondary/20" />
+          </div>
+
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <CalendarDaysIcon className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">Hecho el</span>
+            <div className="mb-1 h-6 w-48 animate-pulse rounded-md bg-secondary/20" />
+          </div>
+        </article>
+
+        <article className="flex h-full w-full flex-col gap-4 md:w-1/2">
+          <div className="flex items-center gap-2">
+            <DollarSign className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">Monto:</span>
+            <div className="mb-1 h-6 w-24 animate-pulse rounded-md bg-secondary/20" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Package className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">Contiene</span>
+            <div className="mb-1 h-6 w-32 animate-pulse rounded-md bg-secondary/20" />
+          </div>
+        </article>
+      </section>
+
+      {fromAdmin && (
+        <section className="flex w-full flex-col justify-between gap-4 border-y border-y-secondary/20 py-4">
+          <div className="flex w-full items-center gap-2">
+            <User2 className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">A nombre de</span>
+            <div className="mb-1 h-6 w-36 animate-pulse rounded-md bg-secondary/20" />
+          </div>
+
+          <div className="flex w-full items-center gap-2">
+            <Mail className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">Email:</span>
+            <div className="mb-1 h-6 w-56 animate-pulse rounded-md bg-secondary/20" />
+          </div>
+
+          <div className="flex w-full items-center gap-2">
+            <Phone className="size-5 min-w-5 text-secondary" />
+            <span className="text-lg text-secondary">Teléfono: </span>
+            <div className="mb-1 h-6 w-36 animate-pulse rounded-md bg-secondary/20" />
+          </div>
+        </section>
+      )}
+
+      <div
+        className={cn(
+          !!fromAdmin ? "justify-between" : "justify-end",
+          "flex w-full"
+        )}
+      >
+        {!!fromAdmin && (
+          <div className="flex gap-3">
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <ClipboardCheck className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-secondary checkbox checkbox-sm pointer-events-none animate-pulse border-none bg-secondary/20 shadow-inner-sm"
+                checked={false}
+              />
+            </div>
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <CreditCard className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-secondary checkbox checkbox-sm pointer-events-none animate-pulse border-none bg-secondary/20 shadow-inner-sm"
+                checked={false}
+              />
+            </div>
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <Truck className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-secondary checkbox checkbox-sm pointer-events-none animate-pulse border-none bg-secondary/20 shadow-inner-sm"
+                checked={false}
+              />
+            </div>
+            <div className="pointer-events-none flex w-fit flex-col items-center gap-2">
+              <PackageOpen className="size-5" />
+              <input
+                type="checkbox"
+                className="checkbox-secondary checkbox checkbox-sm pointer-events-none animate-pulse border-none bg-secondary/20 shadow-inner-sm"
+                checked={false}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="h-8 w-48 animate-pulse self-end rounded-md bg-secondary/20" />
+      </div>
+    </div>
+  );
+}
 
 export function OrdersItem({
   item,
@@ -117,7 +225,7 @@ export function OrdersItem({
             <span className="text-lg text-primary">{item.user.email}</span>
           </div>
 
-          <div className="flex w-1/2 items-center gap-2">
+          <div className="flex w-full items-center gap-2">
             <Phone className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Teléfono: </span>
             <span className="text-lg text-primary">
@@ -185,42 +293,6 @@ export function OrdersItem({
           <ClipboardCheck className="size-5" /> Ver detalle
         </Link>
       </div>
-    </div>
-  );
-}
-
-export function LoadingOrdersItem() {
-  return (
-    <div className="flex w-full items-center justify-between gap-6 rounded-xl border-2 border-secondary/20 p-4">
-      <article className="flex h-full w-1/2 flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <Hash className="size-5 text-secondary" />
-          <span className="text-lg text-secondary">Pedido Nro</span>
-          <div className="h-7 w-16 animate-pulse rounded-lg bg-secondary/30" />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <CalendarDaysIcon className="size-5 text-secondary" />
-          <span className="text-lg text-secondary">Iniciado el</span>
-          <div className="h-7 w-36 animate-pulse rounded-lg bg-secondary/30" />
-        </div>
-      </article>
-
-      <article className="flex h-full w-1/2 flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <DollarSign className="size-5 text-secondary" />
-          <span className="text-lg text-secondary">Monto:</span>
-          <div className="h-7 w-28 animate-pulse rounded-lg bg-secondary/30" />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Package className="size-5 text-secondary" />
-          <span className="text-lg text-secondary">Contiene</span>
-          <div className="h-7 w-28 animate-pulse rounded-lg bg-secondary/30" />
-        </div>
-
-        <div className="mt-2 h-8 w-48 animate-pulse self-end rounded-lg bg-secondary/30" />
-      </article>
     </div>
   );
 }

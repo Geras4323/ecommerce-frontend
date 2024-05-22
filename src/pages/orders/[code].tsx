@@ -20,7 +20,10 @@ import { z } from "zod";
 import { withAuth } from "@/functions/session";
 import type { ServerSuccess, ServerError } from "@/types/types";
 import { type Day, days } from "@/utils/miscellaneous";
-import { LoadingSingleOrderItem, SingleOrderItem } from "@/components/orders";
+import {
+  LoadingSingleOrderItem,
+  SingleOrderItem,
+} from "@/components/administration/orders";
 import { useState } from "react";
 import {
   Tooltip,
