@@ -7,6 +7,7 @@ const config: Config = {
   theme: {
     extend: {
       height: {
+        104: "26rem",
         120: "30rem",
         128: "32rem",
         144: "36rem",
@@ -14,6 +15,7 @@ const config: Config = {
       minWidth: {
         "screen-xxs": "480px",
         "screen-xs": "560px",
+        "screen-md": "768px",
         "screen-sm": "640px",
         "screen-lg": "1024px",
       },

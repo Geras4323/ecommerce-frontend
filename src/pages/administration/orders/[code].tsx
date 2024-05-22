@@ -1,8 +1,9 @@
 import { GeneralLayout } from "@/layouts/GeneralLayout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getProducts } from "@/functions/products";
+import { type Product, getProducts } from "@/functions/products";
 import {
   CalendarDaysIcon,
+  ChevronDown,
   ClipboardCheck,
   CreditCard,
   DollarSign,
@@ -15,12 +16,12 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
-import { getOrder } from "@/functions/orders";
+import { type OrderProduct, getOrder } from "@/functions/orders";
 import { z } from "zod";
 import { withAuth } from "@/functions/session";
 import { type ServerError } from "@/types/types";
 import { type Day, days } from "@/utils/miscellaneous";
-import { LoadingSingleOrderItem, SingleOrderItem } from "@/components/orders";
+import { LoadingSingleOrderItem } from "@/components/orders";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { vars } from "@/utils/vars";
@@ -29,9 +30,22 @@ import {
   PaymentVoucherSkeleton,
 } from "src/pages/orders/[code]";
 import { ErrorSpan } from "@/components/forms";
+import Image from "next/image";
+import { cn } from "@/utils/lib";
+import NoImage from "../../../../public/no_image.png";
+import { getCategories } from "@/functions/categories";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 
-type State = keyof States;
-export type States = {
+type OpenState = keyof OpenStates;
+export type OpenStates = {
+  general: boolean;
+  state: boolean;
+  payments: boolean;
+  products: boolean;
+};
+
+type OrderState = keyof OrderStates;
+export type OrderStates = {
   confirmed: number;
   payed: number;
   sent: number;
@@ -42,17 +56,33 @@ export default function Order() {
   const params = useParams();
   const queryClient = useQueryClient();
 
+  const mq = useMediaQueries();
+
   const codeID = z.string().catch("").parse(params?.code);
   const isValidCode = !isNaN(parseInt(codeID));
 
-  const [orderState, setOrderState] = useState<States>({
+  const [openState, setOpenState] = useState<OpenStates>({
+    general: false,
+    state: false,
+    payments: false,
+    products: false,
+  });
+
+  const [orderState, setOrderState] = useState<OrderStates>({
     confirmed: 0,
     payed: 0,
     sent: 0,
     delivered: 0,
   });
 
-  function alternateState(state: State) {
+  function alternateOpenState(state: OpenState) {
+    setOpenState((prev) => {
+      const newState = { ...prev, [state]: !!prev[state] ? false : true };
+      return newState;
+    });
+  }
+
+  function alternateOrderState(state: OrderState) {
     setOrderState((prev) => {
       const newState = { ...prev, [state]: prev[state] === 1 ? 0 : 1 };
 
@@ -66,6 +96,16 @@ export default function Order() {
   const productsQuery = useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
+
+  const categoriesQuery = useQuery<
+    Awaited<ReturnType<typeof getCategories>>,
+    ServerError
+  >({
+    queryKey: ["categories"],
+    queryFn: getCategories,
     refetchOnWindowFocus: true,
     retry: false,
   });
@@ -92,7 +132,7 @@ export default function Order() {
         dbStates.forEach((v, i) => {
           tempOrders[i]![1] = parseInt(v);
         });
-        return Object.fromEntries(tempOrders) as States;
+        return Object.fromEntries(tempOrders) as OrderStates;
       });
     }
   }, [orderQuery.isSuccess, orderQuery.data]);
@@ -108,25 +148,46 @@ export default function Order() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["order"] }),
   });
 
+  if (!mq) return;
+
   return (
     <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
-      <div className="mx-auto flex h-screen w-screen max-w-7xl flex-col gap-4 pb-24 pt-24">
+      <div className="mx-auto flex h-screen w-screen max-w-7xl flex-col gap-4 px-4 pb-24 pt-24">
         <div className="flex w-full items-center gap-4 border-b border-b-secondary/20 text-primary">
           <CreditCard className="size-6" />
           <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
         </div>
 
-        <section className="flex h-full w-full flex-row gap-4">
+        <section className="flex h-full w-full flex-col gap-4 lg:flex-row">
           {/* DETAILS */}
-          <article className="flex h-full w-1/3 flex-col gap-4">
+          <article className="mb-4 flex h-fit w-full flex-col gap-2 lg:h-full lg:w-1/3 lg:gap-4">
             {/* ORDER INFO */}
-            <span className="col-span-2 w-full text-lg underline underline-offset-4">
-              INFORMACIÓN GENERAL
-            </span>
+            <div
+              onClick={() => alternateOpenState("general")}
+              className="col-span-2 flex w-full items-center justify-between"
+            >
+              <span className="select-none text-lg underline underline-offset-4">
+                INFORMACIÓN GENERAL
+              </span>
+              <ChevronDown
+                className={cn(
+                  mq >= mqs.lg && "hidden",
+                  !!openState.general && "rotate-180",
+                  "size-6 transition-all"
+                )}
+              />
+            </div>
             {orderQuery.isError ? (
               <ErrorSpan message="Ocurrió un error al cargar el pedido" />
             ) : (
-              <>
+              <div
+                className={cn(
+                  !!openState.general || mq >= mqs.lg
+                    ? "h-72 border py-3"
+                    : "h-0 opacity-0",
+                  "flex flex-col gap-4 overflow-hidden rounded-lg border-secondary/20 bg-secondary/10 px-3 shadow-md transition-all ease-in-out"
+                )}
+              >
                 <div className="flex items-center gap-2">
                   <Hash className="size-5 text-secondary" />
                   <span className="text-lg text-secondary">Pedido Nro</span>
@@ -140,7 +201,7 @@ export default function Order() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <CalendarDaysIcon className="size-5 text-secondary" />
+                  <CalendarDaysIcon className="size-5 min-w-5 text-secondary" />
                   <span className="text-lg text-secondary">Iniciado el</span>
                   {orderQuery.isPending ? (
                     <div className="h-7 w-48 animate-pulse rounded-lg bg-secondary/30" />
@@ -164,7 +225,7 @@ export default function Order() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <DollarSign className="size-5 text-secondary" />
+                  <DollarSign className="size-5 min-w-5 text-secondary" />
                   <span className="text-lg text-secondary">
                     Total a abonar:
                   </span>
@@ -184,7 +245,7 @@ export default function Order() {
 
                 {/* USER INFO */}
                 <div className="flex items-center gap-2">
-                  <User2 className="size-5 text-secondary" />
+                  <User2 className="size-5 min-w-5 text-secondary" />
                   <span className="text-lg text-secondary">A nombre de</span>
                   {orderQuery.isPending ? (
                     <div className="h-7 w-36 animate-pulse rounded-lg bg-secondary/30" />
@@ -197,7 +258,7 @@ export default function Order() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Mail className="size-5 text-secondary" />
+                  <Mail className="size-5 min-w-5 text-secondary" />
                   <span className="text-lg text-secondary">Email:</span>
                   {orderQuery.isPending ? (
                     <div className="h-7 w-64 animate-pulse rounded-lg bg-secondary/30" />
@@ -209,7 +270,7 @@ export default function Order() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Phone className="size-5 text-secondary" />
+                  <Phone className="size-5 min-w-5 text-secondary" />
                   <span className="text-lg text-secondary">Teléfono: </span>
                   {orderQuery.isPending ? (
                     <div className="h-7 w-32 animate-pulse rounded-lg bg-secondary/30" />
@@ -219,18 +280,176 @@ export default function Order() {
                     </span>
                   )}
                 </div>
-              </>
+              </div>
             )}
           </article>
 
-          <hr className="h-full w-px border-none bg-secondary/20" />
+          <hr className="hidden h-full w-px border-none bg-secondary/20 lg:block" />
+
+          {/* STATE */}
+          <article className="mb-4 flex h-fit w-full flex-col items-center gap-2 lg:h-full lg:w-1/3 lg:gap-4">
+            <section className="mb-4 flex w-full flex-col items-center gap-2 lg:mb-0 lg:gap-4">
+              <div
+                onClick={() => alternateOpenState("state")}
+                className="flex w-full select-none items-center justify-between"
+              >
+                <span className="col-span-2 w-full text-lg underline underline-offset-4">
+                  ETAPAS DEL PEDIDO
+                </span>
+                <ChevronDown
+                  className={cn(
+                    mq >= mqs.lg && "hidden",
+                    !!openState.state && "rotate-180",
+                    "size-6 transition-all"
+                  )}
+                />
+              </div>
+              <div
+                className={cn(
+                  !!openState.state || mq >= mqs.lg
+                    ? "h-28 border py-3"
+                    : "h-0 opacity-0",
+                  "grid select-none grid-cols-2 gap-x-10 gap-y-5 overflow-hidden rounded-lg border-secondary/20 bg-secondary/10 px-4 shadow-md transition-all"
+                )}
+              >
+                <div
+                  className="flex w-fit cursor-pointer items-center gap-2"
+                  onClick={() => alternateOrderState("confirmed")}
+                >
+                  <input
+                    type="checkbox"
+                    className="checkbox-primary checkbox"
+                    checked={!!orderState.confirmed}
+                    readOnly
+                  />
+                  <span>Confirmado</span>
+                  <ClipboardCheck className="size-5" />
+                </div>
+                <div
+                  className="flex w-fit cursor-pointer items-center gap-2"
+                  onClick={() => alternateOrderState("payed")}
+                >
+                  <input
+                    type="checkbox"
+                    className="checkbox-primary checkbox"
+                    checked={!!orderState.payed}
+                    readOnly
+                  />
+                  <span>Pagado</span>
+                  <CreditCard className="size-5" />
+                </div>
+                <div
+                  className="flex w-fit cursor-pointer items-center gap-2"
+                  onClick={() => alternateOrderState("sent")}
+                >
+                  <input
+                    type="checkbox"
+                    className="checkbox-primary checkbox"
+                    checked={!!orderState.sent}
+                    readOnly
+                  />
+                  <span>Enviado</span>
+                  <Truck className="size-5" />
+                </div>
+                <div
+                  className="flex w-fit cursor-pointer items-center gap-2"
+                  onClick={() => alternateOrderState("delivered")}
+                >
+                  <input
+                    type="checkbox"
+                    className="checkbox-primary checkbox"
+                    checked={!!orderState.delivered}
+                    readOnly
+                  />
+                  <span>Entregado</span>
+                  <PackageOpen className="size-5" />
+                </div>
+              </div>
+            </section>
+
+            <hr className="hidden h-px w-full border-none bg-secondary/20 lg:block" />
+
+            <section className="flex w-full flex-col gap-2 overflow-y-auto overflow-x-hidden lg:gap-4">
+              <div
+                onClick={() => alternateOpenState("payments")}
+                className="flex w-full select-none items-center justify-between"
+              >
+                <span className="text-lg underline underline-offset-4">
+                  COMPROBANTES ADJUNTOS
+                </span>
+                <ChevronDown
+                  className={cn(
+                    mq >= mqs.lg && "hidden",
+                    !!openState.payments && "rotate-180",
+                    "size-6 transition-all"
+                  )}
+                />
+              </div>
+              <div
+                className={cn(
+                  !!openState.payments || mq >= mqs.lg
+                    ? "h-32"
+                    : "h-0 opacity-0",
+                  "overflow-y-auto transition-all"
+                )}
+              >
+                {orderQuery.data?.payments.length === 0 ? (
+                  <p className="mt-1 w-full text-center text-secondary">
+                    No hay comprobantes de pago adjuntos
+                  </p>
+                ) : (
+                  <div className="flex h-full flex-col gap-2 overflow-y-auto">
+                    {orderQuery.isPending ? (
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <PaymentVoucherSkeleton key={i} />
+                      ))
+                    ) : orderQuery.isError ? (
+                      <ErrorSpan
+                        className="w-fit self-center"
+                        message="Ocurrió un error al cargar el pedido"
+                      />
+                    ) : (
+                      orderQuery.data.payments.map((payment, i) => (
+                        <PaymentVoucher
+                          key={payment.id}
+                          payment={payment}
+                          number={i}
+                        />
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+          </article>
+
+          <hr className="hidden h-full w-px border-none bg-secondary/20 lg:block" />
 
           {/* PRODUCTS */}
-          <article className="flex h-full w-1/3 flex-col gap-4">
-            <span className="text-lg underline underline-offset-4">
-              PRODUCTOS ENCARGADOS
-            </span>
-            <section className="flex h-full w-full flex-col gap-3 overflow-y-auto">
+          <article className="mb-4 flex h-fit w-full flex-col gap-2 lg:h-full lg:max-h-none lg:w-1/3 lg:gap-4">
+            <div
+              onClick={() => alternateOpenState("products")}
+              className="flex select-none items-center justify-between"
+            >
+              <span className="text-lg underline underline-offset-4">
+                PRODUCTOS ENCARGADOS
+              </span>
+              <ChevronDown
+                className={cn(
+                  mq >= mqs.lg && "hidden",
+                  !!openState.products && "rotate-180",
+                  "size-6 transition-all"
+                )}
+              />
+            </div>
+            <section
+              className={cn(
+                !!openState.products || mq >= mqs.lg
+                  ? "h-120"
+                  : "h-0 opacity-0",
+                "flex w-full flex-col gap-3 overflow-y-auto pr-1 transition-all lg:h-full"
+              )}
+            >
               {productsQuery.isPending || orderQuery.isPending ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <LoadingSingleOrderItem key={i} />
@@ -247,114 +466,18 @@ export default function Order() {
                   );
                   if (product)
                     return (
-                      <SingleOrderItem
+                      <OrderedProduct
                         key={item.id}
                         item={item}
                         product={product}
-                        showDescription={false}
+                        category={
+                          categoriesQuery.data?.find(
+                            (category) => category.id === product.categoryID
+                          )?.name
+                        }
                       />
                     );
                 })
-              )}
-            </section>
-          </article>
-
-          <hr className="h-full w-px border-none bg-secondary/20" />
-
-          {/* STATE */}
-          <article className="flex h-full w-1/3 flex-col items-center gap-4">
-            <section className="flex w-full flex-col items-center gap-4">
-              <span className="col-span-2 w-full text-lg underline underline-offset-4">
-                ETAPAS DEL PEDIDO
-              </span>
-              <div className="grid select-none grid-cols-2 gap-x-10 gap-y-5">
-                <div
-                  className="flex w-fit cursor-pointer items-center gap-2"
-                  onClick={() => alternateState("confirmed")}
-                >
-                  <input
-                    type="checkbox"
-                    className="checkbox-primary checkbox"
-                    checked={!!orderState.confirmed}
-                    readOnly
-                  />
-                  <span>Confirmado</span>
-                  <ClipboardCheck className="size-5" />
-                </div>
-                <div
-                  className="flex w-fit cursor-pointer items-center gap-2"
-                  onClick={() => alternateState("payed")}
-                >
-                  <input
-                    type="checkbox"
-                    className="checkbox-primary checkbox"
-                    checked={!!orderState.payed}
-                    readOnly
-                  />
-                  <span>Pagado</span>
-                  <CreditCard className="size-5" />
-                </div>
-                <div
-                  className="flex w-fit cursor-pointer items-center gap-2"
-                  onClick={() => alternateState("sent")}
-                >
-                  <input
-                    type="checkbox"
-                    className="checkbox-primary checkbox"
-                    checked={!!orderState.sent}
-                    readOnly
-                  />
-                  <span>Enviado</span>
-                  <Truck className="size-5" />
-                </div>
-                <div
-                  className="flex w-fit cursor-pointer items-center gap-2"
-                  onClick={() => alternateState("delivered")}
-                >
-                  <input
-                    type="checkbox"
-                    className="checkbox-primary checkbox"
-                    checked={!!orderState.delivered}
-                    readOnly
-                  />
-                  <span>Entregado</span>
-                  <PackageOpen className="size-5" />
-                </div>
-              </div>
-            </section>
-
-            <hr className="h-px w-full border-none bg-secondary/20" />
-
-            <section className="flex w-full flex-col gap-4 overflow-y-auto">
-              <span className="text-lg underline underline-offset-4">
-                COMPROBANTES ADJUNTOS
-              </span>
-
-              {orderQuery.data?.payments.length === 0 ? (
-                <p className="mt-1 w-full text-center text-secondary">
-                  No hay comprobantes de pago adjuntos
-                </p>
-              ) : (
-                <div className="flex h-full flex-col gap-2 overflow-y-auto">
-                  {orderQuery.isPending ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <PaymentVoucherSkeleton key={i} />
-                    ))
-                  ) : orderQuery.isError ? (
-                    <ErrorSpan
-                      className="w-fit self-center"
-                      message="Ocurrió un error al cargar el pedido"
-                    />
-                  ) : (
-                    orderQuery.data.payments.map((payment, i) => (
-                      <PaymentVoucher
-                        key={payment.id}
-                        payment={payment}
-                        number={i}
-                      />
-                    ))
-                  )}
-                </div>
               )}
             </section>
           </article>
@@ -365,3 +488,63 @@ export default function Order() {
 }
 
 export const getServerSideProps = withAuth("noAdmin");
+
+function OrderedProduct({
+  item,
+  product,
+  category,
+}: {
+  item: OrderProduct;
+  product: Product;
+  category?: string;
+}) {
+  const price = item.quantity * product.price;
+
+  return (
+    <div className="flex h-fit w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4">
+      <div className="flex flex-row gap-6">
+        <Image
+          alt="product"
+          width={50}
+          height={50}
+          src={product.images[0]?.url ?? NoImage}
+          className={cn(
+            !product.images[0]?.url && "opacity-50 blur-[1px]",
+            "size-16 min-w-16 rounded-full border border-secondary/30"
+          )}
+          unoptimized
+        />
+        <div className="flex flex-col gap-2">
+          <span className="line-clamp-3 text-primary">{product.name}</span>
+          {category && (
+            <div className="flex flex-col gap-0.5 text-sm text-secondary">
+              {category}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex h-full flex-row justify-end gap-2">
+        <div className="order-1 flex h-8 w-24 items-end justify-center gap-2 rounded-lg">
+          <div className="flex items-end gap-0.5">
+            <span className="text-xl text-primary">{item.quantity}</span>
+            <span className="text-base text-primary/70">x</span>
+          </div>
+          <div className="flex items-end gap-0.5">
+            <span className="text-base text-primary/70">$</span>
+            <span className="text-lg text-primary">
+              {product.price.toLocaleString("es-AR")}
+            </span>
+          </div>
+        </div>
+
+        <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center">
+          <span className="text-lg text-primary/70">$</span>
+          <span className="text-xl text-primary">
+            {price.toLocaleString("es-AR")}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

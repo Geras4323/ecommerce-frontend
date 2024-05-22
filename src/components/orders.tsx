@@ -229,12 +229,12 @@ export function SingleOrderItem({
   item,
   product,
   category,
-  showDescription = true,
+  showCategory = true,
 }: {
   item: OrderProduct;
   product: Product;
   category?: string;
-  showDescription?: boolean;
+  showCategory?: boolean;
 }) {
   const price = item.quantity * product.price;
 
@@ -254,7 +254,7 @@ export function SingleOrderItem({
         />
         <div className="flex flex-col gap-2">
           <span className="text-primary">{product.name}</span>
-          {showDescription && (
+          {showCategory && (
             <div className="flex flex-col gap-0.5 text-sm text-secondary">
               {category}
             </div>
