@@ -23,7 +23,7 @@ import Image from "next/image";
 import Link from "next/link";
 import NoImage from "../../public/no_image.png";
 import { useEffect, useState } from "react";
-import { type States } from "src/pages/administration/orders/[code]";
+import { type OrderStates } from "src/pages/administration/orders/[code]";
 
 export function OrdersItem({
   item,
@@ -32,7 +32,7 @@ export function OrdersItem({
   item: TOrdersItem;
   fromAdmin?: boolean;
 }) {
-  const [orderState, setOrderState] = useState<States>({
+  const [orderState, setOrderState] = useState<OrderStates>({
     confirmed: 0,
     payed: 0,
     sent: 0,
@@ -47,7 +47,7 @@ export function OrdersItem({
       dbStates.forEach((v, i) => {
         tempOrders[i]![1] = parseInt(v);
       });
-      return Object.fromEntries(tempOrders) as States;
+      return Object.fromEntries(tempOrders) as OrderStates;
     });
   }, [item.state]);
 

@@ -321,11 +321,11 @@ export function PaymentVoucherSkeleton() {
       {/* Number */}
       <div className="absolute left-1 top-1 size-5 rounded-md bg-secondary/20" />
       {/* Data */}
-      <div className="flex flex-col gap-1">
-        <div className="h-6 w-28 rounded-md bg-secondary/20" />
-        <div className="h-6 w-20 rounded-md bg-secondary/20" />
+      <div className="flex flex-col gap-2">
+        <div className="h-5 w-28 rounded-md bg-secondary/20" />
+        <div className="h-5 w-20 rounded-md bg-secondary/20" />
       </div>
-      <div className="h-8 w-44 rounded-md bg-secondary/20" />
+      <div className="h-7 w-44 rounded-md bg-secondary/20" />
     </div>
   );
 }
