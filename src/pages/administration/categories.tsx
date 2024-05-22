@@ -3,12 +3,15 @@ import { getCategories } from "@/functions/categories";
 import { withAuth } from "@/functions/session";
 import type { ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
-import { Barcode, Search } from "lucide-react";
-import Image from "next/image";
+import { Search } from "lucide-react";
 import { CategoryDataAside } from "src/containers/administration/categories/dataAside";
 import { CategoryCreateAside } from "src/containers/administration/categories/createAside";
 import { useCategoryStore } from "@/hooks/states/categories";
 import { useState } from "react";
+import {
+  CategoriesItem,
+  CategoriesItemSkeleton,
+} from "@/components/administration/categories";
 
 function Categories() {
   const { selected_category, category_select, create_isOpen, create_open } =
@@ -57,49 +60,27 @@ function Categories() {
 
           {/* CATEGORY LIST */}
           <div className="mx-auto flex w-fit flex-row flex-wrap justify-center gap-3">
-            {categoriesQuery.data
-              ?.filter((category) =>
-                filter
-                  ? category.name.toLowerCase().includes(filter.toLowerCase())
-                  : category
-              )
-              .map((category) => (
-                <div
-                  key={category.id}
-                  onClick={() => {
-                    if (selected_category || create_isOpen) return;
-
-                    category_select(category);
-                  }}
-                  className="flex h-24 w-full cursor-pointer gap-4 overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md transition-colors duration-100 hover:bg-secondary/20 xs:w-80 xs:max-w-80"
-                  style={{
-                    boxShadow:
-                      "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
-                  }}
-                >
-                  <div className="min-w-fit">
-                    <Image
-                      alt="categoryImage"
-                      src={category.image ?? ""}
-                      width={200}
-                      height={200}
-                      className="h-full w-24 border-r border-r-secondary/10 bg-secondary/20 object-cover transition-all"
-                      unoptimized
+            {categoriesQuery.isPending
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <CategoriesItemSkeleton key={i} />
+                ))
+              : categoriesQuery.data
+                  ?.filter((category) =>
+                    filter
+                      ? category.name
+                          .toLowerCase()
+                          .includes(filter.toLowerCase())
+                      : category
+                  )
+                  .map((category) => (
+                    <CategoriesItem
+                      key={category.id}
+                      category={category}
+                      selected_category={selected_category}
+                      category_select={category_select}
+                      create_isOpen={create_isOpen}
                     />
-                  </div>
-                  <div className="flex h-full w-full flex-col items-start justify-center gap-2 truncate">
-                    <span className="truncate text-lg font-semibold text-primary">
-                      {category.name}
-                    </span>
-                    {category.code && (
-                      <div className="flex items-center gap-1.5 text-sm text-primary/70">
-                        <Barcode className="mb-1 size-4" />
-                        <span>{category.code}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                  ))}
           </div>
         </section>
 
