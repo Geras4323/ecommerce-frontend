@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/shadcn/select";
 
-function Showroom() {
+export default function Showroom() {
   const { session } = useSession();
   const cart = useShoppingCart();
   const mq = useMediaQueries();
@@ -70,44 +70,57 @@ function Showroom() {
             </div>
 
             <div className="block lg:hidden">
-              <Select
-                onValueChange={(v) =>
-                  setSelectedCategory(() => {
-                    if (v === "all") return undefined;
-                    return categoriesQuery.data?.find((cat) => cat.name === v);
-                  })
-                }
-                value={selectedCategory?.name ?? "all"}
-              >
-                <SelectTrigger className="flex h-12 w-full min-w-72 cursor-pointer overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md transition-colors duration-100 hover:bg-secondary/20 focus:outline-none data-[state=open]:rounded-b-none">
-                  <SelectValue defaultValue="all" />
-                </SelectTrigger>
-                <SelectContent className="w-[calc(100%-2px)] data-[state=open]:rounded-t-none">
-                  <SelectOption value="all" className="h-11">
-                    Todas las categorías
-                  </SelectOption>
-                  {categoriesQuery.data?.map((category) => (
-                    <SelectOption key={category.id} value={category.name}>
-                      <div className="flex items-center gap-3">
-                        <Image
-                          alt={category.name}
-                          src={category.image ?? ""}
-                          className={cn(
-                            category.id === selectedCategory?.id
-                              ? "saturate-100"
-                              : "saturate-0",
-                            "size-8 rounded-md object-cover"
-                          )}
-                          width={40}
-                          height={40}
-                          unoptimized
-                        />
-                        {category.name}
-                      </div>
+              {categoriesQuery.isPending ? (
+                <div className="flex h-12 w-full animate-pulse rounded-md bg-secondary/20" />
+              ) : categoriesQuery.isError ? (
+                <div className="flex w-full justify-center">
+                  <ErrorSpan
+                    message="Ocurrió un error al cargar las categorías"
+                    className="gap-3 text-lg"
+                  />
+                </div>
+              ) : (
+                <Select
+                  onValueChange={(v) =>
+                    setSelectedCategory(() => {
+                      if (v === "all") return undefined;
+                      return categoriesQuery.data?.find(
+                        (cat) => cat.name === v
+                      );
+                    })
+                  }
+                  value={selectedCategory?.name ?? "all"}
+                >
+                  <SelectTrigger className="flex h-12 w-full cursor-pointer overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md transition-colors duration-100 hover:bg-secondary/20 focus:outline-none data-[state=open]:rounded-b-none">
+                    <SelectValue defaultValue="all" />
+                  </SelectTrigger>
+                  <SelectContent className="w-[calc(100%-2px)] data-[state=open]:rounded-t-none">
+                    <SelectOption value="all" className="h-11">
+                      Todas las categorías
                     </SelectOption>
-                  ))}
-                </SelectContent>
-              </Select>
+                    {categoriesQuery.data?.map((category) => (
+                      <SelectOption key={category.id} value={category.name}>
+                        <div className="flex items-center gap-3">
+                          <Image
+                            alt={category.name}
+                            src={category.image ?? ""}
+                            className={cn(
+                              category.id === selectedCategory?.id
+                                ? "saturate-100"
+                                : "saturate-0",
+                              "size-8 rounded-md object-cover"
+                            )}
+                            width={40}
+                            height={40}
+                            unoptimized
+                          />
+                          {category.name}
+                        </div>
+                      </SelectOption>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             {/* PC */}
@@ -136,7 +149,7 @@ function Showroom() {
         </section>
 
         {/* PRODUCTS */}
-        <section className="mb-8 flex w-full flex-col gap-4 md:max-w-2xl lg:max-w-xl xl:max-w-2xl 2xl:max-w-6xl">
+        <section className="mb-8 flex w-full flex-col gap-4 md:w-screen md:max-w-2xl lg:max-w-xl xl:max-w-2xl 2xl:max-w-6xl">
           <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2 text-primary">
             <Package className="size-6" />
             <h2 className="text-xl font-medium tracking-wide">PRODUCTOS</h2>
@@ -183,7 +196,20 @@ function Showroom() {
   );
 }
 
-export default Showroom;
+function CategoryItemSkeleton() {
+  return (
+    <div className="flex h-16 w-full min-w-72 animate-pulse overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md">
+      {/* Image */}
+      <div className="min-w-fit">
+        <div className="h-full w-24 border-r border-r-secondary/10 bg-secondary/10" />
+      </div>
+      {/* Name */}
+      <div className="flex h-full w-full items-center p-6">
+        <div className="h-6 w-32 rounded-md bg-secondary/10" />
+      </div>
+    </div>
+  );
+}
 
 function CategoryItem({
   category,
@@ -217,7 +243,7 @@ function CategoryItem({
           height={200}
           className={cn(
             !category.image
-              ? "scale-90 object-contain opacity-20"
+              ? "object-contain opacity-20 scale-90"
               : "object-cover",
             category.id === selectedCategory?.id
               ? "saturate-100"
@@ -243,16 +269,42 @@ function CategoryItem({
   );
 }
 
-function CategoryItemSkeleton() {
+function ProductItemSkeleton() {
   return (
-    <div className="flex h-16 w-full min-w-72 animate-pulse overflow-hidden rounded-md border border-secondary/10 bg-secondary/10 shadow-md">
-      {/* Image */}
-      <div className="min-w-fit">
-        <div className="h-full w-24 border-r border-r-secondary/10 bg-secondary/10" />
+    <div className="flex h-fit w-full animate-pulse flex-col gap-4 overflow-hidden rounded-lg bg-secondary/10 p-3 shadow-md md:h-52 md:flex-row">
+      {/* Images */}
+      <div className="flex h-52 w-full flex-nowrap gap-2 overflow-hidden md:w-44 md:min-w-44">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="size-52 min-w-52 rounded-lg bg-secondary/20 md:size-44 md:min-w-44"
+          />
+        ))}
       </div>
-      {/* Name */}
-      <div className="flex h-full w-full items-center p-6">
-        <div className="h-6 w-32 rounded-md bg-secondary/10" />
+
+      <div className="flex w-full flex-col justify-between gap-4 md:gap-2">
+        <div className="flex items-start justify-between gap-10">
+          {/* Name */}
+          <div className="flex w-full flex-col gap-2">
+            <div className="h-6 w-full rounded-md bg-secondary/20" />
+            <div className="h-6 w-3/5 rounded-md bg-secondary/20" />
+          </div>
+          {/* Price */}
+          <div className="h-7 w-36 rounded-md bg-secondary/20" />
+        </div>
+
+        {/* Description */}
+        <div className="flex w-full flex-col gap-2 text-primary/60">
+          <div className="h-6 w-full rounded-md bg-secondary/20" />
+          <div className="h-6 w-2/3 rounded-md bg-secondary/20" />
+        </div>
+
+        <div className="flex w-full justify-between gap-4">
+          {/* Quantity */}
+          <div className="flex h-8 w-24 items-center rounded-lg bg-secondary/20" />
+          {/* Cart Button */}
+          <div className="flex h-8 w-48 items-center rounded-lg bg-secondary/20" />
+        </div>
       </div>
     </div>
   );
@@ -395,34 +447,6 @@ function ProductItem({
               Ver en el carrito
             </Link>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProductItemSkeleton() {
-  return (
-    <div className="flex w-full animate-pulse gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 shadow-md">
-      {/* Image */}
-      <div className="h-52 min-w-52 p-3">
-        <div className="h-full w-full rounded-lg bg-secondary/10" />
-      </div>
-      {/* Data */}
-      <div className="flex w-full flex-col justify-between gap-2 p-4 pl-0">
-        {/* Name & Price */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="h-14 w-52 rounded-md bg-secondary/10" />
-          <div className="h-8 w-20 rounded-md bg-secondary/10" />
-        </div>
-
-        {/* Description */}
-        <div className="h-14 w-full rounded-md bg-secondary/10" />
-
-        {/* Cart & Add */}
-        <div className="flex w-full justify-end gap-4">
-          <div className="h-8 w-full rounded-md bg-secondary/10" />
-          <div className="h-8 w-48 rounded-md bg-secondary/10" />
         </div>
       </div>
     </div>
