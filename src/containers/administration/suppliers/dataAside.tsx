@@ -180,7 +180,7 @@ export function SupplierDataAside() {
               type="submit"
               isPending={dataMutation.isPending}
               className="btn-primary w-32"
-              animation="loading-dots"
+              animation="dots"
             >
               Guardar
             </LoadableButton>

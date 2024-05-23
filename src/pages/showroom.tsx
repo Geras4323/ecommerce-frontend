@@ -435,6 +435,7 @@ function ProductItem({
               }}
               className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
               isPending={addToCart.isPending}
+              animation="dots"
             >
               <ShoppingCart className="size-5" />
               Añadir al carrito

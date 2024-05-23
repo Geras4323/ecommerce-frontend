@@ -141,6 +141,7 @@ export function LoginForm({
         <LoadableButton
           isPending={mutation.isPending}
           className="btn btn-primary mt-2 w-full"
+          animation="dots"
         >
           Iniciar sesión
         </LoadableButton>

@@ -154,7 +154,7 @@ export function SupplierCreateAside() {
               type="submit"
               isPending={dataMutation.isPending}
               className="btn-primary w-32"
-              animation="loading-dots"
+              animation="dots"
             >
               Crear
             </LoadableButton>

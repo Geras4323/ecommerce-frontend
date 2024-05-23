@@ -282,7 +282,7 @@ export function CategoryDataAside() {
               type="submit"
               isPending={dataMutation.isPending || imageMutation.isPending}
               className="btn-primary w-32"
-              animation="loading-dots"
+              animation="dots"
             >
               Guardar
             </LoadableButton>

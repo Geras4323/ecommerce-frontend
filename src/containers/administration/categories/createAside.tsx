@@ -244,7 +244,7 @@ export function CategoryCreateAside() {
               type="submit"
               isPending={dataMutation.isPending || imageMutation.isPending}
               className="btn-primary w-32"
-              animation="loading-dots"
+              animation="dots"
             >
               Crear
             </LoadableButton>

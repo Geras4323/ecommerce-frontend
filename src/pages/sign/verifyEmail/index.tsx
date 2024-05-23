@@ -53,7 +53,7 @@ function VerifyEmail() {
           {!mutation.isSuccess && (
             <LoadableButton
               onClick={() => mutation.mutate()}
-              animation="loading-dots"
+              animation="dots"
               isPending={mutation.isPending}
               className="btn btn-outline btn-primary mt-4 w-36 self-center"
             >

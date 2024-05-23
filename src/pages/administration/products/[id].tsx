@@ -572,7 +572,7 @@ export default function ProductData() {
                   uploadImagesMutation.isPending
                 }
                 className="btn-primary w-32"
-                animation="loading-dots"
+                animation="dots"
               >
                 Guardar
               </LoadableButton>

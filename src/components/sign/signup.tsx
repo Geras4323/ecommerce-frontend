@@ -321,6 +321,7 @@ export function SignupForm({
         <LoadableButton
           isPending={mutation.isPending}
           className="btn btn-primary w-full"
+          animation="dots"
         >
           Registrarse
         </LoadableButton>

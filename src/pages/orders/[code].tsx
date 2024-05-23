@@ -239,7 +239,7 @@ export default function Order() {
                       isPending={mutation.isPending}
                       onClick={() => mutation.mutate()}
                       className="btn btn-primary btn-sm w-52"
-                      animation="loading-dots"
+                      animation="dots"
                     >
                       <FileUp className="size-5" />
                       <span>Subir comprobante</span>
