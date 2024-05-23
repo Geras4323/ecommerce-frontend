@@ -161,7 +161,7 @@ export default function Cart() {
                 TOTAL
               </span>
               {cart.cartItems.isPending ? (
-                <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/30" />
+                <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/20" />
               ) : (
                 <div className="flex items-end gap-1">
                   <span className="text-xl text-primary/70">$</span>
@@ -178,6 +178,8 @@ export default function Cart() {
                   onClick={() => createOrderMutation.mutate()}
                   isPending={createOrderMutation.isPending}
                   className="btn btn-primary btn-sm ml-1 w-48"
+                  animation="dots"
+                  disabled={cart.cartItems.isPending}
                 >
                   <Check className="size-5" />
                   Confirmar pedido
@@ -189,7 +191,9 @@ export default function Cart() {
 
         <div className="grid h-auto w-full grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
           {productsQuery.isPending || cart.cartItems.isPending ? (
-            Array.from({ length: 4 }).map((_, i) => <LoadingCartItem key={i} />)
+            Array.from({ length: 4 }).map((_, i) => (
+              <CartItemSkeleton key={i} />
+            ))
           ) : productsQuery.isError || cart.cartItems.isError ? (
             <div className="col-span-2 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
               Se ha producido un error
@@ -240,6 +244,29 @@ export default function Cart() {
 }
 
 export const getServerSideProps = withAuth("noAdmin");
+
+export function CartItemSkeleton() {
+  return (
+    <div className="flex h-40 w-full animate-pulse flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 lg:h-28 lg:flex-row">
+      <div className="flex w-full flex-row gap-6">
+        {/* Image */}
+        <div className="size-16 min-w-16 rounded-full bg-secondary/20" />
+        {/* Data */}
+        <div className="flex w-full flex-col gap-2">
+          <div className="h-6 w-4/5 rounded-md bg-secondary/20 pr-4" />
+          <div className="h-6 w-1/4 min-w-20 rounded-md bg-secondary/20 pr-4" />
+        </div>
+      </div>
+
+      <div className="flex h-full flex-row items-end justify-end gap-4 lg:mr-6 lg:flex-col lg:items-center lg:justify-center lg:gap-2">
+        {/* Price */}
+        <div className="flex h-8 w-24 rounded-md bg-secondary/20 lg:w-24 lg:items-end" />
+
+        <div className="flex h-8 w-28 items-center rounded-md bg-secondary/20" />
+      </div>
+    </div>
+  );
+}
 
 export function CartItem({
   item,
@@ -333,30 +360,6 @@ export function CartItem({
             <Plus className="size-4" />
           </button>
         </div>
-      </div>
-    </div>
-  );
-}
-
-export function LoadingCartItem() {
-  return (
-    <div className="flex h-28 w-full animate-pulse justify-between rounded-xl border-2 border-secondary/20 p-4">
-      <div className="flex flex-row gap-4">
-        {/* Image */}
-        <div className="size-16 rounded-full bg-secondary/20" />
-
-        {/* Title and description */}
-        <div className="flex flex-col gap-2">
-          <div className="h-8 w-80 rounded-md bg-secondary/20" />
-          <div className="h-8 w-56 rounded-md bg-secondary/20" />
-          <div className="h-8 w-52 rounded-md bg-secondary/20" />
-        </div>
-      </div>
-
-      <div className="flex h-full flex-col items-center justify-center gap-3">
-        <div className="flex h-6 w-24 rounded-md bg-secondary/20" />
-
-        <div className="flex h-7 w-28 rounded-lg bg-secondary/20" />
       </div>
     </div>
   );
