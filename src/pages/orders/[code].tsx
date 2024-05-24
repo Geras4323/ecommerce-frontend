@@ -21,8 +21,8 @@ import { withAuth } from "@/functions/session";
 import type { ServerSuccess, ServerError } from "@/types/types";
 import { type Day, days } from "@/utils/miscellaneous";
 import {
-  LoadingSingleOrderItem,
   SingleOrderItem,
+  SingleOrderItemSkeleton,
 } from "@/components/administration/orders";
 import { useState } from "react";
 import {
@@ -106,17 +106,19 @@ export default function Order() {
             </Link>
             <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
           </div>
-          <div className="hidden gap-2 text-info lg:flex">
-            <Info className="size-5" />
-            Nos pondremos en contacto a la brevedad
-          </div>
+          {!orderQuery.isPending && !orderQuery.isError && (
+            <div className="hidden gap-2 text-info lg:flex">
+              <Info className="size-5" />
+              Nos pondremos en contacto a la brevedad
+            </div>
+          )}
         </div>
 
         <section className="flex h-full w-full flex-col gap-4 lg:flex-row">
           <article className="order-2 flex h-full w-full flex-col gap-4 overflow-y-auto lg:order-1 lg:w-3/5">
             {productsQuery.isPending || orderQuery.isPending ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <LoadingSingleOrderItem key={i} />
+                <SingleOrderItemSkeleton key={i} />
               ))
             ) : productsQuery.isError || orderQuery.isError ? (
               <div className="flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
@@ -149,7 +151,7 @@ export default function Order() {
               <Hash className="size-5 text-secondary" />
               <span className="text-lg text-secondary">Pedido Nro</span>
               {orderQuery.isPending ? (
-                <div className="h-7 w-20 animate-pulse rounded-lg bg-secondary/30" />
+                <div className="h-6 w-20 animate-pulse rounded-lg bg-secondary/30" />
               ) : (
                 <span className="text-xl font-medium text-primary">
                   {orderQuery.data?.id}
@@ -161,7 +163,7 @@ export default function Order() {
               <CalendarDaysIcon className="size-5 text-secondary" />
               <span className="text-lg text-secondary">Iniciado el</span>
               {orderQuery.isPending ? (
-                <div className="h-7 w-48 animate-pulse rounded-lg bg-secondary/30" />
+                <div className="h-6 w-48 animate-pulse rounded-lg bg-secondary/30" />
               ) : (
                 !orderQuery.isError && (
                   <>
@@ -189,7 +191,7 @@ export default function Order() {
               <DollarSign className="size-5 text-secondary" />
               <span className="text-lg text-secondary">Total a abonar:</span>
               {orderQuery.isPending ? (
-                <div className="h-7 w-32 animate-pulse rounded-lg bg-secondary/30" />
+                <div className="h-6 w-32 animate-pulse rounded-lg bg-secondary/30" />
               ) : (
                 !orderQuery.isError && (
                   <div className="flex items-end gap-1">
@@ -312,7 +314,8 @@ export function PaymentVoucher({
         className="btn btn-outline btn-secondary btn-sm"
       >
         <FilePieChart className="size-5" />
-        Ver comprobante
+        <span className="xxs:hidden lg:block">Ver</span>
+        <span className="hidden xxs:block lg:hidden">Ver comprobante</span>
       </a>
     </div>
   );

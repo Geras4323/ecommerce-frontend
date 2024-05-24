@@ -297,6 +297,28 @@ export function OrdersItem({
   );
 }
 
+export function SingleOrderItemSkeleton() {
+  return (
+    <div className="flex h-40 w-full animate-pulse flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 xs:h-28 xs:flex-row xs:gap-6">
+      <div className="flex w-full flex-row gap-6">
+        {/* Image */}
+        <div className="size-16 min-w-16 rounded-full bg-secondary/20" />
+        {/* Data */}
+        <div className="flex w-full flex-col gap-2">
+          <div className="h-6 w-4/5 rounded-md bg-secondary/20 text-primary" />
+          <div className="h-6 w-2/5 min-w-20 rounded-md bg-secondary/20 text-primary" />
+        </div>
+      </div>
+
+      <div className="flex h-full flex-row items-end justify-end gap-3 xs:flex-col xs:items-center xs:justify-center xs:gap-2">
+        <div className="order-2 flex h-7 w-20 rounded-md bg-secondary/20 xs:order-1 xs:border-none" />
+
+        <div className="order-2 flex h-7 w-24 rounded-md bg-secondary/20 xs:order-1 xs:border-none" />
+      </div>
+    </div>
+  );
+}
+
 export function SingleOrderItem({
   item,
   product,
@@ -334,7 +356,7 @@ export function SingleOrderItem({
         </div>
       </div>
 
-      <div className="flex h-full flex-row justify-end gap-2 xs:flex-col xs:justify-center xs:gap-2">
+      <div className="flex h-full flex-row items-end justify-end gap-2 xs:flex-col xs:justify-center xs:gap-2">
         <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center xs:order-1 xs:border-none">
           <span className="text-lg text-primary/70">$</span>
           <span className="text-xl text-primary">
@@ -354,31 +376,6 @@ export function SingleOrderItem({
             </span>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-export function LoadingSingleOrderItem() {
-  return (
-    <div className="flex h-28 w-full animate-pulse justify-between gap-6 overflow-hidden rounded-xl border-2 border-secondary/20 p-4">
-      <div className="flex flex-row gap-4">
-        {/* Image */}
-        <div className="size-16 rounded-full bg-secondary/20" />
-
-        {/* Title and description */}
-        <div className="flex flex-col gap-2">
-          <div className="h-8 w-80 rounded-md bg-secondary/20" />
-          <div className="h-8 w-56 rounded-md bg-secondary/20" />
-          <div className="h-8 w-52 rounded-md bg-secondary/20" />
-        </div>
-      </div>
-
-      {/* Price */}
-      <div className="flex h-full flex-col items-center justify-center gap-2">
-        <div className="flex h-7 w-24 rounded-md bg-secondary/20" />
-
-        <div className="flex h-7 w-32 rounded-lg bg-secondary/20" />
       </div>
     </div>
   );
