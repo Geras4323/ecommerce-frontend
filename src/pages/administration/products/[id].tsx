@@ -143,8 +143,6 @@ export default function ProductData() {
   }
 
   function existentImagesChanged() {
-    console.log("existent: ", existentFiles);
-    console.log(productQuery.data?.images);
     return !existentFiles.every((file, i) =>
       _.isEqual(file, { ...productQuery.data?.images[i], isDeleted: false })
     );
@@ -168,7 +166,6 @@ export default function ProductData() {
       router.push("/administration/products");
       return;
     }
-    if (existentImagesChanged()) console.log("si");
     setIsDiscardChangesModalOpen(true);
   }
 
