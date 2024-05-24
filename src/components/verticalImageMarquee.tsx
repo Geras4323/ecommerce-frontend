@@ -59,7 +59,7 @@ function MarqueeImage({ src }: { src: string }) {
       height={200}
       src={src}
       draggable={false}
-      className="aspect-square w-full select-none rounded-xl border border-secondary/30 shadow-md lg:rounded-2xl"
+      className="aspect-square w-full select-none rounded-xl border border-secondary/30 object-cover shadow-md lg:rounded-2xl"
     />
   );
 }

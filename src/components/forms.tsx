@@ -12,7 +12,7 @@ export function ErrorSpan({
     <div
       className={cn(
         !!className && className,
-        "flex items-center gap-1 text-base text-error"
+        "flex items-center gap-2 text-base text-error"
       )}
     >
       <AlertCircle className="mb-0.5 size-4 min-w-4" />
@@ -36,13 +36,23 @@ export function MandatoryMark({ className }: WithClassName) {
   return <span className={cn(!!className && className, "text-error")}>*</span>;
 }
 
+type Animation = keyof typeof animations;
+const animations = {
+  spinner: "loading-spinner",
+  dots: "loading-dots",
+  ring: "loading-ring",
+  ball: "loading-ball",
+  bars: "loading-bars",
+  infinity: "loading-infinity",
+};
+
 export const LoadableButton = ({
   type,
   isPending,
   className,
   disabled,
   children,
-  animation = "loading-spinner",
+  animation = "dots",
   onClick,
 }: {
   type?: "button" | "reset" | "submit";
@@ -50,13 +60,7 @@ export const LoadableButton = ({
   className?: string;
   disabled?: boolean;
   children?: ReactNode;
-  animation?:
-    | "loading-spinner"
-    | "loading-dots"
-    | "loading-ring"
-    | "loading-ball"
-    | "loading-bars"
-    | "loading-infinity";
+  animation?: Animation;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }) => {
   return (
@@ -73,7 +77,11 @@ export const LoadableButton = ({
       )}
       disabled={disabled}
     >
-      {isPending ? <span className={cn("loading", animation)} /> : children}
+      {isPending ? (
+        <span className={cn("loading", !!animation && animations[animation])} />
+      ) : (
+        children
+      )}
     </button>
   );
 };

@@ -3,8 +3,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/shadcn/table";
 import { withAuth } from "@/functions/session";
@@ -72,30 +70,28 @@ function Suppliers() {
 
         {/* MAIN TABLE */}
         <section className="relative flex h-full w-full flex-col p-4 transition-all duration-300">
-          <div className="mb-8 flex min-h-12 w-full items-center justify-start">
+          <div className="mb-4 flex h-fit w-full items-center justify-end gap-4 border-b border-secondary/30 pb-4">
+            <div className="input input-bordered flex items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
+              <Search className="size-5 text-secondary" />
+              <input
+                type="text"
+                placeholder="Buscar proveedor"
+                className="h-full w-full bg-transparent"
+                onChange={(event) => table.setGlobalFilter(event.target.value)}
+              />
+            </div>
+
             <button
-              className="btn btn-primary mr-8 whitespace-nowrap transition-all duration-300"
+              className="btn btn-primary whitespace-nowrap transition-all duration-300"
               onClick={create_open}
               disabled={!!selected_supplier}
             >
               Crear proveedor
             </button>
-
-            <div className="input flex w-96 items-center justify-start border border-secondary/30 p-0">
-              <div className="flex h-full min-w-12 items-center justify-center border-r border-r-secondary/30">
-                <Search className="size-6 text-secondary" />
-              </div>
-              <input
-                type="text"
-                placeholder="Filtrar por nombre"
-                className="h-full w-full bg-transparent px-3"
-                onChange={(event) => table.setGlobalFilter(event.target.value)}
-              />
-            </div>
           </div>
 
           <Table>
-            <TableHeader>
+            {/* <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
                   key={headerGroup.id}
@@ -117,7 +113,7 @@ function Suppliers() {
                   ))}
                 </TableRow>
               ))}
-            </TableHeader>
+            </TableHeader> */}
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (

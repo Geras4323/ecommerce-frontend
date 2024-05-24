@@ -107,7 +107,7 @@ export function DeleteCategoryModal({
           className="btn btn-primary w-28"
           onClick={() => mutation.mutate()}
           isPending={mutation.isPending}
-          animation="loading-dots"
+          animation="dots"
         >
           Confirmar
         </LoadableButton>
@@ -173,7 +173,7 @@ export function DeleteCategoryImageModal({
           className="btn btn-primary w-28"
           onClick={() => mutation.mutate()}
           isPending={mutation.isPending}
-          animation="loading-dots"
+          animation="dots"
         >
           Confirmar
         </LoadableButton>

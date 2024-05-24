@@ -7,16 +7,24 @@ const config: Config = {
   theme: {
     extend: {
       height: {
+        104: "26rem",
         120: "30rem",
         128: "32rem",
         144: "36rem",
       },
       minWidth: {
+        "screen-xxs": "480px",
+        "screen-xs": "560px",
+        "screen-md": "768px",
         "screen-sm": "640px",
         "screen-lg": "1024px",
       },
       maxHeight: {
         104: "26rem",
+      },
+      screens: {
+        xxs: "480px",
+        xs: "560px",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
@@ -36,6 +44,10 @@ const config: Config = {
       },
       boxShadow: {
         button: "0 3px 3px rgba(0,0,0, .1), 0 5px 10px rgba(0,0,0, .05)",
+        inner: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)",
+        "inner-sm": "inset 0 2px 4px 0 rgb(0 0 0 / 0.10)",
+        "inner-md": "inset 0 2px 4px 0 rgb(0 0 0 / 0.15)",
+        "inner-lg": "inset 0 2px 4px 0 rgb(0 0 0 / 0.20)",
       },
     },
   },
@@ -65,7 +77,7 @@ const config: Config = {
         light: {
           ...daisyThemes["[data-theme=business]"],
           primary: "hsl(41, 18%, 20%)",
-          secondary: "hsl(40, 20%, 50%)",
+          secondary: "hsl(40, 20%, 40%)",
           "btn-primary": "hsl(41, 18%, 20%)",
           "btn-secondary": "hsl(41, 18%, 20%)",
           accent: "#67CBA0",
@@ -84,6 +96,10 @@ const config: Config = {
       },
     ],
   },
-  plugins: [require("daisyui"), require("tailwindcss-animate")],
+  plugins: [
+    require("daisyui"),
+    require("tailwindcss-animate"),
+    require("tailwindcss-3d"),
+  ],
 };
 export default config;

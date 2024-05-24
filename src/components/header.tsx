@@ -9,16 +9,17 @@ import {
   Package,
   WalletCards,
   LogOut,
+  Home,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useState } from "react";
 import { cn } from "@/utils/lib";
 import { useShoppingCart } from "@/hooks/cart";
 import { useRouter } from "next/router";
-import { Tangerine } from "next/font/google";
 import { useTheme } from "next-themes";
+import { Arizonia } from "next/font/google";
 
-const tangerine = Tangerine({ weight: ["700"], subsets: ["latin"] });
+const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
 type Section = {
   title: string;
@@ -27,6 +28,15 @@ type Section = {
   url: string;
   disabled: boolean;
 };
+
+const urlsShowLogin = [
+  "/",
+  "/login",
+  "/signup",
+  "/sign",
+  "/sign/verifyEmail/[token]",
+];
+
 const sections = [
   {
     title: "Mis datos",
@@ -34,6 +44,13 @@ const sections = [
     Svg: User2,
     url: "/account",
     disabled: true,
+  },
+  {
+    title: "Inicio",
+    description: "Pantalla principal",
+    Svg: Home,
+    url: "/",
+    disabled: false,
   },
   {
     title: "Showroom",
@@ -71,34 +88,39 @@ export const Header = () => {
     <header className="fixed z-50 flex h-16 w-full items-center justify-between border-b border-b-secondary/20 bg-base-300/70 px-6 py-2 backdrop-blur">
       <Link
         href="/"
-        className={cn(tangerine.className, "select-none text-4xl text-primary")}
+        className={cn(
+          arizonia.className,
+          router.pathname === "/sign"
+            ? "block"
+            : "invisible w-0 sm:visible sm:w-fit",
+          "select-none text-3xl text-primary"
+        )}
       >
         Mis Ideas Pintadas
       </Link>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center">
         <ThemeSwitcher />
 
         {session.isPending ? (
-          <div className="h-8 w-44 animate-pulse rounded-lg bg-secondary/30" />
+          <div className="ml-4 h-8 w-44 animate-pulse rounded-lg bg-secondary/30" />
         ) : session.isError ? (
           <div>
-            {router.pathname !== "/" &&
-              router.pathname !== "/login" &&
-              router.pathname !== "/signup" &&
-              router.pathname !== "/sign" &&
-              router.pathname !== "/sign/verifyEmail/[token]" && (
-                <Link href="/sign" className="btn btn-primary btn-sm">
-                  Iniciar sesión
-                </Link>
-              )}
+            {!urlsShowLogin.some((i) => i === router.pathname) && (
+              <Link
+                href="/sign"
+                className="btn btn-primary btn-sm ml-4 whitespace-nowrap"
+              >
+                Iniciar sesión
+              </Link>
+            )}
           </div>
         ) : (
           <Popover
             open={isSessionOpen}
             onOpenChange={() => setIsSessionOpen((prev) => !prev)}
           >
-            <PopoverTrigger className="btn btn-ghost btn-sm relative flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary">
+            <PopoverTrigger className="btn btn-ghost btn-sm relative ml-4 flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary">
               <span className="text-lg font-medium">
                 {session.data.name} {session.data.surname}
               </span>

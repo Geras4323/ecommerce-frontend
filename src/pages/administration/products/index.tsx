@@ -1,39 +1,43 @@
 import { AdministrationLayout } from "@/components/layouts/administration";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/shadcn/table";
 import { withAuth } from "@/functions/session";
 import type { ServerError } from "@/types/types";
-import { cn } from "@/utils/lib";
 import { useQuery } from "@tanstack/react-query";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { Search } from "lucide-react";
-import Image from "next/image";
-import NoImage from "../../../../public/no_image.png";
+import { ClipboardList, Filter, Package, Search, Tag, X } from "lucide-react";
 import { getProducts, type Product } from "@/functions/products";
 import { useProductStore } from "@/hooks/states/products";
 import { ProductCreateAside } from "src/containers/administration/products/createAside";
-import { getCategories } from "@/functions/categories";
-import { getSuppliers } from "@/functions/suppliers";
-import { useRouter } from "next/router";
-
-const columnHelper = createColumnHelper<Product>();
+import { type Category, getCategories } from "@/functions/categories";
+import { type Supplier, getSuppliers } from "@/functions/suppliers";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectOption,
+  SelectTrigger,
+} from "@/components/shadcn/select";
+import { cn } from "@/utils/lib";
+import { mqs, useMediaQueries } from "@/hooks/screen";
+import {
+  Dropdown,
+  DropdownContent,
+  DropdownTrigger,
+} from "@/components/shadcn/dropdown";
+import {
+  ProductsItem,
+  ProductsItemSkeleton,
+} from "@/components/administration/products";
 
 function Products() {
-  const router = useRouter();
+  const { create_open } = useProductStore();
+  const mq = useMediaQueries();
 
-  const { create_isOpen, create_open } = useProductStore();
+  const [nameFilter, setNameFilter] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
+    null
+  );
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -65,176 +69,213 @@ function Products() {
     retry: false,
   });
 
-  const columns = [
-    columnHelper.display({
-      id: `image_`,
-      cell: (info) => (
-        <div className="mr-4 min-w-24">
-          <Image
-            alt={info.row.original.name}
-            src={info.row.original.images?.[0]?.url ?? NoImage}
-            width={100}
-            height={100}
-            className="size-24 rounded-md object-cover"
-            unoptimized
-          />
-        </div>
-      ),
-    }),
-    columnHelper.accessor("code", {
-      header: "Código",
-      cell: (info) => (
-        <p className="mr-4 h-8 w-16 text-base text-secondary">
-          {info.getValue()}
-        </p>
-      ),
-    }),
-    columnHelper.accessor("price", {
-      header: "Precio",
-      cell: (info) => (
-        <div className="mr-4 w-28 whitespace-nowrap text-2xl">
-          $ {info.getValue().toLocaleString("es-AR")}
-        </div>
-      ),
-    }),
-    columnHelper.accessor("name", {
-      header: "Nombre",
-      cell: (info) => (
-        <div className="mr-4 w-32 text-lg">{info.getValue()}</div>
-      ),
-    }),
-    columnHelper.accessor("categoryID", {
-      header: "Categoría",
-      cell: (info) => (
-        <div className="mr-4 w-28 text-lg">
-          {categoriesQuery.data?.find((c) => c.id === info.getValue())?.name}
-        </div>
-      ),
-    }),
-    columnHelper.accessor("supplierID", {
-      header: "Proveedor",
-      cell: (info) => {
-        const value = info.getValue();
-        return value ? (
-          <div className="mr-4 w-32 text-lg">
-            {suppliersQuery.data?.find((s) => s.id === value)?.name}
-          </div>
-        ) : (
-          <span className="mr-4 w-32 text-base italic text-secondary">
-            Sin proveedor
-          </span>
-        );
-      },
-    }),
-    columnHelper.accessor("description", {
-      header: "Descripción",
-      cell: (info) => (
-        <span className="w-24 truncate text-base text-secondary">
-          {info.getValue()}
-        </span>
-      ),
-    }),
-  ];
+  if (productsQuery.isError) return <>Products error</>;
 
-  const table = useReactTable({
-    columns,
-    data: productsQuery.data ?? [],
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getColumnCanGlobalFilter: () => true,
-  });
-  const numberOfColumns = table.getTotalSize();
+  if (categoriesQuery.isPending) return <>Categories pending</>;
+  if (categoriesQuery.isError) return <>Categories error</>;
+
+  if (suppliersQuery.isPending) return <>Suppliers pending</>;
+  if (suppliersQuery.isError) return <>Suppliers error</>;
+
+  let filteredProducts: Product[] = productsQuery.data ?? [];
+
+  if (nameFilter) {
+    filteredProducts = filteredProducts?.filter(
+      (product) =>
+        product.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
+        product.code.toLowerCase().includes(nameFilter.toLowerCase())
+    );
+  }
+
+  if (selectedCategory) {
+    filteredProducts = filteredProducts.filter(
+      (product) => product.categoryID === selectedCategory.id
+    );
+  }
+
+  if (selectedSupplier) {
+    filteredProducts = filteredProducts.filter(
+      (product) => product.supplierID === selectedSupplier.id
+    );
+  }
 
   return (
     <AdministrationLayout active="Productos">
-      <div className="flex h-full w-full">
+      <div className="flex w-full">
         {/* CREATE */}
         <ProductCreateAside />
 
         {/* MAIN TABLE */}
-        <section className="relative flex h-full w-full flex-col p-4 transition-all duration-300">
-          <div className="mb-8 flex min-h-12 w-full items-center justify-start">
-            <button
-              className="btn btn-primary mr-8 whitespace-nowrap transition-all duration-300"
-              onClick={create_open}
-            >
-              Crear producto
-            </button>
+        <section className="relative w-full flex-col p-4 transition-all duration-300">
+          <div className="mx-auto mb-4 flex h-fit w-full max-w-screen-md flex-col items-end justify-center gap-4 border-b border-secondary/30 pb-4 xl:w-full xl:max-w-screen-2xl">
+            <div className="flex items-center gap-4">
+              <Dropdown>
+                <DropdownTrigger className="btn btn-outline btn-primary focus:outline-none">
+                  <Filter className="size-5" />
+                  <span>Filtro</span>
+                </DropdownTrigger>
+                <DropdownContent
+                  sideOffset={5}
+                  side={mq ? (mq < mqs.md ? "bottom" : "left") : "left"}
+                  align={mq ? (mq < mqs.md ? "center" : "start") : "start"}
+                  className="flex h-fit w-72 min-w-72 flex-col gap-3 rounded-lg border border-secondary/30 bg-base-100 p-3 shadow-md"
+                >
+                  {/* Name */}
+                  <div className="input input-bordered flex h-10 items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
+                    <Search className="size-5 text-secondary" />
+                    <input
+                      type="text"
+                      placeholder="Buscar producto"
+                      value={nameFilter ?? ""}
+                      className="h-full w-full bg-transparent"
+                      onChange={(event) => setNameFilter(event.target.value)}
+                    />
+                  </div>
 
-            <div className="input flex w-96 items-center justify-start border border-secondary/30 p-0">
-              <div className="flex h-full min-w-12 items-center justify-center border-r border-r-secondary/30">
-                <Search className="size-6 text-secondary" />
-              </div>
-              <input
-                type="text"
-                placeholder="Filtrar por cualquier campo"
-                className="h-full w-full bg-transparent px-3"
-                onChange={(event) => table.setGlobalFilter(event.target.value)}
-              />
+                  {/* Category */}
+                  <Select
+                    value={`${selectedCategory?.id}`}
+                    onValueChange={(v) =>
+                      setSelectedCategory(
+                        categoriesQuery.data.find(
+                          (c) => c.id === parseInt(v)
+                        ) ?? null
+                      )
+                    }
+                  >
+                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
+                      <span
+                        className={cn(
+                          "flex items-center gap-3",
+                          !selectedCategory && "italic text-secondary"
+                        )}
+                      >
+                        <Tag className="size-4 min-w-4" />
+                        {selectedCategory?.name ?? "Categoría"}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent sideOffset={0} align="start">
+                      <SelectOption
+                        value={`${-1}`}
+                        className="rounded-lg italic text-secondary"
+                      >
+                        Sin filtro
+                      </SelectOption>
+                      {categoriesQuery.data?.map((category) => (
+                        <SelectOption
+                          key={category.id}
+                          value={`${category.id}`}
+                          className="rounded-lg"
+                        >
+                          {category.name}
+                        </SelectOption>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Supplier */}
+                  <Select
+                    onValueChange={(v) =>
+                      setSelectedSupplier(
+                        suppliersQuery.data.find((s) => s.id === parseInt(v)) ??
+                          null
+                      )
+                    }
+                  >
+                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
+                      <span
+                        className={cn(
+                          "flex items-center gap-3",
+                          !selectedSupplier && "italic text-secondary"
+                        )}
+                      >
+                        <ClipboardList className="mb-0.5 size-4 min-w-4" />
+                        {selectedSupplier?.name ?? "Proveedor"}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent sideOffset={0} align="end">
+                      <SelectOption
+                        value={`${-1}`}
+                        className="rounded-lg italic text-secondary"
+                      >
+                        Sin filtro
+                      </SelectOption>
+                      {suppliersQuery.data?.map((supplier) => (
+                        <SelectOption
+                          key={supplier.id}
+                          value={`${supplier.id}`}
+                          className="rounded-lg"
+                        >
+                          {supplier.name}
+                        </SelectOption>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </DropdownContent>
+              </Dropdown>
+
+              <button
+                className="btn btn-primary col-span-4 whitespace-nowrap transition-all duration-300"
+                onClick={create_open}
+              >
+                Crear producto
+              </button>
             </div>
+
+            {(nameFilter || selectedCategory || selectedSupplier) && (
+              <section className="flex flex-wrap items-center justify-end gap-2">
+                {nameFilter && (
+                  <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
+                    <Package className="mr-1 size-4 text-secondary" />
+                    {nameFilter}
+                    <X
+                      onClick={() => setNameFilter("")}
+                      className="size-5 cursor-pointer text-secondary"
+                    />
+                  </div>
+                )}
+                {!!selectedCategory && (
+                  <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
+                    <Tag className="mr-1 size-4 text-secondary" />
+                    {selectedCategory?.name}
+                    <X
+                      onClick={() => setSelectedCategory(null)}
+                      className="size-5 cursor-pointer text-secondary"
+                    />
+                  </div>
+                )}
+                {!!selectedSupplier && (
+                  <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
+                    <ClipboardList className="mr-1 size-4 text-secondary" />
+                    {selectedSupplier?.name}
+                    <X
+                      onClick={() => setSelectedSupplier(null)}
+                      className="size-5 cursor-pointer text-secondary"
+                    />
+                  </div>
+                )}
+              </section>
+            )}
           </div>
 
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow
-                  key={headerGroup.id}
-                  className="bg-secondary/20 hover:bg-secondary/20"
-                >
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className="cursor-default"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={() =>
-                      router.push(`/administration/products/${row.original.id}`)
-                    }
-                    className={cn(
-                      create_isOpen
-                        ? "cursor-default"
-                        : "cursor-pointer hover:bg-secondary/20"
-                    )}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+          <div className="mx-auto grid w-full max-w-screen-md grid-cols-1 gap-4 xl:max-w-screen-2xl xl:grid-cols-2">
+            {productsQuery.isPending
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <ProductsItemSkeleton key={i} />
                 ))
-              ) : (
-                <TableRow>
-                  {" "}
-                  <TableCell
-                    colSpan={numberOfColumns}
-                    className="h-12 text-center"
-                  >
-                    Sin resultados
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              : filteredProducts.map((product) => (
+                  <ProductsItem
+                    key={product.id}
+                    product={product}
+                    category={categoriesQuery.data?.find(
+                      (c) => c.id === product?.categoryID
+                    )}
+                    supplier={suppliersQuery.data?.find(
+                      (s) => s.id === product?.supplierID
+                    )}
+                  />
+                ))}
+          </div>
         </section>
       </div>
     </AdministrationLayout>

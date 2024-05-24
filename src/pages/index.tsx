@@ -1,5 +1,3 @@
-// import Logo from "../../public/logoNB.png";
-// import Image from "next/image";
 import Link from "next/link";
 import { GeneralLayout } from "src/layouts/GeneralLayout";
 import { useSession } from "@/hooks/session";
@@ -7,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getImages } from "@/functions/images";
 import { type ServerError } from "@/types/types";
 import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
-import { Tangerine } from "next/font/google";
 import { cn } from "@/utils/lib";
+import { Arizonia } from "next/font/google";
 
-const tangerine = Tangerine({ weight: ["700"], subsets: ["latin"] });
+const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
 export default function Home() {
   const { session, logoutMutation } = useSession();
@@ -71,14 +69,14 @@ export default function Home() {
           <div className="flex w-full flex-col items-center">
             <h1
               className={cn(
-                tangerine.className,
-                "mb-12 select-none text-8xl text-primary"
+                arizonia.className,
+                "mb-12 select-none text-5xl text-primary md:text-6xl xl:text-7xl"
               )}
             >
               Mis Ideas Pintadas
             </h1>
 
-            <div className="flex w-full max-w-sm flex-col">
+            <div className="flex w-full max-w-sm flex-col px-8 sm:px-0">
               {session.data ? (
                 <div className="flex w-full flex-col gap-4">
                   {session.data.role === "admin" && (

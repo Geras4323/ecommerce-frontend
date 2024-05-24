@@ -4,9 +4,9 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "next-themes";
 import type { AppProps } from "next/app";
 import { useState } from "react";
-import { Montserrat, Comfortaa } from "next/font/google";
+import { Comfortaa } from "next/font/google";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
+const comfortaa = Comfortaa({ subsets: ["latin"] });
 
 export default function App({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient());
@@ -14,7 +14,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <div className={montserrat.className}>
+        <div className={comfortaa.className}>
           <Component {...pageProps} />
         </div>
       </ThemeProvider>

@@ -4,7 +4,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { DollarSign, Trash2, Upload, X } from "lucide-react";
+import { ChevronLeft, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
@@ -31,6 +31,7 @@ import { GeneralLayout } from "@/layouts/GeneralLayout";
 import { useRouter } from "next/router";
 import imageCompression from "browser-image-compression";
 import _ from "lodash";
+import Link from "next/link";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -274,16 +275,20 @@ export default function ProductData() {
     <>
       <Toaster richColors />
       <GeneralLayout title="Product" description="Edición de producto">
-        <div className="flex h-full w-screen flex-col pt-24">
-          {/* HEADER */}
-
+        <div className="flex h-full w-screen flex-col pb-4 pt-24">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="mx-auto flex h-full w-fit flex-col items-end gap-8 overflow-y-auto px-2"
+            className="mx-auto flex h-full w-fit flex-col items-end gap-8 overflow-y-auto px-4"
           >
             <div className="flex h-fit w-full items-center justify-between gap-4">
               <div className="flex w-full items-center gap-4 truncate">
-                <span className="truncate text-2xl">
+                <Link
+                  href="/administration/products"
+                  className="btn btn-ghost btn-sm"
+                >
+                  <ChevronLeft className="size-5" />
+                </Link>
+                <span className="truncate text-lg sm:text-xl md:text-2xl">
                   {productQuery.data.name}
                 </span>
               </div>
@@ -299,10 +304,13 @@ export default function ProductData() {
               </button>
             </div>
 
-            <div className="flex flex-row items-start gap-6">
-              <div className="grid w-screen max-w-screen-sm grid-cols-2 items-center gap-4">
+            <div className="flex flex-col items-start gap-6 sm:flex-row">
+              <div className="grid w-full max-w-screen-sm grid-cols-2 items-center gap-4">
                 <div className="col-span-2 flex flex-col gap-1">
-                  <label htmlFor="name" className="text-lg text-secondary">
+                  <label
+                    htmlFor="name"
+                    className="text-md text-primary sm:text-lg"
+                  >
                     <MandatoryMark /> Nombre:
                   </label>
                   <input
@@ -310,31 +318,35 @@ export default function ProductData() {
                     type="text"
                     placeholder="Nuevo nombre"
                     {...register("name")}
-                    className="input input-bordered w-full bg-base-300/50"
+                    className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
                   />
                   <ErrorSpan message={errors.name?.message} />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="price" className="text-lg text-secondary">
+                  <label
+                    htmlFor="price"
+                    className="text-md text-primary sm:text-lg"
+                  >
                     <MandatoryMark /> Precio:
                   </label>
-                  <div className="input flex items-center justify-start border border-secondary/30 p-0">
-                    <div className="flex h-full w-12 items-center justify-center">
-                      <DollarSign className="size-6 text-secondary" />
-                    </div>
+                  <div className="flex h-12 items-center justify-start gap-3 rounded-lg border border-[var(--fallback-bc,oklch(var(--bc)/0.2))] px-4 shadow-inner-sm outline-none">
+                    <span className="text-xl text-secondary">$</span>
                     <input
                       type="text"
                       placeholder="..."
                       {...register("price")}
-                      className="h-full w-full bg-transparent pr-3"
+                      className="h-full w-full bg-transparent pr-3 outline-none"
                     />
                   </div>
                   <ErrorSpan message={errors.price?.message} />
                 </div>
 
                 <div className="flex h-full flex-col justify-start gap-1">
-                  <label htmlFor="code" className="text-lg text-secondary">
+                  <label
+                    htmlFor="code"
+                    className="text-md text-primary sm:text-lg"
+                  >
                     Código:
                   </label>
                   <input
@@ -342,13 +354,16 @@ export default function ProductData() {
                     type="text"
                     placeholder="Nuevo código"
                     {...register("code")}
-                    className="input input-bordered w-full bg-base-300/50"
+                    className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
                   />
                   <ErrorSpan message={errors.code?.message} />
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="category" className="text-lg text-secondary">
+                <div className="col-span-2 flex flex-col gap-1 md:col-span-1">
+                  <label
+                    htmlFor="category"
+                    className="text-md text-primary sm:text-lg"
+                  >
                     <MandatoryMark /> Categoría:
                   </label>
                   <Controller
@@ -359,7 +374,7 @@ export default function ProductData() {
                         defaultValue={`${productQuery.data.categoryID}`}
                         onValueChange={(v) => field.onChange(v)}
                       >
-                        <SelectTrigger className="input input-bordered w-full border bg-base-300/50 outline-none">
+                        <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -378,8 +393,11 @@ export default function ProductData() {
                   <ErrorSpan message={errors.categoryID?.message} />
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="supplier" className="text-lg text-secondary">
+                <div className="col-span-2 flex flex-col gap-1 md:col-span-1">
+                  <label
+                    htmlFor="supplier"
+                    className="text-md text-primary sm:text-lg"
+                  >
                     Proveedor:
                   </label>
                   <Controller
@@ -394,7 +412,7 @@ export default function ProductData() {
                         }
                         onValueChange={(v) => field.onChange(v)}
                       >
-                        <SelectTrigger className="input input-bordered w-full border bg-base-300/50 outline-none">
+                        <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -421,7 +439,7 @@ export default function ProductData() {
                 <div className="col-span-2 flex flex-col gap-1">
                   <label
                     htmlFor="description"
-                    className="text-lg text-secondary"
+                    className="text-md text-primary sm:text-lg"
                   >
                     <MandatoryMark /> Descripción:
                   </label>
@@ -429,21 +447,25 @@ export default function ProductData() {
                     id="description"
                     placeholder="Nueva descripción"
                     {...register("description")}
-                    className="input input-bordered h-48 max-h-96 min-h-16 w-full bg-base-300/50 py-4"
+                    className="input input-bordered h-48 max-h-96 min-h-16 w-full py-4 shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
                   />
                   <ErrorSpan message={errors.description?.message} />
                 </div>
               </div>
 
-              <div className="flex w-80 flex-col gap-1">
-                <label className="text-lg text-secondary">Imágenes:</label>
+              {/* IMAGES */}
+              <div className="flex w-full min-w-80 flex-col gap-1 sm:w-80">
+                <label className="text-md text-primary sm:text-lg">
+                  Imágenes:
+                </label>
                 <section className="flex min-w-fit flex-col gap-4">
                   <div className="flex h-12 items-center justify-center rounded-lg border border-secondary/30 bg-base-300/50">
                     <label
                       htmlFor="update_image"
-                      className="flex size-full cursor-pointer items-center justify-center"
+                      className="flex size-full cursor-pointer items-center justify-center gap-3 text-primary/80 hover:text-primary hover:shadow-md"
                     >
-                      <Upload className="mt-1 size-6 animate-bounce text-primary/80" />
+                      <Upload className="mt-1 size-5 animate-bounce sm:size-6" />
+                      <span className="sm:text-md text-sm">Subir imágenes</span>
                     </label>
                     <input
                       id="update_image"
@@ -461,37 +483,39 @@ export default function ProductData() {
                   </div>
 
                   <div className="flex max-h-104 flex-col gap-4 overflow-y-auto">
-                    <div className="grid grid-cols-3 gap-4">
-                      {tempFiles.map((file, i) => (
-                        <div key={i} className="group relative">
-                          <Image
-                            src={URL.createObjectURL(file)}
-                            width={200}
-                            height={200}
-                            alt={`${i}`}
-                            className="size-24 select-none rounded-xl opacity-50"
-                            draggable={false}
-                            unoptimized
-                          />
-                          <div className="pointer-events-none absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-base-300 font-semibold text-primary opacity-80">
-                            <Upload className="size-3.5" />
+                    {tempFiles.length !== 0 && (
+                      <div className="flex grid-cols-3 flex-wrap gap-4 sm:grid">
+                        {tempFiles.map((file, i) => (
+                          <div key={i} className="group relative">
+                            <Image
+                              src={URL.createObjectURL(file)}
+                              width={200}
+                              height={200}
+                              alt={`${i}`}
+                              className="size-24 select-none rounded-xl object-cover opacity-50"
+                              draggable={false}
+                              unoptimized
+                            />
+                            <div className="pointer-events-none absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-base-300 font-semibold text-primary opacity-80">
+                              <Upload className="size-3.5" />
+                            </div>
+                            <div
+                              onClick={() => removeUploadedImage(i)}
+                              className="absolute bottom-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md bg-error font-semibold opacity-0 transition-opacity duration-100 group-hover:opacity-90"
+                            >
+                              <Trash2 className="size-3 text-white" />
+                            </div>
                           </div>
-                          <div
-                            onClick={() => removeUploadedImage(i)}
-                            className="absolute bottom-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md bg-error font-semibold text-primary opacity-0 transition-opacity duration-100 group-hover:opacity-90"
-                          >
-                            <Trash2 className="size-3" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
 
                     {!!existentFiles && (
                       <ReactSortable
                         animation={150}
                         list={existentFiles}
                         setList={setExistentFiles}
-                        className="grid grid-cols-3 gap-4"
+                        className="flex grid-cols-3 flex-wrap gap-4 sm:grid"
                         direction="horizontal"
                       >
                         {existentFiles.map((image, i) => (
@@ -504,7 +528,7 @@ export default function ProductData() {
                               className={cn(
                                 image.isDeleted && "opacity-30",
                                 i === 0 && "border-2 border-primary",
-                                "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
+                                "size-24 rounded-xl object-cover hover:cursor-grab active:cursor-grabbing"
                               )}
                               unoptimized
                             />
@@ -515,7 +539,7 @@ export default function ProductData() {
                               onClick={() =>
                                 alternateExistentImageDeletion(image.id)
                               }
-                              className="absolute bottom-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md bg-error font-semibold text-primary opacity-0 transition-opacity duration-100 group-hover:opacity-90"
+                              className="absolute bottom-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md bg-error font-semibold text-white opacity-0 transition-opacity duration-100 group-hover:opacity-90"
                             >
                               {image.isDeleted ? (
                                 <X className="size-3" />
@@ -548,7 +572,7 @@ export default function ProductData() {
                   uploadImagesMutation.isPending
                 }
                 className="btn-primary w-32"
-                animation="loading-dots"
+                animation="dots"
               >
                 Guardar
               </LoadableButton>
