@@ -9,6 +9,7 @@ import {
   Package,
   WalletCards,
   LogOut,
+  Home,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useState } from "react";
@@ -43,6 +44,13 @@ const sections = [
     Svg: User2,
     url: "/account",
     disabled: true,
+  },
+  {
+    title: "Inicio",
+    description: "Pantalla principal",
+    Svg: Home,
+    url: "/",
+    disabled: false,
   },
   {
     title: "Showroom",
