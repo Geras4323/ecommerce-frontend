@@ -26,6 +26,7 @@ import {
   ProductsItem,
   ProductsItemSkeleton,
 } from "@/components/administration/products";
+import { ErrorSpan } from "@/components/forms";
 
 function Products() {
   const { create_open } = useProductStore();
@@ -69,14 +70,6 @@ function Products() {
     retry: false,
   });
 
-  if (productsQuery.isError) return <>Products error</>;
-
-  if (categoriesQuery.isPending) return <>Categories pending</>;
-  if (categoriesQuery.isError) return <>Categories error</>;
-
-  if (suppliersQuery.isPending) return <>Suppliers pending</>;
-  if (suppliersQuery.isError) return <>Suppliers error</>;
-
   let filteredProducts: Product[] = productsQuery.data ?? [];
 
   if (nameFilter) {
@@ -99,6 +92,9 @@ function Products() {
     );
   }
 
+  const anyError =
+    productsQuery.isError || categoriesQuery.isError || suppliersQuery.isError;
+
   return (
     <AdministrationLayout active="Productos">
       <div className="flex w-full">
@@ -107,175 +103,204 @@ function Products() {
 
         {/* MAIN TABLE */}
         <section className="relative w-full flex-col p-4 transition-all duration-300">
-          <div className="mx-auto mb-4 flex h-fit w-full max-w-screen-md flex-col items-end justify-center gap-4 border-b border-secondary/30 pb-4 xl:w-full xl:max-w-screen-2xl">
-            <div className="flex items-center gap-4">
-              <Dropdown>
-                <DropdownTrigger className="btn btn-outline btn-primary focus:outline-none">
-                  <Filter className="size-5" />
-                  <span>Filtro</span>
-                </DropdownTrigger>
-                <DropdownContent
-                  sideOffset={5}
-                  side={mq ? (mq < mqs.md ? "bottom" : "left") : "left"}
-                  align={mq ? (mq < mqs.md ? "center" : "start") : "start"}
-                  className="flex h-fit w-72 min-w-72 flex-col gap-3 rounded-lg border border-secondary/30 bg-base-100 p-3 shadow-md"
-                >
-                  {/* Name */}
-                  <div className="input input-bordered flex h-10 items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
-                    <Search className="size-5 text-secondary" />
-                    <input
-                      type="text"
-                      placeholder="Buscar producto"
-                      value={nameFilter ?? ""}
-                      className="h-full w-full bg-transparent"
-                      onChange={(event) => setNameFilter(event.target.value)}
-                    />
-                  </div>
+          {!anyError && (
+            <div className="mx-auto mb-4 flex h-fit w-full max-w-screen-md flex-col items-end justify-center gap-4 border-b border-secondary/30 pb-4 xl:w-full xl:max-w-screen-2xl">
+              <div className="flex items-center gap-4">
+                {categoriesQuery.isPending || suppliersQuery.isPending ? (
+                  <div className="h-12 w-24 animate-pulse rounded-md bg-secondary/20" />
+                ) : (
+                  <Dropdown>
+                    <DropdownTrigger className="btn btn-outline btn-primary focus:outline-none">
+                      <Filter className="size-5" />
+                      <span>Filtro</span>
+                    </DropdownTrigger>
+                    <DropdownContent
+                      sideOffset={5}
+                      side={mq ? (mq < mqs.md ? "bottom" : "left") : "left"}
+                      align={mq ? (mq < mqs.md ? "center" : "start") : "start"}
+                      className="flex h-fit w-72 min-w-72 flex-col gap-3 rounded-lg border border-secondary/30 bg-base-100 p-3 shadow-md"
+                    >
+                      {/* Name */}
+                      <div className="input input-bordered flex h-10 items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
+                        <Search className="size-5 text-secondary" />
+                        <input
+                          type="text"
+                          placeholder="Buscar producto"
+                          value={nameFilter ?? ""}
+                          className="h-full w-full bg-transparent"
+                          onChange={(event) =>
+                            setNameFilter(event.target.value)
+                          }
+                        />
+                      </div>
 
-                  {/* Category */}
-                  <Select
-                    value={`${selectedCategory?.id}`}
-                    onValueChange={(v) =>
-                      setSelectedCategory(
-                        categoriesQuery.data.find(
-                          (c) => c.id === parseInt(v)
-                        ) ?? null
-                      )
-                    }
+                      {/* Category */}
+                      <Select
+                        value={`${selectedCategory?.id}`}
+                        onValueChange={(v) =>
+                          setSelectedCategory(
+                            categoriesQuery.data.find(
+                              (c) => c.id === parseInt(v)
+                            ) ?? null
+                          )
+                        }
+                      >
+                        <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
+                          <span
+                            className={cn(
+                              "flex items-center gap-3",
+                              !selectedCategory && "italic text-secondary"
+                            )}
+                          >
+                            <Tag className="size-4 min-w-4" />
+                            {selectedCategory?.name ?? "Categoría"}
+                          </span>
+                        </SelectTrigger>
+                        <SelectContent sideOffset={0} align="start">
+                          <SelectOption
+                            value={`${-1}`}
+                            className="rounded-lg italic text-secondary"
+                          >
+                            Sin filtro
+                          </SelectOption>
+                          {categoriesQuery.data?.map((category) => (
+                            <SelectOption
+                              key={category.id}
+                              value={`${category.id}`}
+                              className="rounded-lg"
+                            >
+                              {category.name}
+                            </SelectOption>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Supplier */}
+                      <Select
+                        onValueChange={(v) =>
+                          setSelectedSupplier(
+                            suppliersQuery.data.find(
+                              (s) => s.id === parseInt(v)
+                            ) ?? null
+                          )
+                        }
+                      >
+                        <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
+                          <span
+                            className={cn(
+                              "flex items-center gap-3",
+                              !selectedSupplier && "italic text-secondary"
+                            )}
+                          >
+                            <ClipboardList className="mb-0.5 size-4 min-w-4" />
+                            {selectedSupplier?.name ?? "Proveedor"}
+                          </span>
+                        </SelectTrigger>
+                        <SelectContent sideOffset={0} align="end">
+                          <SelectOption
+                            value={`${-1}`}
+                            className="rounded-lg italic text-secondary"
+                          >
+                            Sin filtro
+                          </SelectOption>
+                          {suppliersQuery.data?.map((supplier) => (
+                            <SelectOption
+                              key={supplier.id}
+                              value={`${supplier.id}`}
+                              className="rounded-lg"
+                            >
+                              {supplier.name}
+                            </SelectOption>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </DropdownContent>
+                  </Dropdown>
+                )}
+
+                {productsQuery.isPending ? (
+                  <div className="h-12 w-36 animate-pulse rounded-md bg-secondary/20" />
+                ) : (
+                  <button
+                    className="btn btn-primary col-span-4 w-36 whitespace-nowrap transition-all duration-300"
+                    onClick={create_open}
                   >
-                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
-                      <span
-                        className={cn(
-                          "flex items-center gap-3",
-                          !selectedCategory && "italic text-secondary"
-                        )}
-                      >
-                        <Tag className="size-4 min-w-4" />
-                        {selectedCategory?.name ?? "Categoría"}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent sideOffset={0} align="start">
-                      <SelectOption
-                        value={`${-1}`}
-                        className="rounded-lg italic text-secondary"
-                      >
-                        Sin filtro
-                      </SelectOption>
-                      {categoriesQuery.data?.map((category) => (
-                        <SelectOption
-                          key={category.id}
-                          value={`${category.id}`}
-                          className="rounded-lg"
-                        >
-                          {category.name}
-                        </SelectOption>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    Crear producto
+                  </button>
+                )}
+              </div>
 
-                  {/* Supplier */}
-                  <Select
-                    onValueChange={(v) =>
-                      setSelectedSupplier(
-                        suppliersQuery.data.find((s) => s.id === parseInt(v)) ??
-                          null
-                      )
-                    }
-                  >
-                    <SelectTrigger className="input input-bordered flex h-10 w-full items-center justify-between gap-4 rounded-md px-4 py-2 shadow-inner focus:outline-none">
-                      <span
-                        className={cn(
-                          "flex items-center gap-3",
-                          !selectedSupplier && "italic text-secondary"
-                        )}
-                      >
-                        <ClipboardList className="mb-0.5 size-4 min-w-4" />
-                        {selectedSupplier?.name ?? "Proveedor"}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent sideOffset={0} align="end">
-                      <SelectOption
-                        value={`${-1}`}
-                        className="rounded-lg italic text-secondary"
-                      >
-                        Sin filtro
-                      </SelectOption>
-                      {suppliersQuery.data?.map((supplier) => (
-                        <SelectOption
-                          key={supplier.id}
-                          value={`${supplier.id}`}
-                          className="rounded-lg"
-                        >
-                          {supplier.name}
-                        </SelectOption>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </DropdownContent>
-              </Dropdown>
-
-              <button
-                className="btn btn-primary col-span-4 whitespace-nowrap transition-all duration-300"
-                onClick={create_open}
-              >
-                Crear producto
-              </button>
+              {(nameFilter || selectedCategory || selectedSupplier) && (
+                <section className="flex flex-wrap items-center justify-end gap-2">
+                  {nameFilter && (
+                    <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
+                      <Package className="mr-1 size-4 text-secondary" />
+                      {nameFilter}
+                      <X
+                        onClick={() => setNameFilter("")}
+                        className="size-5 cursor-pointer text-secondary"
+                      />
+                    </div>
+                  )}
+                  {!!selectedCategory && (
+                    <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
+                      <Tag className="mr-1 size-4 text-secondary" />
+                      {selectedCategory?.name}
+                      <X
+                        onClick={() => setSelectedCategory(null)}
+                        className="size-5 cursor-pointer text-secondary"
+                      />
+                    </div>
+                  )}
+                  {!!selectedSupplier && (
+                    <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
+                      <ClipboardList className="mr-1 size-4 text-secondary" />
+                      {selectedSupplier?.name}
+                      <X
+                        onClick={() => setSelectedSupplier(null)}
+                        className="size-5 cursor-pointer text-secondary"
+                      />
+                    </div>
+                  )}
+                </section>
+              )}
             </div>
+          )}
 
-            {(nameFilter || selectedCategory || selectedSupplier) && (
-              <section className="flex flex-wrap items-center justify-end gap-2">
-                {nameFilter && (
-                  <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
-                    <Package className="mr-1 size-4 text-secondary" />
-                    {nameFilter}
-                    <X
-                      onClick={() => setNameFilter("")}
-                      className="size-5 cursor-pointer text-secondary"
+          {!anyError && (
+            <div className="mx-auto grid w-full max-w-screen-md grid-cols-1 gap-4 xl:max-w-screen-2xl xl:grid-cols-2">
+              {productsQuery.isPending
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <ProductsItemSkeleton key={i} />
+                  ))
+                : filteredProducts.map((product) => (
+                    <ProductsItem
+                      key={product.id}
+                      product={product}
+                      category={categoriesQuery.data?.find(
+                        (c) => c.id === product?.categoryID
+                      )}
+                      supplier={suppliersQuery.data?.find(
+                        (s) => s.id === product?.supplierID
+                      )}
                     />
-                  </div>
-                )}
-                {!!selectedCategory && (
-                  <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
-                    <Tag className="mr-1 size-4 text-secondary" />
-                    {selectedCategory?.name}
-                    <X
-                      onClick={() => setSelectedCategory(null)}
-                      className="size-5 cursor-pointer text-secondary"
-                    />
-                  </div>
-                )}
-                {!!selectedSupplier && (
-                  <div className="flex h-8 w-fit items-center gap-1 rounded-lg bg-secondary/30 px-2 py-1">
-                    <ClipboardList className="mr-1 size-4 text-secondary" />
-                    {selectedSupplier?.name}
-                    <X
-                      onClick={() => setSelectedSupplier(null)}
-                      className="size-5 cursor-pointer text-secondary"
-                    />
-                  </div>
-                )}
-              </section>
-            )}
-          </div>
+                  ))}
+            </div>
+          )}
 
-          <div className="mx-auto grid w-full max-w-screen-md grid-cols-1 gap-4 xl:max-w-screen-2xl xl:grid-cols-2">
-            {productsQuery.isPending
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <ProductsItemSkeleton key={i} />
-                ))
-              : filteredProducts.map((product) => (
-                  <ProductsItem
-                    key={product.id}
-                    product={product}
-                    category={categoriesQuery.data?.find(
-                      (c) => c.id === product?.categoryID
-                    )}
-                    supplier={suppliersQuery.data?.find(
-                      (s) => s.id === product?.supplierID
-                    )}
-                  />
-                ))}
-          </div>
+          {anyError && (
+            <div className="flex w-full flex-col gap-2">
+              {productsQuery.isError && (
+                <ErrorSpan message="Ocurrió un error durante la carga de los productos" />
+              )}
+              {categoriesQuery.isError && (
+                <ErrorSpan message="Ocurrió un error durante la carga de las categorías" />
+              )}
+              {suppliersQuery.isError && (
+                <ErrorSpan message="Ocurrió un error durante la carga de los proveedores" />
+              )}
+            </div>
+          )}
         </section>
       </div>
     </AdministrationLayout>
