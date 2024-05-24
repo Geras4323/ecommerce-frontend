@@ -115,7 +115,7 @@ export default function Order() {
         </div>
 
         <section className="flex h-full w-full flex-col gap-4 lg:flex-row">
-          <article className="order-2 flex h-full w-full flex-col gap-4 overflow-y-auto lg:order-1 lg:w-3/5">
+          <article className="order-2 flex h-full w-full flex-col gap-2 overflow-y-auto lg:order-1 lg:w-3/5">
             {productsQuery.isPending || orderQuery.isPending ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <SingleOrderItemSkeleton key={i} />

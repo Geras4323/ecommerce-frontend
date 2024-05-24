@@ -356,15 +356,15 @@ export function SingleOrderItem({
         </div>
       </div>
 
-      <div className="flex h-full flex-row items-end justify-end gap-2 xs:flex-col xs:justify-center xs:gap-2">
-        <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center xs:order-1 xs:border-none">
+      <div className="flex h-full flex-row items-end justify-end gap-2 xs:flex-col xs:items-center xs:justify-center xs:gap-2">
+        <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center xs:order-1 xs:border-none xs:pl-0">
           <span className="text-lg text-primary/70">$</span>
           <span className="text-xl text-primary">
             {price.toLocaleString("es-AR")}
           </span>
         </div>
 
-        <div className="order-1 flex h-8 w-24 items-end justify-center gap-2 rounded-lg xs:order-2">
+        <div className="order-1 flex h-8 w-fit items-end justify-center gap-2 rounded-lg xs:order-2">
           <div className="flex items-end gap-0.5">
             <span className="text-xl text-primary">{item.quantity}</span>
             <span className="text-base text-primary/70">x</span>
