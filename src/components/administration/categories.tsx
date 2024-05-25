@@ -54,7 +54,6 @@ export function CategoriesItem({
           width={200}
           height={200}
           className="h-full w-24 border-r border-r-secondary/10 bg-secondary/20 object-cover transition-all"
-          unoptimized
         />
       </div>
       <div className="flex h-full w-full flex-col items-start justify-center gap-2 truncate">

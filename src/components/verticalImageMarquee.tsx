@@ -1,6 +1,3 @@
-import Image from "next/image";
-import React from "react";
-
 type Speed = "slow" | "medium" | "fast";
 
 export function VerticalImageMarquee({

@@ -23,7 +23,9 @@ export default function Home() {
     refetchOnWindowFocus: false,
   });
 
-  const firstMarqueeUrls = imagesQuery.data?.map((image) => image.url);
+  const firstMarqueeUrls = imagesQuery.data
+    ?.map((image) => image.url)
+    .filter((_, i) => i < 8);
   const secondMarqueeUrls = firstMarqueeUrls?.toReversed();
 
   return (

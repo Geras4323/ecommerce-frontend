@@ -560,7 +560,6 @@ function OrderedProduct({
             !product.images[0]?.url && "opacity-50 blur-[1px]",
             "size-16 min-w-16 rounded-full border border-secondary/30"
           )}
-          unoptimized
         />
         <div className="flex flex-col gap-2">
           <span className="line-clamp-3 text-primary">{product.name}</span>

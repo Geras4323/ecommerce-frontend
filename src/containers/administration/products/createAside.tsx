@@ -401,7 +401,6 @@ export function ProductCreateAside() {
                         i === 0 && "border-2 border-primary",
                         "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
                       )}
-                      unoptimized
                     />
                   </div>
                 ))}

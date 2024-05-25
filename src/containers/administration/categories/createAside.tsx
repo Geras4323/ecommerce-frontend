@@ -183,7 +183,6 @@ export function CategoryCreateAside() {
                       height={200}
                       src={URL.createObjectURL(image)}
                       className="absolute size-full rounded-md"
-                      unoptimized
                     />
                   )}
                 </div>

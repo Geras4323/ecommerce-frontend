@@ -96,7 +96,6 @@ export default function NotFound() {
                   height={200}
                   alt={file.data.name}
                   className="mr-4 size-48"
-                  unoptimized
                 />
               </div>
             ))}

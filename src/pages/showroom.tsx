@@ -112,7 +112,6 @@ export default function Showroom() {
                             )}
                             width={40}
                             height={40}
-                            unoptimized
                           />
                           {category.name}
                         </div>
@@ -250,7 +249,6 @@ function CategoryItem({
               : "saturate-0",
             "h-full w-24 border-r border-r-secondary/10 bg-secondary/20 transition-all"
           )}
-          unoptimized
         />
       </div>
       <div className="flex h-full w-full items-center truncate p-6">
@@ -358,9 +356,8 @@ function ProductItem({
                   "h-full w-52 rounded-lg border border-secondary/10 object-cover md:w-full"
                 )}
                 src={image.url ?? NoImage}
-                height="200"
-                width="200"
-                unoptimized
+                height={208}
+                width={208}
               />
             </CarouselItem>
           ))}
