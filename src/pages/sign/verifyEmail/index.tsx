@@ -1,7 +1,7 @@
 import { ErrorSpan, LoadableButton } from "@/components/forms";
 import { leaveIfVerified } from "@/functions/session";
 import { useSession } from "@/hooks/session";
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { type ServerError } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";

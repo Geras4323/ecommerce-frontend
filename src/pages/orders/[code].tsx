@@ -1,4 +1,4 @@
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "@/functions/products";
 import {

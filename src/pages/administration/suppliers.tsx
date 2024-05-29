@@ -1,4 +1,4 @@
-import { AdministrationLayout } from "@/components/layouts/administration";
+import { AdministrationLayout } from "@/layouts/administration";
 import {
   Table,
   TableBody,

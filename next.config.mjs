@@ -7,7 +7,13 @@ const config = {
   //   defaultLocale: "en",
   // },
   images: {
-    domains: ["res.cloudinary.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.cloudinary.com",
+        port: "",
+      },
+    ],
   },
 };
 export default config;

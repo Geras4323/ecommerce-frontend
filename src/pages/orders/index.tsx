@@ -4,7 +4,7 @@ import {
 } from "@/components/administration/orders";
 import { getMyOrders } from "@/functions/orders";
 import { withAuth } from "@/functions/session";
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, Undo2 } from "lucide-react";
 import Link from "next/link";
@@ -23,7 +23,7 @@ export default function Orders() {
           <Link href="/showroom" className="btn btn-ghost btn-sm">
             <ChevronLeft className="size-5" />
           </Link>
-          <h1 className="py-2 text-xl font-medium">PEDIDOS</h1>
+          <h1 className="py-2 text-xl font-medium tracking-wide">PEDIDOS</h1>
         </div>
         <section className="flex h-full w-full flex-col gap-4 overflow-y-auto">
           {ordersQuery.isPending ? (

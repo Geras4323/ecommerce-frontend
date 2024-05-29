@@ -1,4 +1,4 @@
-import { AdministrationLayout } from "@/components/layouts/administration";
+import { AdministrationLayout } from "@/layouts/administration";
 import { withAuth } from "@/functions/session";
 import type { ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";

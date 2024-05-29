@@ -1,4 +1,4 @@
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { useEffect, useState } from "react";
 // import Image1 from "../../public/categories/bath.jpg";
 // import Image2 from "../../public/categories/clothes.jpg";

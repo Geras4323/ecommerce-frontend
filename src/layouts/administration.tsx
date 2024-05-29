@@ -1,4 +1,4 @@
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import type { WithChildren } from "@/types/types";
 import { cn } from "@/utils/lib";
 import {
@@ -19,9 +19,8 @@ type Section = {
   disabled: boolean;
 };
 
-type SectionName = (typeof sections)[number]["name"];
-
-const sections = [
+export type SectionName = (typeof sections)[number]["name"];
+export const sections = [
   {
     name: "Proveedores",
     url: "/administration/suppliers",
@@ -74,7 +73,7 @@ export function AdministrationLayout({
                   />
                 );
             })}
-            <hr className="my-2 border-secondary/20" />
+            <hr className="border-secondary/20" />
             {sections.map((section, i) => {
               if (i >= 3 && !section.disabled)
                 return (

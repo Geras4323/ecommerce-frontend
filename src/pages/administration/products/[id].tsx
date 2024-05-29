@@ -27,7 +27,7 @@ import { getProduct, type Product } from "@/functions/products";
 import { ReactSortable } from "react-sortablejs";
 import { cn } from "@/utils/lib";
 import { type ProductImage } from "@/functions/images";
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { useRouter } from "next/router";
 import imageCompression from "browser-image-compression";
 import _ from "lodash";

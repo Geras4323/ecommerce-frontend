@@ -1,7 +1,7 @@
 import type { TCartItem } from "@/functions/cart";
 import { type Product, getProducts } from "@/functions/products";
 import { useShoppingCart } from "@/hooks/cart";
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import {
   useQuery,
@@ -151,7 +151,9 @@ export default function Cart() {
             </Link>
             <div className="flex items-center gap-4">
               <ShoppingCart className="hidden size-6" />
-              <h1 className="text-xl font-medium">CARRITO DE COMPRAS</h1>
+              <h1 className="text-xl font-medium tracking-wide">
+                CARRITO DE COMPRAS
+              </h1>
             </div>
           </div>
 

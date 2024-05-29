@@ -1,5 +1,5 @@
 import { type Category, getCategories } from "@/functions/categories";
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { type UseMutationResult, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { type Dispatch, type SetStateAction, useState } from "react";

@@ -1,4 +1,4 @@
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { useEffect, useState } from "react";
 import { leaveIfLoggedIn } from "@/functions/session";
 import { useSearchParams } from "next/navigation";

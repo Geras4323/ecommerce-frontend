@@ -1,7 +1,7 @@
 import { LoadingSpinner } from "@/components/loading";
 import { verifyEmail } from "@/functions/auth";
 import { leaveIfVerified } from "@/functions/session";
-import { GeneralLayout } from "@/layouts/GeneralLayout";
+import { GeneralLayout } from "@/layouts/general";
 import { type ServerError } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { useQuery } from "@tanstack/react-query";

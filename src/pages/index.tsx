@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GeneralLayout } from "src/layouts/GeneralLayout";
+import { GeneralLayout } from "src/layouts/general";
 import { useSession } from "@/hooks/session";
 import { useQuery } from "@tanstack/react-query";
 import { getImages } from "@/functions/images";
@@ -7,6 +7,7 @@ import { type ServerError } from "@/types/types";
 import { VerticalImageMarquee } from "@/components/verticalImageMarquee";
 import { cn } from "@/utils/lib";
 import { Arizonia } from "next/font/google";
+import { LogIn, LogOut, Package, Table2, UserRoundPlus } from "lucide-react";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
@@ -83,46 +84,55 @@ export default function Home() {
                 <div className="flex w-full flex-col gap-4">
                   {session.data.role === "admin" && (
                     <Link
-                      href="/administration/categories"
-                      className="btn btn-primary shadow-button"
+                      href="/administration"
+                      className="btn btn-primary gap-3 shadow-button"
                     >
+                      <Table2 className="size-5" />
                       Administración
                     </Link>
                   )}
                   <Link
                     href="/showroom"
-                    className="btn btn-primary shadow-button"
+                    className="btn btn-primary gap-3 shadow-button"
                     style={{
                       boxShadow:
                         "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
                     }}
                   >
+                    <Package className="size-5" />
                     Ir al showroom
                   </Link>
                   <hr className="border-b border-t-0 border-b-secondary/30" />
                   <button
                     onClick={() => logoutMutation.mutate()}
-                    className="btn btn-outline btn-secondary shadow-button"
+                    className="btn btn-outline btn-secondary gap-3 shadow-button"
                   >
+                    <LogOut className="size-5" />
                     Cerrar sesión
                   </button>
                 </div>
               ) : (
                 <div className="group flex w-full flex-col gap-4">
-                  <Link href="/sign" className="btn btn-primary shadow-button">
+                  <Link
+                    href="/sign"
+                    className="btn btn-primary gap-3 shadow-button"
+                  >
+                    <LogIn className="size-5" />
                     Iniciar sesión
                   </Link>
                   <Link
                     href="/sign?action=signup"
-                    className="btn btn-outline btn-secondary shadow-button"
+                    className="btn btn-outline btn-secondary gap-3 shadow-button"
                   >
+                    <UserRoundPlus className="size-5" />
                     Registrarse
                   </Link>
                   <hr className="border-b border-t-0 border-b-secondary/30" />
                   <Link
                     href="/showroom"
-                    className="btn btn-outline btn-secondary shadow-button"
+                    className="btn btn-outline btn-secondary gap-3 shadow-button"
                   >
+                    <Package className="size-5" />
                     Ir al showroom
                   </Link>
                 </div>
