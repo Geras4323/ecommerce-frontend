@@ -3,7 +3,7 @@ import { getCategories } from "@/functions/categories";
 import { withAuth } from "@/functions/session";
 import type { ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { Search, Tag } from "lucide-react";
 import { CategoryDataAside } from "src/containers/administration/categories/dataAside";
 import { CategoryCreateAside } from "src/containers/administration/categories/createAside";
 import { useCategoryStore } from "@/hooks/states/categories";
@@ -39,7 +39,7 @@ function Categories() {
         <section className="relative mx-auto flex h-full w-full max-w-screen-2xl flex-col p-4 transition-all duration-300">
           <div className="mb-4 flex h-fit w-full items-center justify-end gap-4 border-b border-secondary/30 pb-4">
             <div className="input input-bordered flex items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
-              <Search className="size-5 text-secondary" />
+              <Search className="size-5 min-w-5 text-secondary" />
               <input
                 type="text"
                 placeholder="Buscar categoría"
@@ -50,10 +50,11 @@ function Categories() {
             </div>
 
             <button
-              className="btn btn-primary whitespace-nowrap transition-all duration-300"
+              className="btn btn-primary gap-3 whitespace-nowrap transition-all duration-300"
               onClick={create_open}
               disabled={!!selected_category}
             >
+              <Tag className="size-5" />
               Crear categoría
             </button>
           </div>

@@ -3,11 +3,11 @@ import type { WithChildren } from "@/types/types";
 import { cn } from "@/utils/lib";
 import {
   type LucideIcon,
-  Tag,
   ClipboardList,
-  Package,
   UsersRound,
   WalletCards,
+  Tags,
+  Boxes,
 } from "lucide-react";
 import Link from "next/link";
 import { Toaster } from "sonner";
@@ -30,13 +30,13 @@ export const sections = [
   {
     name: "Categorías",
     url: "/administration/categories",
-    icon: Tag,
+    icon: Tags,
     disabled: false,
   },
   {
     name: "Productos",
     url: "/administration/products",
-    icon: Package,
+    icon: Boxes,
     disabled: false,
   },
   {

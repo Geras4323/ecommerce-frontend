@@ -2,7 +2,15 @@ import { AdministrationLayout } from "@/layouts/administration";
 import { withAuth } from "@/functions/session";
 import type { ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
-import { ClipboardList, Filter, Package, Search, Tag, X } from "lucide-react";
+import {
+  ClipboardList,
+  Filter,
+  Package,
+  PackagePlus,
+  Search,
+  Tag,
+  X,
+} from "lucide-react";
 import { getProducts, type Product } from "@/functions/products";
 import { useProductStore } from "@/hooks/states/products";
 import { ProductCreateAside } from "src/containers/administration/products/createAside";
@@ -122,7 +130,7 @@ function Products() {
                     >
                       {/* Name */}
                       <div className="input input-bordered flex h-10 items-center justify-start gap-3 px-4 py-2 shadow-inner focus:shadow-inner focus:outline-none">
-                        <Search className="size-5 text-secondary" />
+                        <Search className="size-5 min-w-5 text-secondary" />
                         <input
                           type="text"
                           placeholder="Buscar producto"
@@ -222,9 +230,10 @@ function Products() {
                   <div className="h-12 w-36 animate-pulse rounded-md bg-secondary/20" />
                 ) : (
                   <button
-                    className="btn btn-primary col-span-4 w-36 whitespace-nowrap transition-all duration-300"
+                    className="btn btn-primary col-span-4 whitespace-nowrap transition-all duration-300"
                     onClick={create_open}
                   >
+                    <PackagePlus className="size-5" />
                     Crear producto
                   </button>
                 )}
