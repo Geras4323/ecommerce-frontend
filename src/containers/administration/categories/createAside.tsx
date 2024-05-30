@@ -6,7 +6,7 @@ import { mqs, useMediaQueries } from "@/hooks/screen";
 import { useCategoryStore } from "@/hooks/states/categories";
 import { type CloudinarySuccess } from "@/types/cloudinary";
 import type { ServerError, ServerSuccess } from "@/types/types";
-import { cn } from "@/utils/lib";
+import { checkMimetype, cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -65,6 +65,12 @@ export function CategoryCreateAside() {
       return;
     }
     create_modal_discardChanges_change(true);
+  }
+
+  function loadImage(image?: File) {
+    if (!image) return;
+    if (!checkMimetype(image.type, ["image/png", "image/jpeg"])) return;
+    setImage(image);
   }
 
   const {
@@ -183,7 +189,7 @@ export function CategoryCreateAside() {
                     id="new_image"
                     type="file"
                     className="hidden"
-                    onChange={(e) => setImage(e.target.files?.[0])}
+                    onChange={(e) => loadImage(e.target.files?.[0])}
                   />
                   {image && (
                     <Image

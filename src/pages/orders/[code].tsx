@@ -36,7 +36,7 @@ import { vars } from "@/utils/vars";
 import axios from "axios";
 import { LoadableButton } from "@/components/forms";
 import { type Payment } from "@/functions/payments";
-import { cn } from "@/utils/lib";
+import { checkMimetype, cn } from "@/utils/lib";
 import { getCategories } from "@/functions/categories";
 import Link from "next/link";
 
@@ -48,6 +48,13 @@ export default function Order() {
   const isValidCode = !isNaN(parseInt(orderID));
 
   const [uploadedVoucher, setUploadedVoucher] = useState<File>();
+
+  function loadVoucher(voucher?: File) {
+    if (!voucher) return;
+    console.log(voucher.type);
+    checkMimetype(voucher.type, ["image/png", "image/jpeg", "application/pdf"]);
+    setUploadedVoucher(voucher);
+  }
 
   const productsQuery = useQuery({
     queryKey: ["products"],
@@ -211,12 +218,12 @@ export default function Order() {
                   type="file"
                   hidden
                   onChange={(e) => {
-                    if (e.target.files) setUploadedVoucher(e.target.files[0]);
+                    if (e.target.files) loadVoucher(e.target.files[0]);
                   }}
                 />
                 <label
                   htmlFor="voucher"
-                  className="btn btn-outline btn-secondary w-full"
+                  className="btn btn-outline btn-primary w-full"
                 >
                   <Paperclip className="size-5" /> Adjuntar comprobante de pago
                 </label>

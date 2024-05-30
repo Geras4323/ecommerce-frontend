@@ -57,7 +57,11 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
-      className={cn(sheetVariants({ side }), !!className && className)}
+      className={cn(
+        sheetVariants({ side }),
+        !!className && className,
+        "focus:outline-none"
+      )}
       {...props}
     >
       {children}
