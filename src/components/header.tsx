@@ -100,7 +100,8 @@ export const Header = () => {
         isNavBordered || theme === "light"
           ? "border-b-secondary/20"
           : "border-b-transparent",
-        "fixed z-50 flex h-16 w-full items-center justify-between border border-secondary/20 bg-base-300 px-6 py-2 backdrop-blur transition-all duration-500"
+        theme === "dark" ? "bg-base-100/70" : "bg-base-300/70",
+        "fixed z-50 flex h-16 w-full items-center justify-between border border-secondary/20 px-6 py-2 backdrop-blur transition-all duration-500"
       )}
     >
       <Link
