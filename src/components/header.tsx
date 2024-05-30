@@ -12,7 +12,7 @@ import {
   Home,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/utils/lib";
 import { useShoppingCart } from "@/hooks/cart";
 import { useRouter } from "next/router";
@@ -83,9 +83,26 @@ export const Header = () => {
   const { theme } = useTheme();
 
   const [isSessionOpen, setIsSessionOpen] = useState(false);
+  const [isNavBordered, setIsNavBordered] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setIsNavBordered(window.scrollY > 1);
+    }
+
+    document.addEventListener("scroll", onScroll);
+    return () => document.removeEventListener("scroll", onScroll);
+  }, [isNavBordered]);
 
   return (
-    <header className="fixed z-50 flex h-16 w-full items-center justify-between border-b border-b-secondary/20 bg-base-300/70 px-6 py-2 backdrop-blur">
+    <header
+      className={cn(
+        isNavBordered || theme === "light"
+          ? "border-b-secondary/20"
+          : "border-b-transparent",
+        "fixed z-50 flex h-16 w-full items-center justify-between border border-secondary/20 bg-base-300 px-6 py-2 backdrop-blur transition-all duration-500"
+      )}
+    >
       <Link
         href="/"
         className={cn(
@@ -135,11 +152,11 @@ export const Header = () => {
                   <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
                 )}
             </PopoverTrigger>
-            <PopoverContent align="end" sideOffset={17}>
+            <PopoverContent align="end" sideOffset={15}>
               <article
                 className={cn(
                   theme === "dark" ? "bg-base-300" : "bg-base-100",
-                  "grid h-fit w-80 grid-cols-1 gap-6 overflow-hidden rounded-b-lg border border-t-0 border-secondary/20 p-4 shadow-xl"
+                  "grid h-fit w-80 grid-cols-1 gap-6 overflow-hidden rounded-b-lg border border-secondary/20 p-4 shadow-xl"
                 )}
               >
                 {sections.map((section) => {
