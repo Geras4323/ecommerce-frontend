@@ -26,7 +26,7 @@ import { z } from "zod";
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
   code: z.string().optional(),
-  name: z.string(),
+  name: z.string().min(1, { message: "Debe tener un nombre" }),
 });
 
 export function CategoryCreateAside() {
@@ -84,7 +84,6 @@ export function CategoryCreateAside() {
       return;
     }
     resetInputData();
-    create_close();
   };
 
   const dataMutation = useMutation<ServerSuccess<Category>, ServerError, Input>(

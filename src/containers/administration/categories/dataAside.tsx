@@ -271,7 +271,6 @@ export function CategoryDataAside() {
               </div>
               {image && (
                 <div className="absolute mt-1 flex w-full items-center justify-center gap-2 text-error">
-                  <AlertCircle className="size-4" />
                   <ErrorSpan message="Imagen no guardada" />
                 </div>
               )}
