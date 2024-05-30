@@ -4,7 +4,13 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { AlertCircle, PanelLeftClose, Trash2, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  PanelBottomClose,
+  PanelLeftClose,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -20,6 +26,7 @@ import {
   DiscardCategoryChangesModal,
 } from "@/components/modals/administration/categories";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -32,6 +39,7 @@ export function CategoryDataAside() {
     useCategoryStore();
 
   const queryClient = useQueryClient();
+  const mq = useMediaQueries();
 
   const [image, setImage] = useState<File>();
   const [isDeleteCategoryModalOpen, setIsDeleteCategoryModalOpen] =
@@ -147,8 +155,8 @@ export function CategoryDataAside() {
   return (
     <Sheet open={!!selected_category}>
       <SheetContent
-        side="left"
-        className="w-full border-r border-r-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
+        side={mq < mqs.sm ? "bottom" : "left"}
+        className="w-full border-t border-secondary/20 bg-base-100 sm:w-1/3 sm:min-w-screen-sm sm:border-r sm:border-t-0"
       >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-between gap-4">
@@ -157,9 +165,12 @@ export function CategoryDataAside() {
               onClick={handleCancel}
               className="btn btn-outline border border-secondary/30 shadow-sm"
             >
-              <PanelLeftClose className="size-6" />
+              <>
+                <PanelBottomClose className="size-6 sm:hidden" />
+                <PanelLeftClose className="hidden size-6 sm:block" />
+              </>
             </button>
-            <span className="truncate whitespace-nowrap text-xl md:text-2xl">
+            <span className="truncate whitespace-nowrap text-xl sm:text-2xl">
               {selected_category?.name}
             </span>
           </div>

@@ -4,7 +4,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { AlertCircle, PanelLeftClose } from "lucide-react";
+import { AlertCircle, PanelBottomClose, PanelLeftClose } from "lucide-react";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import {
   DiscardSupplierChangesModal,
 } from "@/components/modals/administration/suppliers";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -28,6 +29,7 @@ export function SupplierDataAside() {
     useSupplierStore();
 
   const queryClient = useQueryClient();
+  const mq = useMediaQueries();
 
   const [isDeleteCategoryModalOpen, setIsDeleteCategoryModalOpen] =
     useState(false);
@@ -101,8 +103,8 @@ export function SupplierDataAside() {
   return (
     <Sheet open={!!selected_supplier}>
       <SheetContent
-        side="left"
-        className="w-full border-r border-r-secondary/20 bg-base-100 xs:w-1/3 xs:min-w-screen-xxs"
+        side={mq < mqs.xs ? "bottom" : "left"}
+        className="w-full border-t border-secondary/20 bg-base-100 xs:w-1/3 xs:min-w-screen-xxs xs:border-r xs:border-t-0"
       >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-between gap-4">
@@ -111,9 +113,12 @@ export function SupplierDataAside() {
               onClick={handleCancel}
               className="btn btn-outline border border-secondary/30 shadow-sm"
             >
-              <PanelLeftClose className="size-6" />
+              <>
+                <PanelBottomClose className="size-6 sm:hidden" />
+                <PanelLeftClose className="hidden size-6 sm:block" />
+              </>
             </button>
-            <span className="truncate whitespace-nowrap text-xl md:text-2xl">
+            <span className="truncate whitespace-nowrap text-xl sm:text-2xl">
               {selected_supplier?.name}
             </span>
           </div>

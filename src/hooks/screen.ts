@@ -40,7 +40,7 @@ export const mqs = {
 //   }
 // }
 
-export function useMediaQueries() {
+export function useMediaQueries(): number {
   const [mq, setMq] = useState<number>();
 
   const mqChange = () => {
@@ -56,7 +56,7 @@ export function useMediaQueries() {
     };
   }, []);
 
-  return mq;
+  return mq ?? 0;
 }
 
 // export function useMediaQueries() {

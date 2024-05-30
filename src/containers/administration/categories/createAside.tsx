@@ -2,6 +2,7 @@ import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
 import { DiscardCategoryChangesModal } from "@/components/modals/administration/categories";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { type Category } from "@/functions/categories";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 import { useCategoryStore } from "@/hooks/states/categories";
 import { type CloudinarySuccess } from "@/types/cloudinary";
 import type { ServerError, ServerSuccess } from "@/types/types";
@@ -10,7 +11,12 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { PanelRightClose, Trash2, Upload } from "lucide-react";
+import {
+  PanelBottomClose,
+  PanelRightClose,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -25,6 +31,7 @@ const inputSchema = z.object({
 
 export function CategoryCreateAside() {
   const queryClient = useQueryClient();
+  const mq = useMediaQueries();
 
   const {
     create_isOpen,
@@ -128,18 +135,21 @@ export function CategoryCreateAside() {
   return (
     <Sheet open={create_isOpen}>
       <SheetContent
-        side="right"
-        className="w-full border-l border-l-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
+        side={mq < mqs.sm ? "bottom" : "right"}
+        className="w-full border-t border-secondary/20 bg-base-100 sm:w-1/3 sm:min-w-screen-sm sm:border-l sm:border-t-0"
       >
         <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
-          <span className="whitespace-nowrap text-xl md:text-2xl">
+          <span className="whitespace-nowrap text-xl sm:text-2xl">
             Crear nueva categoría
           </span>
           <button
             onClick={handleCancel}
             className="btn btn-ghost btn-outline border border-secondary/30 shadow-sm"
           >
-            <PanelRightClose className="size-6" />
+            <>
+              <PanelBottomClose className="size-6 sm:hidden" />
+              <PanelRightClose className="hidden size-6 sm:block" />
+            </>
           </button>
         </div>
 

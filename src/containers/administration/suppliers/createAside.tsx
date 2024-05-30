@@ -2,13 +2,14 @@ import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
 import { DiscardSupplierChangesModal } from "@/components/modals/administration/suppliers";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { type Category } from "@/functions/categories";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 import { useSupplierStore } from "@/hooks/states/suppliers";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { PanelRightClose } from "lucide-react";
+import { PanelBottomClose, PanelRightClose } from "lucide-react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -21,6 +22,7 @@ const inputSchema = z.object({
 
 export function SupplierCreateAside() {
   const queryClient = useQueryClient();
+  const mq = useMediaQueries();
 
   const {
     create_isOpen,
@@ -89,18 +91,21 @@ export function SupplierCreateAside() {
   return (
     <Sheet open={create_isOpen}>
       <SheetContent
-        side="right"
-        className="w-full border-l border-l-secondary/20 bg-base-100 xs:w-1/3 xs:min-w-screen-xxs"
+        side={mq < mqs.xs ? "bottom" : "right"}
+        className="w-full border-t border-secondary/20 bg-base-100 xs:w-1/3 xs:min-w-screen-xxs xs:border-l xs:border-t-0"
       >
         <div className="mb-8 flex h-12 w-full items-center justify-end gap-4">
-          <span className="whitespace-nowrap text-xl md:text-2xl">
+          <span className="whitespace-nowrap text-xl sm:text-2xl">
             Crear nuevo proveedor
           </span>
           <button
             onClick={handleCancel}
             className="btn btn-ghost btn-outline border border-secondary/30 shadow-sm"
           >
-            <PanelRightClose className="size-6" />
+            <>
+              <PanelBottomClose className="size-6 sm:hidden" />
+              <PanelRightClose className="hidden size-6 sm:block" />
+            </>
           </button>
         </div>
 
