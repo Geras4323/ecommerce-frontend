@@ -10,7 +10,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { PanelLeftClose, Trash2, Upload } from "lucide-react";
+import { PanelRightClose, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -139,7 +139,7 @@ export function CategoryCreateAside() {
             onClick={handleCancel}
             className="btn btn-ghost btn-outline border border-secondary/30 shadow-sm"
           >
-            <PanelLeftClose className="size-6" />
+            <PanelRightClose className="size-6" />
           </button>
         </div>
 

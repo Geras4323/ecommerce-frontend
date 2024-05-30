@@ -18,7 +18,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { PanelLeftClose, Upload } from "lucide-react";
+import { PanelRightClose, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
@@ -204,7 +204,7 @@ export function ProductCreateAside() {
             onClick={handleCancel}
             className="btn btn-ghost btn-outline border border-secondary/30 shadow-sm"
           >
-            <PanelLeftClose className="size-6" />
+            <PanelRightClose className="size-6" />
           </button>
         </div>
 

@@ -4,7 +4,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { AlertCircle, PanelRightClose, Trash2, Upload } from "lucide-react";
+import { AlertCircle, PanelLeftClose, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -157,7 +157,7 @@ export function CategoryDataAside() {
               onClick={handleCancel}
               className="btn btn-outline border border-secondary/30 shadow-sm"
             >
-              <PanelRightClose className="size-6" />
+              <PanelLeftClose className="size-6" />
             </button>
             <span className="truncate whitespace-nowrap text-xl md:text-2xl">
               {selected_category?.name}
