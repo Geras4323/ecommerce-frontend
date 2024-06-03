@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
+import { ProductDataDrawer } from "src/containers/showroom/products/dataDrawer";
 
 export default function Showroom() {
   const { session } = useSession();
@@ -43,6 +44,7 @@ export default function Showroom() {
   const mq = useMediaQueries();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
+  const [selectedProduct, setSelectedProduct] = useState<Product>();
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -184,6 +186,7 @@ export default function Showroom() {
                         ) !== -1
                       }
                       mediaQuery={mq}
+                      selectProduct={(p: Product) => setSelectedProduct(p)}
                     />
                   );
               })
@@ -191,6 +194,19 @@ export default function Showroom() {
           </div>
         </section>
       </div>
+
+      <ProductDataDrawer
+        product={selectedProduct}
+        addToCart={cart.addCartItem}
+        logged={!!session.data}
+        verified={!!session.data?.verified}
+        inCart={
+          cart.cartItems.data?.findIndex(
+            (cI) => cI.productID === selectedProduct?.id
+          ) !== -1
+        }
+        setSelectedProduct={setSelectedProduct}
+      />
     </GeneralLayout>
   );
 }
@@ -315,6 +331,7 @@ function ProductItem({
   inCart,
   addToCart,
   mediaQuery,
+  selectProduct,
 }: {
   product: Product;
   logged: boolean;
@@ -330,13 +347,21 @@ function ProductItem({
     unknown
   >;
   mediaQuery: number | undefined;
+  selectProduct: (p: Product) => void;
 }) {
   const router = useRouter();
 
   const [quantity, setQuantity] = useState(1);
 
+  function openDrawer() {
+    selectProduct(product);
+  }
+
   return (
-    <div className="flex h-fit w-full flex-col gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 p-3 shadow-md md:h-52 md:flex-row">
+    <div
+      onClick={openDrawer}
+      className="flex h-fit w-full cursor-pointer flex-col gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 p-3 shadow-md md:h-52 md:flex-row"
+    >
       <Carousel
         opts={{
           axis: "x",
@@ -393,15 +418,17 @@ function ProductItem({
           {!inCart && (
             <div className="flex h-8 w-full items-center rounded-lg">
               <button
-                onClick={() =>
-                  setQuantity((prev) => (prev > 1 ? --prev : prev))
-                }
-                className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => (prev > 1 ? --prev : prev));
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
               >
                 <Minus className="size-4" />
               </button>
               <input
                 value={quantity}
+                onClick={(e) => e.stopPropagation()}
                 onChange={(e) => {
                   const num = Number(e.target.value);
                   if (!isNaN(num)) setQuantity(num);
@@ -409,8 +436,11 @@ function ProductItem({
                 className="btn-sm m-0 h-8 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center font-semibold outline-none"
               />
               <button
-                onClick={() => setQuantity((prev) => ++prev)}
-                className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => ++prev);
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
               >
                 <Plus className="size-4" />
               </button>
@@ -419,7 +449,9 @@ function ProductItem({
 
           {!inCart || !logged ? (
             <LoadableButton
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+
                 if (!logged) {
                   router.push("/sign");
                   return;
@@ -439,6 +471,7 @@ function ProductItem({
             </LoadableButton>
           ) : (
             <Link
+              onClick={(e) => e.stopPropagation()}
               href="/cart"
               className="btn btn-outline btn-secondary btn-sm flex min-w-48 items-center gap-3"
             >

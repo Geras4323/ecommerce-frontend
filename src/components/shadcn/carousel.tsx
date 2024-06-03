@@ -216,7 +216,10 @@ const CarouselPrevious = forwardRef<
       ref={ref}
       className={cn(!!className && className)}
       disabled={!canScrollPrev}
-      onClick={scrollPrev}
+      onClick={(e) => {
+        e.stopPropagation();
+        scrollPrev();
+      }}
       {...props}
     >
       {children}
@@ -239,7 +242,10 @@ const CarouselNext = forwardRef<
         "transition-transform duration-150 active:scale-95"
       )}
       disabled={!canScrollNext}
-      onClick={scrollNext}
+      onClick={(e) => {
+        e.stopPropagation();
+        scrollNext();
+      }}
       {...props}
     >
       {children}
