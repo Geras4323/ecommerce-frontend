@@ -358,7 +358,10 @@ function ProductItem({
   }
 
   return (
-    <div className="flex h-fit w-full flex-col gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 p-3 shadow-md md:h-52 md:flex-row">
+    <div
+      onClick={openDrawer}
+      className="flex h-fit w-full cursor-pointer flex-col gap-4 overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 p-3 shadow-md md:h-52 md:flex-row"
+    >
       <Carousel
         opts={{
           axis: "x",
@@ -368,7 +371,7 @@ function ProductItem({
         }}
         className="mb-2 h-52 self-center md:mb-0 md:aspect-square md:h-full"
       >
-        <CarouselContent onClick={openDrawer} className="-ml-2 h-full">
+        <CarouselContent className="-ml-2 h-full">
           {product.images.map((image) => (
             <CarouselItem key={image.id} className="pl-2 md:basis-full">
               <Image
@@ -393,10 +396,7 @@ function ProductItem({
       </Carousel>
 
       <div className="flex w-full flex-col justify-between gap-4 md:gap-2">
-        <div
-          onClick={openDrawer}
-          className="flex items-start justify-between gap-6"
-        >
+        <div className="flex items-start justify-between gap-6">
           <span className="text-lg font-semibold text-primary/80">
             {product.name}
           </span>
@@ -408,10 +408,7 @@ function ProductItem({
           </div>
         </div>
 
-        <div
-          onClick={openDrawer}
-          className="flex flex-col gap-0.5 text-primary/60"
-        >
+        <div className="flex flex-col gap-0.5 text-primary/60">
           {product.description.split("\n").map((t, i) => {
             if (i < 2) return <p key={i}>{t}</p>;
           })}
@@ -421,15 +418,17 @@ function ProductItem({
           {!inCart && (
             <div className="flex h-8 w-full items-center rounded-lg">
               <button
-                onClick={() =>
-                  setQuantity((prev) => (prev > 1 ? --prev : prev))
-                }
-                className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => (prev > 1 ? --prev : prev));
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
               >
                 <Minus className="size-4" />
               </button>
               <input
                 value={quantity}
+                onClick={(e) => e.stopPropagation()}
                 onChange={(e) => {
                   const num = Number(e.target.value);
                   if (!isNaN(num)) setQuantity(num);
@@ -437,8 +436,11 @@ function ProductItem({
                 className="btn-sm m-0 h-8 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center font-semibold outline-none"
               />
               <button
-                onClick={() => setQuantity((prev) => ++prev)}
-                className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => ++prev);
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
               >
                 <Plus className="size-4" />
               </button>
@@ -447,7 +449,9 @@ function ProductItem({
 
           {!inCart || !logged ? (
             <LoadableButton
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+
                 if (!logged) {
                   router.push("/sign");
                   return;
@@ -467,6 +471,7 @@ function ProductItem({
             </LoadableButton>
           ) : (
             <Link
+              onClick={(e) => e.stopPropagation()}
               href="/cart"
               className="btn btn-outline btn-secondary btn-sm flex min-w-48 items-center gap-3"
             >
