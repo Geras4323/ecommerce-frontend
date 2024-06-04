@@ -234,15 +234,15 @@ function CategoryItem({
 }: {
   category: Category;
   selectedCategory?: Category;
-  setSelectedCategory?: Dispatch<SetStateAction<Category | undefined>>;
+  setSelectedCategory: Dispatch<SetStateAction<Category | undefined>>;
 }) {
   return (
     <div
       onClick={() => {
-        if (setSelectedCategory)
-          category.id === selectedCategory?.id
-            ? setSelectedCategory(undefined)
-            : setSelectedCategory(category);
+        window.scrollTo({ top: 0 });
+        category.id === selectedCategory?.id
+          ? setSelectedCategory(undefined)
+          : setSelectedCategory(category);
       }}
       className={cn(
         category.id === selectedCategory?.id
