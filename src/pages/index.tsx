@@ -11,6 +11,8 @@ import { LogIn, LogOut, Package, Table2, UserRoundPlus } from "lucide-react";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
+const IMAGES_LIMIT = 16;
+
 export default function Home() {
   const { session, logoutMutation } = useSession();
 
@@ -19,15 +21,15 @@ export default function Home() {
     ServerError
   >({
     queryKey: ["images"],
-    queryFn: getImages,
+    queryFn: () => getImages(IMAGES_LIMIT),
     retry: false,
     refetchOnWindowFocus: false,
   });
 
-  const firstMarqueeUrls = imagesQuery.data
-    ?.map((image) => image.url)
-    .filter((_, i) => i < 8);
-  const secondMarqueeUrls = firstMarqueeUrls?.toReversed();
+  const imagesUrls = imagesQuery.data?.map((image) => image.url);
+
+  const firstMarqueeUrls = imagesUrls?.slice(0, IMAGES_LIMIT / 2);
+  const secondMarqueeUrls = imagesUrls?.slice(IMAGES_LIMIT / 2, IMAGES_LIMIT);
 
   return (
     <GeneralLayout title="Home" description="This is the home">

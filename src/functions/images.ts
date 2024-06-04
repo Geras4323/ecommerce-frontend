@@ -11,8 +11,8 @@ export const imageSchema = z
   })
   .and(databaseEntrySchema);
 
-export async function getImages() {
-  const url = `${vars.serverUrl}/api/v1/images`;
+export async function getImages(limit: number) {
+  const url = `${vars.serverUrl}/api/v1/images?limit=${limit}`;
   const res = await axios.get(url, { withCredentials: true });
   return imageSchema.array().parse(res.data);
 }
