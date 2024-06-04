@@ -126,7 +126,7 @@ export default function Cart() {
                   "dd-MM-yyyy HH:mm"
                 )}\`
 
-                **Total**:  \`$${total?.toLocaleString("es-AR")}\`
+                **Total**:  \`$${total?.toLocaleString(vars.region)}\`
 
                 **Descripción**:
               `,
@@ -168,7 +168,7 @@ export default function Cart() {
                 <div className="flex items-end gap-1">
                   <span className="text-xl text-primary/70">$</span>
                   <span className="text-2xl text-primary">
-                    {total?.toLocaleString("es-AR")}
+                    {total?.toLocaleString(vars.region)}
                   </span>
                 </div>
               )}
@@ -328,7 +328,7 @@ export function CartItem({
         <div className="flex w-fit items-center justify-center gap-1 text-center lg:w-full lg:items-end">
           <span className="text-base text-primary/70">$</span>
           <span className="text-xl text-primary lg:text-lg">
-            {price.toLocaleString("es-AR")}
+            {price.toLocaleString(vars.region)}
           </span>
         </div>
 

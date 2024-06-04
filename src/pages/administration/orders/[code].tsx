@@ -243,7 +243,7 @@ export default function Order() {
                         <div className="flex items-end gap-1">
                           <span className="text-lg text-primary">$</span>
                           <span className="text-xl text-primary">
-                            {orderQuery.data.total.toLocaleString("es-AR")}
+                            {orderQuery.data.total.toLocaleString(vars.region)}
                           </span>
                         </div>
                       )}
@@ -580,7 +580,7 @@ function OrderedProduct({
           <div className="flex items-end gap-0.5">
             <span className="text-base text-primary/70">$</span>
             <span className="text-lg text-primary">
-              {product.price.toLocaleString("es-AR")}
+              {product.price.toLocaleString(vars.region)}
             </span>
           </div>
         </div>
@@ -588,7 +588,7 @@ function OrderedProduct({
         <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center">
           <span className="text-lg text-primary/70">$</span>
           <span className="text-xl text-primary">
-            {price.toLocaleString("es-AR")}
+            {price.toLocaleString(vars.region)}
           </span>
         </div>
       </div>

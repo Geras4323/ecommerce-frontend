@@ -24,6 +24,7 @@ import Link from "next/link";
 import NoImage from "../../../public/no_image.png";
 import { useEffect, useState } from "react";
 import { type OrderStates } from "src/pages/administration/orders/[code]";
+import { vars } from "@/utils/vars";
 
 export function OrdersItemSkeleton({
   fromAdmin = false,
@@ -193,7 +194,7 @@ export function OrdersItem({
               <div className="flex items-end gap-1">
                 <span className="text-lg text-primary">$</span>
                 <span className="text-xl text-primary">
-                  {item.total.toLocaleString("es-AR")}
+                  {item.total.toLocaleString(vars.region)}
                 </span>
               </div>
             )}
@@ -359,7 +360,7 @@ export function SingleOrderItem({
         <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center xs:order-1 xs:border-none xs:pl-0">
           <span className="text-lg text-primary/70">$</span>
           <span className="text-xl text-primary">
-            {price.toLocaleString("es-AR")}
+            {price.toLocaleString(vars.region)}
           </span>
         </div>
 
@@ -371,7 +372,7 @@ export function SingleOrderItem({
           <div className="flex items-end gap-0.5">
             <span className="text-base text-primary/70">$</span>
             <span className="text-lg text-primary">
-              {product.price.toLocaleString("es-AR")}
+              {product.price.toLocaleString(vars.region)}
             </span>
           </div>
         </div>

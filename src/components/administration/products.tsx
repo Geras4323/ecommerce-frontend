@@ -1,6 +1,7 @@
 import type { Category } from "@/functions/categories";
 import type { Product } from "@/functions/products";
 import type { Supplier } from "@/functions/suppliers";
+import { vars } from "@/utils/vars";
 import { Barcode, ClipboardList, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -90,7 +91,7 @@ export function ProductsItem({
             {product.name}
           </span>
           <span className="whitespace-nowrap text-2xl font-bold">
-            $ {product.price.toLocaleString("es-AR")}
+            $ {product.price.toLocaleString(vars.region)}
           </span>
         </div>
         <article className="flex flex-col justify-between gap-3 text-sm 2xl:flex-row 2xl:items-center 2xl:gap-6">

@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/shadcn/select";
 import { ProductDataDrawer } from "src/containers/showroom/products/dataDrawer";
+import { vars } from "@/utils/vars";
 
 export default function Showroom() {
   const { session } = useSession();
@@ -403,7 +404,7 @@ function ProductItem({
           <div className="flex items-end gap-1">
             <span className="text-xl text-primary/70">$</span>
             <span className="text-2xl text-primary">
-              {product.price?.toLocaleString("es-AR")}
+              {product.price?.toLocaleString(vars.region)}
             </span>
           </div>
         </div>

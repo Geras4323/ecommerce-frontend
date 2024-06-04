@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { Comfortaa } from "next/font/google";
+import { vars } from "@/utils/vars";
 
 const comfortaa = Comfortaa({ subsets: ["latin"] });
 
@@ -98,7 +99,7 @@ export const ProductDataDrawer = ({
                   <div className="flex w-full items-end justify-end gap-1">
                     <span className="text-2xl text-primary/70">$</span>
                     <span className="text-3xl text-primary">
-                      {product?.price.toLocaleString("es-AR")}
+                      {product?.price.toLocaleString(vars.region)}
                     </span>
                   </div>
                 </div>
@@ -250,7 +251,7 @@ export const ProductDataDrawer = ({
                   <div className="flex w-full items-end justify-end gap-1">
                     <span className="text-2xl text-primary/70">$</span>
                     <span className="text-3xl text-primary">
-                      {product?.price.toLocaleString("es-AR")}
+                      {product?.price.toLocaleString(vars.region)}
                     </span>
                   </div>
 

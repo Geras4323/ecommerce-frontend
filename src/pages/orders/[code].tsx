@@ -204,7 +204,7 @@ export default function Order() {
                   <div className="flex items-end gap-1">
                     <span className="text-lg text-primary">$</span>
                     <span className="text-xl text-primary">
-                      {orderQuery.data.total.toLocaleString("es-AR")}
+                      {orderQuery.data.total.toLocaleString(vars.region)}
                     </span>
                   </div>
                 )

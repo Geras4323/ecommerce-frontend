@@ -135,8 +135,8 @@ export default function ProductData() {
       values.name !== productQuery.data?.name ||
       values.code !== productQuery.data?.code ||
       values.description !== productQuery.data?.description ||
-      Number(values.price).toLocaleString("es-AR") !==
-        productQuery.data?.price.toLocaleString("es-AR") ||
+      Number(values.price).toLocaleString(vars.region) !==
+        productQuery.data?.price.toLocaleString(vars.region) ||
       Number(values.categoryID) !== productQuery.data?.categoryID ||
       Number(values.supplierID) !== productQuery.data?.supplierID
     );
