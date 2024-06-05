@@ -16,7 +16,7 @@ export function SwitchCard({
     <div
       className={cn(
         isLogging ? "left-0 border-r" : "left-1/2 border-l",
-        "absolute z-50 h-full w-1/2 border-x-secondary/20 bg-secondary/10 transition-all duration-1000 ease-in-out"
+        "absolute z-10 h-full w-1/2 border-x-secondary/20 bg-secondary/10 transition-all duration-1000 ease-in-out"
       )}
     >
       <div

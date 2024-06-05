@@ -122,7 +122,7 @@ export function SignupForm({
 
   if (mutation.isSuccess)
     return (
-      <div className="absolute flex h-screen w-screen items-center justify-center px-4 text-base">
+      <div className="fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center bg-base-100 px-4 text-base">
         <div
           className={cn(
             theme === "dark" ? "border-l-info" : "border-l-primary",

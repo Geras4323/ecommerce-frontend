@@ -27,7 +27,7 @@ function Sign() {
     <GeneralLayout title="Iniciar" description="Iniciar sesión o registrarse">
       <div className="flex h-dvh w-screen flex-col items-center justify-center gap-8 px-4">
         <div
-          className="relative hidden h-120 w-full max-w-4xl grid-cols-2 overflow-hidden rounded-xl border border-secondary/20 md:grid"
+          className="relative mt-8 hidden h-120 w-full max-w-4xl grid-cols-2 overflow-hidden rounded-xl border border-secondary/20 md:grid 2xl:mt-0"
           style={{
             boxShadow: "0 4px 6px rgba(0,0,0, .3), 0 5px 20px rgba(0,0,0, .1)",
           }}
