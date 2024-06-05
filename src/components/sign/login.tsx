@@ -10,6 +10,7 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { Undo2 } from "lucide-react";
+import { useEffect } from "react";
 
 type Inputs = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -58,6 +59,10 @@ export function LoginForm({
     mutation.reset();
     switchSideProp && switchSideProp();
   }
+
+  useEffect(() => {
+    reset();
+  }, [isLogging, reset]);
 
   return (
     <form

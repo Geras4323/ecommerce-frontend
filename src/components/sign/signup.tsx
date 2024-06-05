@@ -5,7 +5,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { ErrorSpan, FormInput, LoadableButton } from "../forms";
@@ -107,6 +107,12 @@ export function SignupForm({
       }
     }
   });
+
+  useEffect(() => {
+    nameReset();
+    passwordReset();
+    setStage("name");
+  }, [isLogging, nameReset, passwordReset]);
 
   function switchSide() {
     nameReset();
