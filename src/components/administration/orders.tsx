@@ -215,9 +215,7 @@ export function OrdersItem({
           <div className="flex w-full items-center gap-2">
             <User2 className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">A nombre de</span>
-            <span className="text-lg text-primary">
-              {item.user.name} {item.user.surname}
-            </span>
+            <span className="text-lg text-primary">{item.user.name}</span>
           </div>
 
           <div className="flex w-full items-center gap-2">

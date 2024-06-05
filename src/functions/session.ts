@@ -17,7 +17,6 @@ export const sessionSchema = z.object({
   deletedAt: z.string().nullable(),
   email: z.string(),
   name: z.string(),
-  surname: z.string(),
   phone: z.string().nullable(),
   role: z.enum(["admin", "customer"]),
   verified: z.boolean(),

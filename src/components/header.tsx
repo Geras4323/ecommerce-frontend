@@ -139,9 +139,7 @@ export const Header = () => {
             onOpenChange={() => setIsSessionOpen((prev) => !prev)}
           >
             <PopoverTrigger className="btn btn-ghost btn-sm relative ml-4 flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary">
-              <span className="text-lg font-medium">
-                {session.data.name} {session.data.surname}
-              </span>
+              <span className="text-lg font-medium">{session.data.name}</span>
               <ChevronDown
                 className={cn(
                   isSessionOpen && "rotate-180",

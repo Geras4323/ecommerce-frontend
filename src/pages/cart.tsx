@@ -113,7 +113,7 @@ export default function Cart() {
             {
               title: `Nuevo pedido`,
               description: `
-                **Nombre**: \`${data.session.name} ${data.session.surname}\`
+                **Nombre**: \`${data.session.name}\`
 
                 **Email**:  \`${data.session.email}\`
 

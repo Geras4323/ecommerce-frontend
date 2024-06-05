@@ -16,7 +16,7 @@ import Link from "next/link";
 type NameInputs = z.infer<typeof nameInputSchema>;
 const nameInputSchema = z.object({
   name: z.string().min(1, { message: "Nombre requerido" }),
-  surname: z.string().min(1, { message: "Apellido Requerido" }),
+  phone: z.string().nullable(),
   email: z.string().email({ message: "Email inválido" }),
 });
 type PasswordsInputs = z.infer<typeof passwordsInputSchema>;
@@ -52,7 +52,10 @@ export function SignupForm({
 
   const onNameSubmit: SubmitHandler<NameInputs> = (data) => {
     setStage("password");
-    setSignNameData(data);
+    setSignNameData({
+      ...data,
+      phone: data.phone !== "" ? data.phone : null,
+    });
   };
 
   const {
@@ -169,7 +172,7 @@ export function SignupForm({
         <div className="flex w-full flex-col gap-8">
           <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Nombre</label>
+              <label className="text-primary/60">Nombre y apellido</label>
             </div>
             <input
               {...nameRegister("name")}
@@ -189,27 +192,31 @@ export function SignupForm({
             </div>
           </FormInput>
 
-          <FormInput className="relative">
-            <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Apellido</label>
+          {/* <FormInput className="relative">
+            <div className="absolute -top-2.5 left-3 z-20 flex items-center justify-between bg-base-100 px-2 text-sm">
+              <label className="text-primary/60">
+                Teléfono <span className="text-secondary">(opcional)</span>
+              </label>
             </div>
-            <input
-              {...nameRegister("surname")}
-              type="text"
-              className={cn(
-                !!nameErrors.surname ? "border-error" : "border-secondary/30",
-                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
-              )}
+            <PhoneInput
+              country={"ar"}
+              localization={es}
+              value={phone}
+              onChange={(value) => setPhone(value)}
+              buttonClass="!bg-base-100 !border !border-secondary/30 !w-full !rounded-md !hover:bg-base-100 hover:[&>*]:!bg-base-100 hover:[&>*]:!rounded-md active:[&>*]:!bg-base-100 active:[&>*]:!rounded-md focus:[&>*]:!bg-base-100"
+              dropdownClass="!bg-base-100 hover:[&>*]:!bg-secondary/10 [&>.highlight]:!bg-secondary/20 !border !border-t-0 !border-secondary/30 !mt-0 !rounded-b-lg !w-full !h-36"
+              inputStyle={{
+                width: "100%",
+                backgroundColor: "hsl(var(--s) / 0.0)",
+                padding: "16px 12px",
+                marginLeft: "40px",
+                zIndex: 10,
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+              }}
+              inputClass="!border-y-0 !h-12 !border-r-0 !border-l !border-l-secondary/30"
             />
-            <div
-              className={cn(
-                !!nameErrors.surname && "opacity-100",
-                "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
-              )}
-            >
-              <ErrorSpan message={nameErrors.surname?.message} />
-            </div>
-          </FormInput>
+          </FormInput> */}
 
           <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
@@ -230,6 +237,30 @@ export function SignupForm({
               )}
             >
               <ErrorSpan message={nameErrors.email?.message} />
+            </div>
+          </FormInput>
+
+          <FormInput className="relative">
+            <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
+              <label className="text-primary/60">
+                Teléfono <span className="text-secondary">(opcional)</span>
+              </label>
+            </div>
+            <input
+              {...nameRegister("phone")}
+              type="number"
+              className={cn(
+                !!nameErrors.phone ? "border-error" : "border-secondary/30",
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
+              )}
+            />
+            <div
+              className={cn(
+                !!nameErrors.phone && "opacity-100",
+                "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
+              )}
+            >
+              <ErrorSpan message={nameErrors.phone?.message} />
             </div>
           </FormInput>
         </div>

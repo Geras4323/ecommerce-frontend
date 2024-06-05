@@ -262,7 +262,6 @@ export default function Order() {
                       ) : (
                         <span className="text-lg text-primary">
                           {orderQuery.data?.user.name}{" "}
-                          {orderQuery.data?.user.surname}
                         </span>
                       )}
                     </div>
