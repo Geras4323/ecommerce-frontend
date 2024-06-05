@@ -16,7 +16,7 @@ import { useProductStore } from "@/hooks/states/products";
 import { ProductCreateAside } from "src/containers/administration/products/createAside";
 import { type Category, getCategories } from "@/functions/categories";
 import { type Supplier, getSuppliers } from "@/functions/suppliers";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -35,18 +35,22 @@ import {
   ProductsItemSkeleton,
 } from "@/components/administration/products";
 import { ErrorSpan } from "@/components/forms";
+import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 
 function Products() {
+  const router = useRouter();
+  const routerRef = useRef(router);
+  const searchParams = useSearchParams();
+
   const { create_open } = useProductStore();
   const mq = useMediaQueries();
 
-  const [nameFilter, setNameFilter] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
-    null
-  );
+  const [nameFilter, setNameFilter] = useState<string>();
+  const [selectedCategory, setSelectedCategory] = useState<Category>();
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier>();
+
+  const filterURLRef = useRef("");
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -77,6 +81,54 @@ function Products() {
     refetchOnWindowFocus: true,
     retry: false,
   });
+
+  // One timer
+  useEffect(() => {
+    const rawName = searchParams.get("name");
+    if (rawName) setNameFilter(rawName);
+
+    const rawCategoryID = searchParams.get("categoryID");
+    if (rawCategoryID && !isNaN(parseInt(rawCategoryID))) {
+      setSelectedCategory(
+        categoriesQuery.data?.find(
+          (category) => category.id === parseInt(rawCategoryID)
+        )
+      );
+    }
+
+    const rawSupplierID = searchParams.get("supplierID");
+    if (rawSupplierID && !isNaN(parseInt(rawSupplierID))) {
+      setSelectedSupplier(
+        suppliersQuery.data?.find(
+          (supplier) => supplier.id === parseInt(rawSupplierID)
+        )
+      );
+    }
+  }, [searchParams, categoriesQuery.data, suppliersQuery.data]);
+
+  // Each timer
+  useEffect(() => {
+    filterURLRef.current = "?";
+
+    if (!!nameFilter) {
+      filterURLRef.current += `name=${nameFilter}&`;
+    }
+    if (!!selectedCategory) {
+      filterURLRef.current += `categoryID=${selectedCategory.id}&`;
+    }
+    if (!!selectedSupplier) {
+      filterURLRef.current += `supplierID=${selectedSupplier.id}&`;
+    }
+
+    filterURLRef.current = filterURLRef.current.slice(0, -1);
+    routerRef.current.push(
+      `/administration/products${filterURLRef.current}`,
+      undefined,
+      {
+        shallow: true,
+      }
+    );
+  }, [nameFilter, selectedCategory, selectedSupplier]);
 
   let filteredProducts: Product[] = productsQuery.data ?? [];
 
@@ -149,7 +201,7 @@ function Products() {
                           setSelectedCategory(
                             categoriesQuery.data.find(
                               (c) => c.id === parseInt(v)
-                            ) ?? null
+                            ) ?? undefined
                           )
                         }
                       >
@@ -189,7 +241,7 @@ function Products() {
                           setSelectedSupplier(
                             suppliersQuery.data.find(
                               (s) => s.id === parseInt(v)
-                            ) ?? null
+                            ) ?? undefined
                           )
                         }
                       >
@@ -256,7 +308,7 @@ function Products() {
                       <Tag className="mr-1 size-4 text-secondary" />
                       {selectedCategory?.name}
                       <X
-                        onClick={() => setSelectedCategory(null)}
+                        onClick={() => setSelectedCategory(undefined)}
                         className="size-5 cursor-pointer text-secondary"
                       />
                     </div>
@@ -266,7 +318,7 @@ function Products() {
                       <ClipboardList className="mr-1 size-4 text-secondary" />
                       {selectedSupplier?.name}
                       <X
-                        onClick={() => setSelectedSupplier(null)}
+                        onClick={() => setSelectedSupplier(undefined)}
                         className="size-5 cursor-pointer text-secondary"
                       />
                     </div>
@@ -292,6 +344,7 @@ function Products() {
                       supplier={suppliersQuery.data?.find(
                         (s) => s.id === product?.supplierID
                       )}
+                      filterURL={filterURLRef.current}
                     />
                   ))}
             </div>

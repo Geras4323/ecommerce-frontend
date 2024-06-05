@@ -59,14 +59,16 @@ export function ProductsItem({
   product,
   category,
   supplier,
+  filterURL,
 }: {
   product: Product;
   category?: Category;
   supplier?: Supplier;
+  filterURL: string;
 }) {
   return (
     <Link
-      href={`/administration/products/${product.id}`}
+      href={`/administration/products/${product.id}${filterURL}`}
       className="flex h-fit w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-secondary/10 shadow-md hover:bg-secondary/15 hover:shadow-lg sm:flex-row 2xl:h-44 2xl:min-h-44"
       style={{
         boxShadow: "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",

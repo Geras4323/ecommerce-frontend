@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { ArrowLeft, ChevronLeft, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
 import { Toaster, toast } from "sonner";
 import { z } from "zod";
@@ -30,8 +30,15 @@ import { type ProductImage } from "@/functions/images";
 import { GeneralLayout } from "@/layouts/general";
 import { useRouter } from "next/router";
 import imageCompression from "browser-image-compression";
-import _ from "lodash";
+import _, { round } from "lodash";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+export type ProductsFilters = {
+  name: string | null;
+  categoryID: string | null;
+  supplierID: string | null;
+};
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -54,6 +61,7 @@ const inputSchema = z.object({
 export default function ProductData() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
 
   const [existentFiles, setExistentFiles] = useState<
     (ProductImage & { isDeleted: boolean })[]
@@ -163,7 +171,7 @@ export default function ProductData() {
       !uplodadedImagesChanged()
     ) {
       setExistentFiles([]);
-      router.push("/administration/products");
+      goBack();
       return;
     }
     setIsDiscardChangesModalOpen(true);
@@ -181,7 +189,7 @@ export default function ProductData() {
       code: productQuery.data?.code ?? "",
       name: productQuery.data?.name ?? "",
       description: productQuery.data?.description ?? "",
-      price: `${productQuery.data?.price}` ?? `${-1}`,
+      price: `${round(productQuery.data?.price ?? 0, 2)}` ?? `${-1}`,
       categoryID: `${productQuery.data?.categoryID}` ?? `${-1}`,
       supplierID: `${productQuery.data?.supplierID}` ?? `${-1}`,
     },
@@ -265,6 +273,36 @@ export default function ProductData() {
     if (uplodadedImagesChanged()) uploadImagesMutation.mutate();
   };
 
+  const filtersRef = useRef<ProductsFilters>({
+    name: "",
+    categoryID: "",
+    supplierID: "",
+  });
+
+  useEffect(() => {
+    filtersRef.current = {
+      name: searchParams.get("name"),
+      categoryID: searchParams.get("categoryID"),
+      supplierID: searchParams.get("supplierID"),
+    };
+  }, [searchParams]);
+
+  function goBack() {
+    let url = "/administration/products?";
+
+    if (!!filtersRef.current.name) {
+      url += `name=${filtersRef.current.name}&`;
+    }
+    if (!!filtersRef.current.categoryID) {
+      url += `categoryID=${filtersRef.current.categoryID}&`;
+    }
+    if (!!filtersRef.current.supplierID) {
+      url += `supplierID=${filtersRef.current.supplierID}&`;
+    }
+
+    router.push(url.slice(0, -1));
+  }
+
   const anyPending =
     productQuery.isPending ||
     categoriesQuery.isPending ||
@@ -284,12 +322,9 @@ export default function ProductData() {
           >
             <div className="flex h-fit w-full items-center justify-between gap-4">
               <div className="flex w-full items-center gap-4 truncate">
-                <Link
-                  href="/administration/products"
-                  className="btn btn-ghost btn-sm"
-                >
+                <button onClick={goBack} className="btn btn-ghost btn-sm">
                   <ChevronLeft className="size-5" />
-                </Link>
+                </button>
                 {productQuery.isPending ? (
                   <div className="h-8 w-52 animate-pulse rounded-md bg-secondary/20 sm:w-80 md:w-96" />
                 ) : anyError ? (
