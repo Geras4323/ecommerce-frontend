@@ -18,11 +18,7 @@ export async function getCartItems() {
   return cartItemSchema.array().parse(res.data);
 }
 
-export async function createCartItem(
-  userID: number,
-  productID: number,
-  quantity: number
-) {
+export async function createCartItem(productID: number, quantity: number) {
   const url = `${vars.serverUrl}/api/v1/cart`;
   const res = await axios.post(
     url,

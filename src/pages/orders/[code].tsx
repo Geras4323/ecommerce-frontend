@@ -51,7 +51,6 @@ export default function Order() {
 
   function loadVoucher(voucher?: File) {
     if (!voucher) return;
-    console.log(voucher.type);
     checkMimetype(voucher.type, ["image/png", "image/jpeg", "application/pdf"]);
     setUploadedVoucher(voucher);
   }

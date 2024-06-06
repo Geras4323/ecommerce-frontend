@@ -308,16 +308,20 @@ export function CartItem({
       />
 
       <div className="flex flex-row gap-6">
-        <Image
-          alt="product"
-          width={50}
-          height={50}
-          src={product.images[0]?.url ?? NoImage}
-          className={cn(
-            !product.images[0]?.url && "opacity-50 blur-[1px]",
-            "size-16 min-w-16 rounded-full border border-secondary/30"
-          )}
-        />
+        {/* Image and shadow effect */}
+        <div className="relative size-16 min-w-16 rounded-full">
+          <div className="absolute size-full rounded-full shadow-inner-lg" />
+          <Image
+            alt="product"
+            width={50}
+            height={50}
+            src={product.images[0]?.url ?? NoImage}
+            className={cn(
+              !product.images[0]?.url && "opacity-50 blur-[1px]",
+              "size-full rounded-full object-cover"
+            )}
+          />
+        </div>
         <div className="flex flex-col gap-2">
           <span className="pr-4 text-primary">{product.name}</span>
           <div className="flex flex-col gap-0.5 text-secondary">{category}</div>

@@ -30,8 +30,7 @@ export function useShoppingCart() {
     ServerError,
     { productID: number; quantity: number }
   >({
-    mutationFn: (data) =>
-      createCartItem(session.data?.id ?? -1, data.productID, data.quantity),
+    mutationFn: (data) => createCartItem(data.productID, data.quantity),
     onSuccess: refetchProducts,
   });
 
