@@ -6,6 +6,18 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      size: {
+        104: "26rem",
+        120: "30rem",
+        128: "32rem",
+        144: "36rem",
+      },
+      width: {
+        104: "26rem",
+        120: "30rem",
+        128: "32rem",
+        144: "36rem",
+      },
       height: {
         104: "26rem",
         120: "30rem",

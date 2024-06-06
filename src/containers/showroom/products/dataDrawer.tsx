@@ -30,6 +30,8 @@ export const ProductDataDrawer = ({
   inCart,
   addToCart,
   setSelectedProduct,
+  isVisualizingProduct,
+  setVisualizedProduct,
 }: {
   product?: Product;
   logged: boolean;
@@ -45,6 +47,8 @@ export const ProductDataDrawer = ({
     unknown
   >;
   setSelectedProduct: (p?: Product) => void;
+  isVisualizingProduct: boolean;
+  setVisualizedProduct: (p?: Product) => void;
 }) => {
   const mq = useMediaQueries();
 
@@ -59,10 +63,7 @@ export const ProductDataDrawer = ({
   }, [setSelectedProduct]);
 
   useEffect(() => {
-    if (!product) {
-      deselectProduct;
-      return;
-    }
+    if (!product) return;
 
     setSelectedImage({ image: product.images[0], position: 0 });
   }, [product, deselectProduct]);
@@ -71,18 +72,20 @@ export const ProductDataDrawer = ({
     <>
       {mq >= mqs.xxs && (
         // I know there's a component for this, but the overlay component does not have the "onClick" prop :(
-        <SheetPrimitive.Root open={!!product}>
+        <SheetPrimitive.Root open={!!product && !isVisualizingProduct}>
           <SheetPrimitive.Portal>
             <SheetPrimitive.Overlay
               className={cn(
-                "fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+                isVisualizingProduct && "pointer-events-none",
+                "fixed inset-0 z-20 bg-black/60 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
               )}
               onClick={deselectProduct}
             />
             <SheetPrimitive.Content
               className={cn(
                 comfortaa.className,
-                "fixed z-50 gap-4 p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out",
+                isVisualizingProduct && "pointer-events-none",
+                "fixed z-20 gap-4 p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out",
                 "inset-y-0 right-0 h-full data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
                 "w-full max-w-screen-xxs border-l border-secondary/20 bg-base-100 focus-visible:outline-none"
               )}
@@ -162,7 +165,8 @@ export const ProductDataDrawer = ({
                           width={260}
                           height={260}
                           src={selectedImage?.image?.url ?? ""}
-                          className="aspect-square h-80 max-h-80 w-full min-w-80 max-w-80 rounded-lg border-none object-cover outline-none"
+                          className="aspect-square h-80 max-h-80 w-full min-w-80 max-w-80 cursor-pointer rounded-lg border-none object-cover outline-none"
+                          onClick={() => setVisualizedProduct(product)}
                         />
                         {selectedImage && (
                           <div className="pointer-events-none absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-base-300 font-semibold text-primary opacity-80">
@@ -245,19 +249,22 @@ export const ProductDataDrawer = ({
       )}
 
       {mq < mqs.xxs && (
-        <Drawer open={!!product} onClose={deselectProduct}>
+        <Drawer
+          open={!!product && !isVisualizingProduct}
+          onClose={() => !isVisualizingProduct && deselectProduct()}
+        >
           <DrawerPrimitive.Portal>
             <DrawerPrimitive.Overlay
               onClick={deselectProduct}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-[2px]"
+              className="fixed inset-0 z-20 bg-black/80 backdrop-blur-[2px]"
             />
             <DrawerPrimitive.Content
               className={cn(
                 comfortaa.className,
-                "fixed inset-x-0 bottom-0 z-50 flex h-auto max-h-192 flex-col rounded-t-xl border-t border-secondary/30 bg-base-100 p-4 focus:outline-none"
+                "fixed inset-x-0 bottom-0 z-20 flex h-auto max-h-192 flex-col rounded-t-xl border-t border-secondary/30 bg-base-100 p-4 focus:outline-none"
               )}
             >
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
                 <DrawerHeader className="flex h-fit min-h-fit w-full flex-col justify-between gap-4">
                   <div className="mx-auto h-1.5 w-2/5 rounded-full bg-secondary/30" />
                   {/* Price */}
@@ -273,7 +280,7 @@ export const ProductDataDrawer = ({
                 </DrawerHeader>
 
                 {/* Content */}
-                <div className="flex h-96 min-h-96 w-full flex-col gap-4 overflow-y-auto">
+                <div className="flex h-96 min-h-96 w-full flex-col gap-4 overflow-y-auto pt-2">
                   <DrawerDescription className="flex flex-col gap-2">
                     <div className="relative w-full text-end">
                       <span className="text-lg">DESCRIPCIÓN</span>
@@ -327,6 +334,7 @@ export const ProductDataDrawer = ({
                           height={260}
                           src={selectedImage?.image?.url ?? ""}
                           className="aspect-square h-full w-full rounded-lg border-none object-cover outline-none"
+                          onClick={() => setVisualizedProduct(product)}
                         />
                         {selectedImage && (
                           <div className="pointer-events-none absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-base-300 font-semibold text-primary opacity-80">

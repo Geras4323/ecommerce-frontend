@@ -38,6 +38,7 @@ import {
 } from "@/components/shadcn/select";
 import { ProductDataDrawer } from "src/containers/showroom/products/dataDrawer";
 import { vars } from "@/utils/vars";
+import { ImageVisualizer } from "@/components/showroom";
 
 export default function Showroom() {
   const { session } = useSession();
@@ -46,6 +47,8 @@ export default function Showroom() {
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedProduct, setSelectedProduct] = useState<Product>();
+
+  const [visualizedProduct, setVisualizedProduct] = useState<Product>();
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -188,6 +191,9 @@ export default function Showroom() {
                       }
                       mediaQuery={mq}
                       selectProduct={(p: Product) => setSelectedProduct(p)}
+                      openImageVisualizer={(p: Product) =>
+                        setVisualizedProduct(p)
+                      }
                     />
                   );
               })
@@ -207,6 +213,16 @@ export default function Showroom() {
           ) !== -1
         }
         setSelectedProduct={setSelectedProduct}
+        isVisualizingProduct={!!visualizedProduct}
+        setVisualizedProduct={setVisualizedProduct}
+      />
+      <ImageVisualizer
+        isOpen={!!visualizedProduct}
+        onClose={() => setVisualizedProduct(undefined)}
+        data={{
+          title: visualizedProduct?.name,
+          images: visualizedProduct?.images ?? [],
+        }}
       />
     </GeneralLayout>
   );
@@ -333,6 +349,7 @@ function ProductItem({
   addToCart,
   mediaQuery,
   selectProduct,
+  openImageVisualizer,
 }: {
   product: Product;
   logged: boolean;
@@ -349,6 +366,7 @@ function ProductItem({
   >;
   mediaQuery: number | undefined;
   selectProduct: (p: Product) => void;
+  openImageVisualizer: (p: Product) => void;
 }) {
   const router = useRouter();
 
@@ -372,7 +390,13 @@ function ProductItem({
         }}
         className="mb-2 h-52 self-center md:mb-0 md:aspect-square md:h-full"
       >
-        <CarouselContent className="-ml-2 h-full">
+        <CarouselContent
+          onClick={(e) => {
+            e.stopPropagation();
+            openImageVisualizer(product);
+          }}
+          className="-ml-2 h-full"
+        >
           {product.images.map((image) => (
             <CarouselItem key={image.id} className="pl-2 md:basis-full">
               <Image
@@ -465,6 +489,7 @@ function ProductItem({
               }}
               className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
               isPending={addToCart.isPending}
+              disabled={addToCart.isPending}
               animation="dots"
             >
               <ShoppingCart className="size-5" />

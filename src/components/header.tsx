@@ -101,7 +101,7 @@ export const Header = () => {
           ? "border-b-secondary/20"
           : "border-b-transparent",
         theme === "dark" ? "bg-base-100/70" : "bg-base-300/70",
-        "fixed top-0 z-50 flex h-16 w-full items-center justify-between border border-secondary/20 px-6 py-2 backdrop-blur transition-all duration-500"
+        "fixed top-0 z-10 flex h-16 w-full items-center justify-between border border-secondary/20 px-6 py-2 backdrop-blur transition-all duration-500"
       )}
     >
       <Link
