@@ -18,7 +18,7 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { PanelRightClose, Upload } from "lucide-react";
+import { PanelRightClose, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
@@ -117,6 +117,13 @@ export function ProductCreateAside() {
       return;
     }
     create_modal_discardChanges_change(true);
+  }
+
+  function removeTempFile(itemIndex: number) {
+    setTempFiles((prev) => {
+      const temp = prev.filter((_, i) => i !== itemIndex);
+      return temp;
+    });
   }
 
   const {
@@ -391,7 +398,7 @@ export function ProductCreateAside() {
                 direction="horizontal"
               >
                 {tempFiles.map((file, i) => (
-                  <div key={i}>
+                  <div key={i} className="group relative">
                     <Image
                       src={URL.createObjectURL(file.data)}
                       width={200}
@@ -399,9 +406,15 @@ export function ProductCreateAside() {
                       alt={file.data.name}
                       className={cn(
                         i === 0 && "border-2 border-primary",
-                        "size-24 rounded-xl hover:cursor-grab active:cursor-grabbing"
+                        "size-24 rounded-xl object-cover hover:cursor-grab active:cursor-grabbing"
                       )}
                     />
+                    <div
+                      onClick={() => removeTempFile(i)}
+                      className="absolute bottom-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-md bg-error font-semibold opacity-0 transition-opacity duration-100 group-hover:opacity-90"
+                    >
+                      <Trash2 className="size-3 text-white" />
+                    </div>
                   </div>
                 ))}
               </ReactSortable>
