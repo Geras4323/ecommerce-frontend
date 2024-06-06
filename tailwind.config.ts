@@ -25,6 +25,8 @@ const config: Config = {
         128: "32rem",
         144: "36rem",
         152: "38rem",
+        168: "42rem",
+        192: "48rem",
       },
       screens: {
         xxs: "480px",
