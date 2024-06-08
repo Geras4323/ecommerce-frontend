@@ -73,8 +73,8 @@ export function LoginForm({
         !!className && className
       )}
     >
-      <div className="flex w-full flex-row gap-4 border-b border-b-secondary/20">
-        <h3 className="w-full pb-1 text-left text-xl tracking-wide text-primary">
+      <div className="flex w-full flex-row items-baseline gap-4 border-b border-b-secondary/20">
+        <h3 className="w-full pb-1 text-left text-lg tracking-wide text-primary xxs:text-xl">
           INICIAR SESIÓN
         </h3>
 

@@ -160,8 +160,8 @@ export function SignupForm({
         onSubmit={handleNameSubmit(onNameSubmit)}
         className="flex h-full w-full flex-col justify-between gap-8"
       >
-        <div className="flex w-full flex-row gap-4 border-b border-b-secondary/20">
-          <h3 className="w-full pb-1 text-left text-xl tracking-wide text-primary">
+        <div className="flex w-full flex-row items-baseline gap-4 border-b border-b-secondary/20">
+          <h3 className="w-full pb-1 text-left text-lg tracking-wide text-primary xxs:text-xl">
             CREAR CUENTA
           </h3>
 
