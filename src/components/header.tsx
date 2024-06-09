@@ -35,6 +35,7 @@ const urlsShowLogin = [
   "/signup",
   "/sign",
   "/sign/verifyEmail/[token]",
+  "/sign/resetPassword/[token]",
 ];
 
 const sections = [
@@ -97,10 +98,11 @@ export const Header = () => {
   return (
     <header
       className={cn(
-        isNavBordered || theme === "light"
-          ? "border-b-secondary/20"
-          : "border-b-transparent",
-        theme === "dark" ? "bg-base-100/70" : "bg-base-300/70",
+        theme === "light"
+          ? "border-b-secondary/20 bg-base-300/70"
+          : isNavBordered
+          ? "border-b-secondary/20 bg-base-100"
+          : "border-b-transparent bg-base-100",
         "fixed top-0 z-20 flex h-16 w-full items-center justify-between border border-secondary/20 px-6 py-2 backdrop-blur transition-all duration-500"
       )}
     >

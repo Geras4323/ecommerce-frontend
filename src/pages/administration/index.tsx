@@ -1,3 +1,4 @@
+import { withAuth } from "@/functions/session";
 import { sections } from "@/layouts/administration";
 import { GeneralLayout } from "@/layouts/general";
 import Link from "next/link";
@@ -33,3 +34,5 @@ export default function Administration() {
     </GeneralLayout>
   );
 }
+
+export const getServerSideProps = withAuth("admin");

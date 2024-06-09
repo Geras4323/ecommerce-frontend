@@ -9,8 +9,9 @@ import axios from "axios";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { Undo2 } from "lucide-react";
-import { useEffect } from "react";
+import { KeyRound, Undo2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { PasswordResetModal } from "../modals/auth";
 
 type Inputs = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -24,6 +25,9 @@ export function LoginForm({
   className,
 }: { isLogging: boolean; switchSide?: () => void } & WithClassName) {
   const router = useRouter();
+
+  const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] =
+    useState(false);
 
   const mutation = useMutation<
     ServerSuccess<Session>,
@@ -65,92 +69,107 @@ export function LoginForm({
   }, [isLogging, reset]);
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className={cn(
-        isLogging ? "opacity-100" : "opacity-0",
-        "flex h-full w-full flex-col items-center justify-between p-12 transition-opacity duration-1000",
-        !!className && className
-      )}
-    >
-      <div className="flex w-full flex-row items-baseline gap-4 border-b border-b-secondary/20">
-        <h3 className="w-full pb-1 text-left text-lg tracking-wide text-primary xxs:text-xl">
-          INICIAR SESIÓN
-        </h3>
-
-        <button
-          type="button"
-          onClick={switchSide}
-          className="flex items-center gap-1.5 whitespace-nowrap text-base text-secondary underline underline-offset-4 md:hidden"
-        >
-          <Undo2 className="size-4" />
-          Crear Cuenta
-        </button>
-      </div>
-
-      <div className="flex w-full flex-col gap-8">
-        <FormInput className="relative col-span-2">
-          <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-            <label className="text-primary/60">Email</label>
-          </div>
-          <input
-            {...register("email")}
-            type="text"
-            className={cn(
-              !!errors.email ? "border-error" : "border-secondary/30",
-              "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
-            )}
-          />
-          <div
-            className={cn(
-              !!errors.email && "opacity-100",
-              "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
-            )}
-          >
-            <ErrorSpan message={errors.email?.message} />
-          </div>
-        </FormInput>
-
-        <FormInput className="relative col-span-2">
-          <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-            <label className="text-primary/60">Contraseña</label>
-          </div>
-          <input
-            {...register("password")}
-            type="password"
-            className={cn(
-              !!errors.password ? "border-error" : "border-secondary/30",
-              "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
-            )}
-          />
-          <div
-            className={cn(
-              !!errors.password && "opacity-100",
-              "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
-            )}
-          >
-            <ErrorSpan message={errors.password?.message} />
-          </div>
-        </FormInput>
-      </div>
-
-      <div className="flex w-full flex-col gap-4">
-        {mutation.isError && (
-          <div className="col-span-2 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 text-base font-medium text-primary">
-            {mutation.error?.response?.data === "Invalid credentials"
-              ? "Email o contraseña incorrectos"
-              : "Se ha producido un error"}
-          </div>
+    <>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className={cn(
+          isLogging ? "opacity-100" : "opacity-0",
+          "flex h-full w-full flex-col items-center justify-between p-12 transition-opacity duration-1000",
+          !!className && className
         )}
+      >
+        <div className="flex w-full flex-row items-baseline gap-4 border-b border-b-secondary/20">
+          <h3 className="w-full pb-1 text-left text-lg tracking-wide text-primary xxs:text-xl">
+            INICIAR SESIÓN
+          </h3>
 
-        <LoadableButton
-          isPending={mutation.isPending}
-          className="btn btn-primary mt-2 w-full"
-          animation="dots"
-        >
-          Iniciar sesión
-        </LoadableButton>
-      </div>
-    </form>
+          <button
+            type="button"
+            onClick={switchSide}
+            className="flex items-center gap-1.5 whitespace-nowrap text-base text-secondary underline underline-offset-4 md:hidden"
+          >
+            <Undo2 className="size-4" />
+            Crear Cuenta
+          </button>
+        </div>
+
+        <div className="flex w-full flex-col gap-8">
+          <FormInput className="relative col-span-2">
+            <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
+              <label className="text-primary/60">Email</label>
+            </div>
+            <input
+              {...register("email")}
+              type="text"
+              className={cn(
+                !!errors.email ? "border-error" : "border-secondary/30",
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
+              )}
+            />
+            <div
+              className={cn(
+                !!errors.email && "opacity-100",
+                "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
+              )}
+            >
+              <ErrorSpan message={errors.email?.message} />
+            </div>
+          </FormInput>
+
+          <FormInput className="relative col-span-2">
+            <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
+              <label className="text-primary/60">Contraseña</label>
+            </div>
+            <input
+              {...register("password")}
+              type="password"
+              className={cn(
+                !!errors.password ? "border-error" : "border-secondary/30",
+                "h-12 rounded-md border bg-base-100 px-4 text-base text-primary shadow-inner transition-colors focus:outline-none"
+              )}
+            />
+            <div
+              className={cn(
+                !!errors.password && "opacity-100",
+                "absolute -bottom-2.5 right-3 bg-base-100 px-2 opacity-0 transition-all"
+              )}
+            >
+              <ErrorSpan message={errors.password?.message} />
+            </div>
+          </FormInput>
+        </div>
+
+        <div className="flex w-full flex-col">
+          {mutation.isError && (
+            <div className="col-span-2 mb-4 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 text-base font-medium text-primary">
+              {mutation.error?.response?.data === "Invalid credentials"
+                ? "Email o contraseña incorrectos"
+                : "Se ha producido un error"}
+            </div>
+          )}
+
+          <div
+            onClick={() => setIsPasswordResetModalOpen(true)}
+            className="flex select-none items-center justify-center gap-2 text-base text-secondary underline-offset-2 hover:cursor-pointer hover:underline"
+          >
+            <KeyRound className="size-4 min-w-4" />
+            <span>Olvidé mi contraseña</span>
+          </div>
+
+          <LoadableButton
+            isPending={mutation.isPending}
+            className="btn btn-primary mt-2 w-full"
+            animation="dots"
+          >
+            Iniciar sesión
+          </LoadableButton>
+        </div>
+      </form>
+
+      <PasswordResetModal
+        isOpen={isPasswordResetModalOpen}
+        onClose={() => setIsPasswordResetModalOpen(false)}
+      />
+    </>
   );
 }

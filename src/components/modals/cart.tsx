@@ -15,11 +15,16 @@ export function OrderConfirmationModal({
   return (
     <Modal isOpen={isOpen}>
       <div className="flex h-full w-full items-center gap-6">
-        <div>
+        <div
+          className={cn(
+            theme === "dark" ? "bg-success/10" : "bg-primary/10",
+            "size-12 rounded-full p-2 sm:size-16"
+          )}
+        >
           <CheckCircle2
             className={cn(
               theme === "dark" ? "text-success" : "text-primary",
-              "size-12 sm:size-16"
+              "size-full"
             )}
           />
         </div>
