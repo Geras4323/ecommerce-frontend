@@ -1,7 +1,9 @@
 import type { WithClassName, WithChildren } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { AlertCircle } from "lucide-react";
+import { useTheme } from "next-themes";
 import type { MouseEventHandler, ReactNode } from "react";
+import { LoadingSpinner } from "./loading";
 
 export function ErrorSpan({
   message,
@@ -17,6 +19,33 @@ export function ErrorSpan({
     >
       <AlertCircle className="mb-0.5 size-4 min-w-4" />
       <span className="italic">{message}</span>
+    </div>
+  );
+}
+
+export function SuccessAlert({
+  message,
+  showRedirect = false,
+}: {
+  message?: string;
+  showRedirect?: boolean;
+}) {
+  const { theme } = useTheme();
+  if (!message) return;
+  return (
+    <div
+      className={cn(
+        theme === "dark" ? "bg-success text-black" : "bg-secondary text-white",
+        "flex h-12 w-full items-center justify-between rounded-lg px-3 py-1"
+      )}
+    >
+      <span>{message}</span>
+      {showRedirect && (
+        <div className="flex animate-pulse items-center gap-2">
+          <span>Redirigiendo...</span>
+          <LoadingSpinner className="size-5 min-w-5" />
+        </div>
+      )}
     </div>
   );
 }

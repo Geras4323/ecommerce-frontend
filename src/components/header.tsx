@@ -40,13 +40,6 @@ const urlsShowLogin = [
 
 const sections = [
   {
-    title: "Mis datos",
-    description: "Ver información de mi cuenta",
-    Svg: User2,
-    url: "/account",
-    disabled: true,
-  },
-  {
     title: "Inicio",
     description: "Pantalla principal",
     Svg: Home,
@@ -58,6 +51,13 @@ const sections = [
     description: "Los productos disponibles",
     Svg: Package,
     url: "/showroom",
+    disabled: false,
+  },
+  {
+    title: "Mi cuenta",
+    description: "Ver información de mi cuenta",
+    Svg: User2,
+    url: "/account",
     disabled: false,
   },
   {
@@ -150,7 +150,7 @@ export const Header = () => {
               />
               {!cart.cartItems.isPending &&
                 cart.cartItems.data?.length !== 0 && (
-                  <div className="absolute right-0 top-0 size-2 rounded-full bg-error" />
+                  <div className="absolute right-0.5 top-0.5 size-2 rounded-full bg-error" />
                 )}
             </PopoverTrigger>
             <PopoverContent align="end" sideOffset={15}>

@@ -36,7 +36,7 @@ export default function ResetPassword() {
 
   const changePasswordMutation = useMutation<void, ServerError, string>({
     mutationFn: async (newPassword) => {
-      const url = `${vars.serverUrl}/api/v1/auth/change-password`;
+      const url = `${vars.serverUrl}/api/v1/auth/recover-password`;
       return axios.post(
         url,
         { token: params?.token, newPassword },

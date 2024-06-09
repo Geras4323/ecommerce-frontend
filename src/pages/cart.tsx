@@ -27,14 +27,13 @@ import { LoadableButton } from "@/components/forms";
 import { type OrderItem } from "@/functions/orders";
 import { type Session, withAuth } from "@/functions/session";
 import Link from "next/link";
-import { useSession } from "@/hooks/session";
 import { format } from "date-fns";
 import { OrderConfirmationModal } from "@/components/modals/cart";
 import { useState } from "react";
 import { getCategories } from "@/functions/categories";
+import { type ServerPage } from "@/types/session";
 
-export default function Cart() {
-  const { session } = useSession();
+const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   const cart = useShoppingCart();
 
   const queryClient = useQueryClient();
@@ -81,12 +80,10 @@ export default function Cart() {
     },
     onSuccess: (order) => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
-      if (session.data) {
-        discordNotifyMutation.mutate({
-          session: session.data,
-          order: order.data,
-        });
-      }
+      discordNotifyMutation.mutate({
+        session: session,
+        order: order.data,
+      });
       setConfirmedOrder(order.data);
     },
   });
@@ -233,18 +230,19 @@ export default function Cart() {
         </div>
       </section>
 
-      {confirmedOrder && session.data && (
+      {confirmedOrder && (
         <OrderConfirmationModal
           isOpen={!!confirmedOrder}
           onClose={() => setConfirmedOrder(null)}
           order={confirmedOrder}
-          email={session.data.email}
+          email={session.email}
         />
       )}
     </GeneralLayout>
   );
-}
+};
 
+export default Cart;
 export const getServerSideProps = withAuth("noAdmin");
 
 export function CartItemSkeleton() {
