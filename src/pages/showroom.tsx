@@ -6,13 +6,13 @@ import { type Dispatch, type SetStateAction, useState } from "react";
 import { type Product, getProducts } from "@/functions/products";
 import { cn } from "@/utils/lib";
 import {
+  Boxes,
   ChevronLeft,
   ChevronRight,
   Minus,
-  Package,
   Plus,
   ShoppingCart,
-  Tag,
+  Tags,
 } from "lucide-react";
 import { useShoppingCart } from "@/hooks/cart";
 import type { ServerError } from "@/types/types";
@@ -71,7 +71,7 @@ export default function Showroom() {
         <section className="relative h-auto w-full min-w-80 lg:w-80">
           <div className="sticky top-24 flex h-fit w-full flex-col gap-4">
             <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2 text-primary">
-              <Tag className="size-6" />
+              <Tags className="size-6" />
               <h2 className="text-xl font-medium tracking-wide">CATEGORÍAS</h2>
             </div>
 
@@ -156,7 +156,7 @@ export default function Showroom() {
         {/* PRODUCTS */}
         <section className="mb-8 flex w-full flex-col gap-4 md:w-screen md:max-w-2xl lg:max-w-xl xl:max-w-2xl 2xl:max-w-6xl">
           <div className="flex h-fit items-center gap-4 border-b border-b-secondary/20 py-2 text-primary">
-            <Package className="size-6" />
+            <Boxes className="size-6" />
             <h2 className="text-xl font-medium tracking-wide">PRODUCTOS</h2>
           </div>
           <div className="grid h-auto w-full grid-cols-1 gap-4 2xl:grid-cols-2">

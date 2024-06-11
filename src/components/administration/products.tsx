@@ -2,7 +2,13 @@ import type { Category } from "@/functions/categories";
 import type { Product } from "@/functions/products";
 import type { Supplier } from "@/functions/suppliers";
 import { vars } from "@/utils/vars";
-import { Barcode, ClipboardList, Tag } from "lucide-react";
+import {
+  Barcode,
+  ClipboardList,
+  GripVertical,
+  ListOrdered,
+  Tag,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -125,5 +131,55 @@ export function ProductsItem({
         </p>
       </div>
     </Link>
+  );
+}
+
+type SortableProduct = { id: number; name: string; imageURL: string };
+
+export function SortableItem({
+  product,
+  position,
+}: {
+  product: SortableProduct;
+  position: number;
+}) {
+  return (
+    <div className="group flex h-24 w-96 justify-start overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 hover:cursor-grab active:cursor-grabbing">
+      <Image
+        alt={product.name}
+        src={product.imageURL}
+        width={96}
+        height={96}
+        className="aspect-square size-24 h-full min-w-24 border-r border-secondary/20 object-cover"
+      />
+
+      <div className="size-full p-3">{product.name}</div>
+
+      <div className="flex h-full w-12 min-w-12 flex-col items-center justify-center gap-2.5 border-l border-secondary/20 pb-2">
+        <div className="flex size-5 items-center justify-center gap-1 font-semibold text-primary opacity-80">
+          <ListOrdered className="mb-0.5 size-4 min-w-4 text-secondary" />
+          {position + 1}
+        </div>
+        <GripVertical className="size-6 min-w-6 text-secondary" />
+      </div>
+    </div>
+  );
+}
+
+export function SortableItemSkeleton() {
+  return (
+    <div className="group flex h-24 w-96 animate-pulse justify-start overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10">
+      <div className="size-24 h-full min-w-24 border-r border-secondary/10 bg-secondary/20" />
+
+      <div className="flex size-full flex-col gap-1.5 p-3">
+        <div className="h-6 w-full rounded-md bg-secondary/20" />
+        <div className="h-6 w-3/4 rounded-md bg-secondary/20" />
+      </div>
+
+      <div className="flex h-full w-12 min-w-12 flex-col items-center justify-center gap-2.5 border-l border-secondary/20">
+        <div className="size-5 w-8 rounded-md bg-secondary/20" />
+        <div className="h-7 w-5 rounded-md bg-secondary/20" />
+      </div>
+    </div>
   );
 }

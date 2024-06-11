@@ -3,6 +3,7 @@ import { withAuth } from "@/functions/session";
 import type { ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import {
+  ArrowDownUp,
   ClipboardList,
   Filter,
   Package,
@@ -37,6 +38,7 @@ import {
 import { ErrorSpan } from "@/components/forms";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 function Products() {
   const router = useRouter();
@@ -166,6 +168,19 @@ function Products() {
           {!anyError && (
             <div className="mx-auto mb-4 flex h-fit w-full max-w-screen-md flex-col items-end justify-center gap-4 border-b border-secondary/30 pb-4 xl:w-full xl:max-w-screen-2xl">
               <div className="flex items-center gap-4">
+                {productsQuery.isPending ? (
+                  <div className="h-12 w-14 animate-pulse rounded-md bg-secondary/20 xxs:w-32 md:w-52" />
+                ) : (
+                  <Link
+                    href="/administration/products/sort"
+                    className="btn btn-outline btn-primary focus:outline-none"
+                  >
+                    <ArrowDownUp className="size-5" />
+                    <span className="hidden xxs:block">Ordenar</span>
+                    <span className="-ml-1 hidden md:block">productos</span>
+                  </Link>
+                )}
+
                 {categoriesQuery.isPending || suppliersQuery.isPending ? (
                   <div className="h-12 w-24 animate-pulse rounded-md bg-secondary/20" />
                 ) : (
@@ -279,7 +294,7 @@ function Products() {
                 )}
 
                 {productsQuery.isPending ? (
-                  <div className="h-12 w-36 animate-pulse rounded-md bg-secondary/20" />
+                  <div className="h-12 w-44 animate-pulse rounded-md bg-secondary/20" />
                 ) : (
                   <button
                     className="btn btn-primary col-span-4 whitespace-nowrap transition-all duration-300"

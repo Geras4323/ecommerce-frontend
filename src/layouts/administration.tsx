@@ -102,7 +102,7 @@ export function AdministrationLayout({
                           "flex h-14 w-full select-none items-center justify-center gap-3 rounded-lg border border-secondary/30 shadow-sm"
                         )}
                       >
-                        <section.icon className="size-6" />
+                        <section.icon className="size-6 min-w-6" />
                         <span className="text-sm uppercase">
                           {section.name}
                         </span>

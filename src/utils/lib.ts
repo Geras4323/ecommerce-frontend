@@ -8,3 +8,20 @@ export const checkMimetype = (type: string, validTypes: string[]) => {
 };
 
 export const axiosOpts = (o: AxiosRequestConfig) => o;
+
+export const withCbk = <S, E>(options: {
+  queryFn: () => Promise<S>;
+  onSuccess?: (d: S) => void;
+  onError?: (e: E) => void;
+}) => {
+  return async () => {
+    try {
+      const data = await options.queryFn();
+      options.onSuccess?.(data);
+      return data;
+    } catch (e) {
+      options.onError?.(e as E);
+      throw e;
+    }
+  };
+};
