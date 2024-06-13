@@ -17,7 +17,10 @@ export function useShoppingCart() {
     queryClient.invalidateQueries({ queryKey: ["cart"] });
   };
 
-  const cartItems = useQuery({
+  const cartItems = useQuery<
+    Awaited<ReturnType<typeof getCartItems>>,
+    ServerError
+  >({
     queryKey: ["cart"],
     queryFn: getCartItems,
     enabled: !!session.data,

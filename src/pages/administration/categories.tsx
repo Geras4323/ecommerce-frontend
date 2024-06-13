@@ -12,6 +12,7 @@ import {
   CategoriesItem,
   CategoriesItemSkeleton,
 } from "@/components/administration/categories";
+import { ErrorSpan } from "@/components/forms";
 
 function Categories() {
   const { selected_category, category_select, create_isOpen, create_open } =
@@ -32,6 +33,9 @@ function Categories() {
   return (
     <AdministrationLayout active="Categorías">
       <div className="flex h-full w-full">
+        {/* DATA ASIDE */}
+        <CategoryDataAside />
+
         {/* CREATE */}
         <CategoryCreateAside />
 
@@ -61,32 +65,33 @@ function Categories() {
 
           {/* CATEGORY LIST */}
           <div className="mx-auto flex w-fit flex-row flex-wrap justify-center gap-3">
-            {categoriesQuery.isPending
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <CategoriesItemSkeleton key={i} />
+            {categoriesQuery.isPending ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <CategoriesItemSkeleton key={i} />
+              ))
+            ) : categoriesQuery.isError ? (
+              <ErrorSpan
+                message={categoriesQuery.error.response?.data.comment}
+              />
+            ) : (
+              categoriesQuery.data
+                ?.filter((category) =>
+                  filter
+                    ? category.name.toLowerCase().includes(filter.toLowerCase())
+                    : category
+                )
+                .map((category) => (
+                  <CategoriesItem
+                    key={category.id}
+                    category={category}
+                    selected_category={selected_category}
+                    category_select={category_select}
+                    create_isOpen={create_isOpen}
+                  />
                 ))
-              : categoriesQuery.data
-                  ?.filter((category) =>
-                    filter
-                      ? category.name
-                          .toLowerCase()
-                          .includes(filter.toLowerCase())
-                      : category
-                  )
-                  .map((category) => (
-                    <CategoriesItem
-                      key={category.id}
-                      category={category}
-                      selected_category={selected_category}
-                      category_select={category_select}
-                      create_isOpen={create_isOpen}
-                    />
-                  ))}
+            )}
           </div>
         </section>
-
-        {/* DATA ASIDE */}
-        <CategoryDataAside />
       </div>
     </AdministrationLayout>
   );

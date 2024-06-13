@@ -1,4 +1,9 @@
-import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
+import {
+  ErrorAlert,
+  ErrorSpan,
+  LoadableButton,
+  MandatoryMark,
+} from "@/components/forms";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +32,7 @@ import {
 } from "@/components/modals/administration/categories";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { mqs, useMediaQueries } from "@/hooks/screen";
+import { cn } from "@/utils/lib";
 
 type Input = z.infer<typeof inputSchema>;
 const inputSchema = z.object({
@@ -189,7 +195,7 @@ export function CategoryDataAside() {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col items-end gap-4"
         >
-          <div className="flex w-full items-center gap-4">
+          <div className="flex w-full items-center gap-8">
             {/* DATA */}
             <section className="flex w-full flex-col gap-4">
               <div className="flex flex-col gap-1">
@@ -277,8 +283,24 @@ export function CategoryDataAside() {
             </section>
           </div>
 
+          <ErrorAlert
+            className="-mb-4"
+            message={dataMutation.error?.response?.data.comment}
+            showX
+          />
+          <ErrorAlert
+            className="-mb-4"
+            message={imageMutation.error?.response?.data.comment}
+            showX
+          />
+
           {/* ACTIONS */}
-          <section className="mt-8 flex gap-4">
+          <section
+            className={cn(
+              dataMutation.isError || imageMutation.isError ? "mt-0" : "mt-4",
+              "flex gap-4"
+            )}
+          >
             <button
               type="button"
               className="btn btn-ghost w-32"

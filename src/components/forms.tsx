@@ -1,8 +1,13 @@
 import type { WithClassName, WithChildren } from "@/types/types";
 import { cn } from "@/utils/lib";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, X } from "lucide-react";
 import { useTheme } from "next-themes";
-import type { MouseEventHandler, ReactNode } from "react";
+import {
+  useEffect,
+  useState,
+  type MouseEventHandler,
+  type ReactNode,
+} from "react";
 import { LoadingSpinner } from "./loading";
 
 export function ErrorSpan({
@@ -19,6 +24,36 @@ export function ErrorSpan({
     >
       <AlertCircle className="mb-0.5 size-4 min-w-4" />
       <span className="italic">{message}</span>
+    </div>
+  );
+}
+
+export function ErrorAlert({
+  message,
+  showX = true,
+  className,
+}: { message?: string; showX?: boolean } & WithClassName) {
+  const [msg, setMsg] = useState<string>();
+
+  useEffect(() => {
+    setMsg(message);
+  }, [message]);
+
+  if (!msg) return;
+  return (
+    <div
+      className={cn(
+        !!className && className,
+        "flex h-fit min-h-12 w-fit items-center justify-between gap-2 whitespace-pre-wrap rounded-lg bg-error px-3 py-1 text-white"
+      )}
+    >
+      <span className="w-full truncate">{msg}</span>
+      {showX && (
+        <X
+          onClick={() => setMsg(undefined)}
+          className="size-5 min-w-5 cursor-pointer"
+        />
+      )}
     </div>
   );
 }

@@ -187,7 +187,8 @@ export default function ResetPassword() {
                       {changePasswordMutation.isError && (
                         <ErrorSpan
                           message={
-                            changePasswordMutation.error?.response?.data ===
+                            changePasswordMutation.error?.response?.data
+                              .error ===
                             "token has invalid claims: token is expired"
                               ? "Este link expiró. Vuelva al login para solicitar un nuevo link."
                               : "Error desconocido."

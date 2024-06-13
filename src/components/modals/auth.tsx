@@ -124,7 +124,10 @@ export function PasswordResetModal({
           </span>
         </p>
 
-        <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="mt-6 flex w-full flex-col gap-6"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <FormInput className="relative col-span-2 [&>*]:bg-base-300">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
               <label className="text-primary/60">
@@ -148,7 +151,16 @@ export function PasswordResetModal({
               <ErrorSpan message={errors.email?.message} />
             </div>
           </FormInput>
-          <div className="mt-6 flex h-auto w-full items-center justify-end gap-2">
+
+          {sendResetPasswordEmailMutation.isError && (
+            <div className="-mb-3 flex h-fit min-h-12 w-full items-center justify-between gap-2 rounded-lg bg-error px-3 py-1 text-white">
+              <span className="max-w-64 truncate xxs:max-w-96">
+                {sendResetPasswordEmailMutation.error.response?.data.comment}
+              </span>
+            </div>
+          )}
+
+          <div className="flex h-auto w-full items-center justify-end gap-2">
             <button type="button" onClick={onClose} className="btn btn-ghost">
               Cancelar
             </button>

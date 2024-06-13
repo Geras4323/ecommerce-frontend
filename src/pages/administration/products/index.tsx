@@ -367,15 +367,15 @@ function Products() {
 
           {anyError && (
             <div className="flex w-full flex-col gap-2">
-              {productsQuery.isError && (
-                <ErrorSpan message="Ocurrió un error durante la carga de los productos" />
-              )}
-              {categoriesQuery.isError && (
-                <ErrorSpan message="Ocurrió un error durante la carga de las categorías" />
-              )}
-              {suppliersQuery.isError && (
-                <ErrorSpan message="Ocurrió un error durante la carga de los proveedores" />
-              )}
+              <ErrorSpan
+                message={productsQuery.error?.response?.data.comment}
+              />
+              <ErrorSpan
+                message={categoriesQuery.error?.response?.data.comment}
+              />
+              <ErrorSpan
+                message={suppliersQuery.error?.response?.data.comment}
+              />
             </div>
           )}
         </section>

@@ -1,4 +1,4 @@
-import { LoadableButton } from "@/components/forms";
+import { ErrorAlert, LoadableButton } from "@/components/forms";
 import {
   Drawer,
   DrawerDescription,
@@ -177,6 +177,11 @@ export const ProductDataDrawer = ({
                     </div>
                   </div>
                 </div>
+
+                <ErrorAlert
+                  className="-mb-2 w-full"
+                  message={addToCart.error?.response?.data.comment}
+                />
 
                 {/* Add to cart */}
                 <div className="flex h-12 min-h-12 w-full flex-row justify-between gap-2">

@@ -2,15 +2,20 @@ import {
   OrdersItemSkeleton,
   OrdersItem,
 } from "@/components/administration/orders";
+import { ErrorAlert } from "@/components/forms";
 import { getMyOrders } from "@/functions/orders";
 import { withAuth } from "@/functions/session";
 import { GeneralLayout } from "@/layouts/general";
+import { type ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, Undo2 } from "lucide-react";
 import Link from "next/link";
 
 export default function Orders() {
-  const ordersQuery = useQuery({
+  const ordersQuery = useQuery<
+    Awaited<ReturnType<typeof getMyOrders>>,
+    ServerError
+  >({
     queryKey: ["orders"],
     queryFn: getMyOrders,
     retry: false,
@@ -31,9 +36,10 @@ export default function Orders() {
               <OrdersItemSkeleton key={i} />
             ))
           ) : ordersQuery.isError ? (
-            <div className="flex h-16 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
-              Se ha producido un error
-            </div>
+            <ErrorAlert
+              className="w-full"
+              message={ordersQuery.error.response?.data.comment}
+            />
           ) : ordersQuery.data.length === 0 ? (
             <div className="mx-auto mt-4 flex w-fit items-center justify-center gap-4">
               <p className="text-xl">Aún no hay pedidos</p>
@@ -43,7 +49,7 @@ export default function Orders() {
               </Link>
             </div>
           ) : (
-            ordersQuery.data?.map((item) => (
+            ordersQuery.data.map((item) => (
               <OrdersItem key={item.id} item={item} />
             ))
           )}

@@ -144,7 +144,7 @@ export function SortableItem({
   position: number;
 }) {
   return (
-    <div className="group flex h-24 w-96 justify-start overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 hover:cursor-grab active:cursor-grabbing">
+    <div className="group flex h-24 w-full max-w-96 justify-start overflow-hidden rounded-lg border border-secondary/10 bg-secondary/10 hover:cursor-grab active:cursor-grabbing">
       <Image
         alt={product.name}
         src={product.imageURL}

@@ -21,6 +21,7 @@ import { getSuppliers, type Supplier } from "@/functions/suppliers";
 import { useSupplierStore } from "@/hooks/states/suppliers";
 import { SupplierCreateAside } from "src/containers/administration/suppliers/createAside";
 import { SupplierDataAside } from "src/containers/administration/suppliers/dataAside";
+import { ErrorSpan } from "@/components/forms";
 
 const columnHelper = createColumnHelper<Supplier>();
 
@@ -65,7 +66,10 @@ function Suppliers() {
   return (
     <AdministrationLayout active="Proveedores">
       <div className="flex h-full w-full">
-        {/* CREATE */}
+        {/* DATA ASIDE */}
+        <SupplierDataAside />
+
+        {/* CREATE ASIDE */}
         <SupplierCreateAside />
 
         {/* MAIN TABLE */}
@@ -91,8 +95,15 @@ function Suppliers() {
             </button>
           </div>
 
-          <Table>
-            {/* <TableHeader>
+          {suppliersQuery.isError ? (
+            <div className="flex w-full justify-center">
+              <ErrorSpan
+                message={suppliersQuery.error.response?.data.comment}
+              />
+            </div>
+          ) : (
+            <Table>
+              {/* <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
                   key={headerGroup.id}
@@ -115,52 +126,50 @@ function Suppliers() {
                 </TableRow>
               ))}
             </TableHeader> */}
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={() => {
-                      if (selected_supplier || create_isOpen) return;
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      onClick={() => {
+                        if (selected_supplier || create_isOpen) return;
 
-                      supplier_select(row.original);
-                    }}
-                    className={cn(
-                      selected_supplier || create_isOpen
-                        ? `cursor-default ${
-                            row.original.id === selected_supplier?.id &&
-                            "bg-secondary/20"
-                          }`
-                        : "cursor-pointer hover:bg-secondary/20"
-                    )}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
+                        supplier_select(row.original);
+                      }}
+                      className={cn(
+                        selected_supplier || create_isOpen
+                          ? `cursor-default ${
+                              row.original.id === selected_supplier?.id &&
+                              "bg-secondary/20"
+                            }`
+                          : "cursor-pointer hover:bg-secondary/20"
+                      )}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    {" "}
+                    <TableCell
+                      colSpan={numberOfColumns}
+                      className="h-12 text-center"
+                    >
+                      Sin resultados
+                    </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  {" "}
-                  <TableCell
-                    colSpan={numberOfColumns}
-                    className="h-12 text-center"
-                  >
-                    Sin resultados
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </section>
-
-        {/* DATA ASIDE */}
-        <SupplierDataAside />
       </div>
     </AdministrationLayout>
   );

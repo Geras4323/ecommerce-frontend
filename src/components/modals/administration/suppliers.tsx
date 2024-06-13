@@ -1,7 +1,8 @@
-import { LoadableButton } from "@/components/forms";
+import { ErrorAlert, LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import { type Supplier } from "@/functions/suppliers";
 import { useSupplierStore } from "@/hooks/states/suppliers";
+import { type ServerError } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -77,7 +78,7 @@ export function DeleteSupplierModal({
     onCloseProp();
   }
 
-  const mutation = useMutation({
+  const mutation = useMutation<void, ServerError, void>({
     mutationFn: async () => {
       const url = `${vars.serverUrl}/api/v1/suppliers/${supplier.id}`;
       return axios.delete(url, { withCredentials: true });
@@ -97,6 +98,11 @@ export function DeleteSupplierModal({
         </span>
       }
     >
+      <ErrorAlert
+        className="-mb-2 w-full"
+        message={mutation.error?.response?.data.comment}
+      />
+
       <div className="flex h-auto w-full items-center justify-end gap-2">
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar

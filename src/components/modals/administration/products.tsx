@@ -1,6 +1,7 @@
-import { LoadableButton } from "@/components/forms";
+import { ErrorAlert, LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import { type Product } from "@/functions/products";
+import { type ServerError } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -71,7 +72,7 @@ export function DeleteProductModal({
     onCloseProp();
   }
 
-  const mutation = useMutation({
+  const mutation = useMutation<void, ServerError, void>({
     mutationFn: async () => {
       const url = `${vars.serverUrl}/api/v1/products/${product.id}`;
       return axios.delete(url, { withCredentials: true });
@@ -90,6 +91,11 @@ export function DeleteProductModal({
         </span>
       }
     >
+      <ErrorAlert
+        className="-mb-2 w-full"
+        message={mutation.error?.response?.data.comment}
+      />
+
       <div className="flex h-auto w-full items-center justify-end gap-2">
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar

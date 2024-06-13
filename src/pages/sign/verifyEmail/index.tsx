@@ -62,7 +62,10 @@ function VerifyEmail() {
           )}
 
           {mutation.isError && (
-            <ErrorSpan message="Ocurrió un error inesperado" className="mt-2" />
+            <ErrorSpan
+              message={mutation.error.response?.data.comment}
+              className="mt-2"
+            />
           )}
         </div>
       </div>

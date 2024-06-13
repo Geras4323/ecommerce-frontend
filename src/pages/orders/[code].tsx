@@ -34,7 +34,7 @@ import {
 import { type CloudinarySuccess } from "@/types/cloudinary";
 import { vars } from "@/utils/vars";
 import axios from "axios";
-import { LoadableButton } from "@/components/forms";
+import { ErrorAlert, ErrorSpan, LoadableButton } from "@/components/forms";
 import { type Payment } from "@/functions/payments";
 import { checkMimetype, cn } from "@/utils/lib";
 import { getCategories } from "@/functions/categories";
@@ -55,7 +55,10 @@ export default function Order() {
     setUploadedVoucher(voucher);
   }
 
-  const productsQuery = useQuery({
+  const productsQuery = useQuery<
+    Awaited<ReturnType<typeof getProducts>>,
+    ServerError
+  >({
     queryKey: ["products"],
     queryFn: getProducts,
     refetchOnWindowFocus: true,
@@ -74,7 +77,7 @@ export default function Order() {
 
   const orderQuery = useQuery<
     Awaited<ReturnType<typeof getOrder>>,
-    ServerError<string>
+    ServerError
   >({
     queryKey: ["order", orderID],
     queryFn: () => getOrder(parseInt(orderID)),
@@ -126,10 +129,18 @@ export default function Order() {
               Array.from({ length: 3 }).map((_, i) => (
                 <SingleOrderItemSkeleton key={i} />
               ))
-            ) : productsQuery.isError || orderQuery.isError ? (
-              <div className="flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
-                Se ha producido un error
-              </div>
+            ) : productsQuery.isError ||
+              categoriesQuery.isError ||
+              orderQuery.isError ? (
+              <>
+                <ErrorSpan
+                  message={productsQuery.error?.response?.data.comment}
+                />
+                <ErrorSpan
+                  message={categoriesQuery.error?.response?.data.comment}
+                />
+                <ErrorSpan message={orderQuery.error?.response?.data.comment} />
+              </>
             ) : (
               orderQuery.data.orderProducts.map((item) => {
                 const product = productsQuery.data.find(
@@ -153,64 +164,72 @@ export default function Order() {
           </article>
 
           <article className="order-1 flex h-fit w-full flex-col gap-4 rounded-lg border-secondary/20 bg-secondary/5 p-4 pb-4 shadow-md lg:order-2 lg:h-full lg:w-2/5 lg:rounded-none lg:border-l lg:bg-transparent lg:pb-0 lg:pl-4 lg:shadow-none">
-            <div className="flex items-center gap-2">
-              <Hash className="size-5 text-secondary" />
-              <span className="text-lg text-secondary">Pedido Nro</span>
-              {orderQuery.isPending ? (
-                <div className="h-6 w-20 animate-pulse rounded-lg bg-secondary/30" />
-              ) : (
-                <span className="text-xl font-medium text-primary">
-                  {orderQuery.data?.id}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <CalendarDaysIcon className="size-5 text-secondary" />
-              <span className="text-lg text-secondary">Iniciado el</span>
-              {orderQuery.isPending ? (
-                <div className="h-6 w-48 animate-pulse rounded-lg bg-secondary/30" />
-              ) : (
-                !orderQuery.isError && (
-                  <>
-                    <span className="text-primary">
-                      {
-                        days[
-                          format(
-                            new Date(orderQuery.data?.createdAt),
-                            "EEEE"
-                          ) as Day
-                        ]
-                      }
+            {orderQuery.isError ? (
+              <ErrorSpan message={orderQuery.error.response?.data.comment} />
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <Hash className="size-5 text-secondary" />
+                  <span className="text-lg text-secondary">Pedido Nro</span>
+                  {orderQuery.isPending ? (
+                    <div className="h-6 w-20 animate-pulse rounded-lg bg-secondary/30" />
+                  ) : (
+                    <span className="text-xl font-medium text-primary">
+                      {orderQuery.data?.id}
                     </span>
-                    <span className="text-lg text-primary">
-                      {format(new Date(), "dd-MM-yyyy")}
-                    </span>
-                  </>
-                )
-              )}
-            </div>
+                  )}
+                </div>
 
-            <hr className="border-b border-t-0 border-b-secondary/20" />
+                <div className="flex items-center gap-2">
+                  <CalendarDaysIcon className="size-5 text-secondary" />
+                  <span className="text-lg text-secondary">Iniciado el</span>
+                  {orderQuery.isPending ? (
+                    <div className="h-6 w-48 animate-pulse rounded-lg bg-secondary/30" />
+                  ) : (
+                    !orderQuery.isError && (
+                      <>
+                        <span className="text-primary">
+                          {
+                            days[
+                              format(
+                                new Date(orderQuery.data?.createdAt),
+                                "EEEE"
+                              ) as Day
+                            ]
+                          }
+                        </span>
+                        <span className="text-lg text-primary">
+                          {format(new Date(), "dd-MM-yyyy")}
+                        </span>
+                      </>
+                    )
+                  )}
+                </div>
 
-            <div className="flex items-center gap-2">
-              <DollarSign className="size-5 text-secondary" />
-              <span className="text-lg text-secondary">Total a abonar:</span>
-              {orderQuery.isPending ? (
-                <div className="h-6 w-32 animate-pulse rounded-lg bg-secondary/30" />
-              ) : (
-                !orderQuery.isError && (
-                  <div className="flex items-end gap-1">
-                    <span className="text-lg text-primary">$</span>
-                    <span className="text-xl text-primary">
-                      {orderQuery.data.total.toLocaleString(vars.region)}
-                    </span>
-                  </div>
-                )
-              )}
-            </div>
+                <hr className="border-b border-t-0 border-b-secondary/20" />
 
-            {!orderQuery.isPending && (
+                <div className="flex items-center gap-2">
+                  <DollarSign className="size-5 text-secondary" />
+                  <span className="text-lg text-secondary">
+                    Total a abonar:
+                  </span>
+                  {orderQuery.isPending ? (
+                    <div className="h-6 w-32 animate-pulse rounded-lg bg-secondary/30" />
+                  ) : (
+                    !orderQuery.isError && (
+                      <div className="flex items-end gap-1">
+                        <span className="text-lg text-primary">$</span>
+                        <span className="text-xl text-primary">
+                          {orderQuery.data.total.toLocaleString(vars.region)}
+                        </span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </>
+            )}
+
+            {!orderQuery.isPending && !orderQuery.isError && (
               <div className="flex w-full flex-col gap-4">
                 <input
                   id="voucher"
@@ -226,6 +245,8 @@ export default function Order() {
                 >
                   <Paperclip className="size-5" /> Adjuntar comprobante de pago
                 </label>
+
+                <ErrorAlert message={mutation.error?.response?.data.comment} />
 
                 {uploadedVoucher && (
                   <div className="my-1.5 flex items-center justify-between gap-4">

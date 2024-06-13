@@ -1,5 +1,5 @@
 import { cn } from "@/utils/lib";
-import { ErrorSpan, FormInput, LoadableButton } from "../forms";
+import { ErrorAlert, ErrorSpan, FormInput, LoadableButton } from "../forms";
 import { useMutation } from "@tanstack/react-query";
 import type { ServerError, ServerSuccess, WithClassName } from "@/types/types";
 import { type Session } from "@/functions/session";
@@ -29,11 +29,7 @@ export function LoginForm({
   const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] =
     useState(false);
 
-  const mutation = useMutation<
-    ServerSuccess<Session>,
-    ServerError<string>,
-    Inputs
-  >({
+  const mutation = useMutation<ServerSuccess<Session>, ServerError, Inputs>({
     mutationFn: async (data) => {
       const url = `${vars.serverUrl}/api/v1/auth/login`;
       return axios.post(url, data, { withCredentials: true });
@@ -140,13 +136,10 @@ export function LoginForm({
         </div>
 
         <div className="flex w-full flex-col">
-          {mutation.isError && (
-            <div className="col-span-2 mb-4 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 text-base font-medium text-primary">
-              {mutation.error?.response?.data === "Invalid credentials"
-                ? "Email o contraseña incorrectos"
-                : "Se ha producido un error"}
-            </div>
-          )}
+          <ErrorAlert
+            className="mb-4 w-full"
+            message={mutation.error?.response?.data.comment}
+          />
 
           <div
             onClick={() => setIsPasswordResetModalOpen(true)}

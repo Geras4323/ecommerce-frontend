@@ -1,8 +1,8 @@
-import { LoadableButton } from "@/components/forms";
+import { ErrorAlert, LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import type { Category } from "@/functions/categories";
 import { useCategoryStore } from "@/hooks/states/categories";
-import type { CloudinaryError, CloudinarySuccess } from "@/types/cloudinary";
+import type { CloudinarySuccess } from "@/types/cloudinary";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -79,7 +79,7 @@ export function DeleteCategoryModal({
     onCloseProp();
   }
 
-  const mutation = useMutation({
+  const mutation = useMutation<void, ServerError, void>({
     mutationFn: async () => {
       const url = `${vars.serverUrl}/api/v1/categories/${category.id}`;
       return axios.delete(url, { withCredentials: true });
@@ -99,6 +99,11 @@ export function DeleteCategoryModal({
         </span>
       }
     >
+      <ErrorAlert
+        className="-mb-2 w-full"
+        message={mutation.error?.response?.data.comment}
+      />
+
       <div className="flex h-auto w-full items-center justify-end gap-2">
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar
@@ -137,7 +142,7 @@ export function DeleteCategoryImageModal({
 
   const mutation = useMutation<
     ServerSuccess<CloudinarySuccess>,
-    ServerError<CloudinaryError>,
+    ServerError,
     void
   >({
     mutationFn: async () => {
@@ -147,9 +152,6 @@ export function DeleteCategoryImageModal({
     onSuccess: () => {
       category_select({ ...category, image: undefined });
       onClose();
-    },
-    onError: (err) => {
-      console.log(err.response?.data.Response.message);
     },
   });
 
@@ -165,6 +167,11 @@ export function DeleteCategoryImageModal({
         </span>
       }
     >
+      <ErrorAlert
+        className="-mb-2 w-full"
+        message={mutation.error?.response?.data.comment}
+      />
+
       <div className="flex h-auto w-full items-center justify-end gap-2">
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar

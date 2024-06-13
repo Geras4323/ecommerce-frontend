@@ -1,4 +1,9 @@
-import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
+import {
+  ErrorAlert,
+  ErrorSpan,
+  LoadableButton,
+  MandatoryMark,
+} from "@/components/forms";
 import { DiscardSupplierChangesModal } from "@/components/modals/administration/suppliers";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { type Category } from "@/functions/categories";
@@ -110,7 +115,7 @@ export function SupplierCreateAside() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col items-end gap-4"
+          className="flex flex-col items-end gap-8"
         >
           <div className="flex w-full items-center gap-4">
             <section className="flex w-full flex-col gap-4">
@@ -146,7 +151,13 @@ export function SupplierCreateAside() {
             </section>
           </div>
 
-          <section className="mt-8 flex gap-4">
+          <ErrorAlert
+            className="-mb-4"
+            message={dataMutation.error?.response?.data.comment}
+            showX
+          />
+
+          <section className="flex gap-4">
             <button
               type="button"
               className="btn btn-ghost w-32"

@@ -10,8 +10,13 @@ export const databaseEntrySchema = z.object({
   // deletedAt: z.string().nullable(),
 });
 
+interface DBError {
+  comment: string;
+  error: string;
+}
+
 export type ServerSuccess<T = any> = AxiosResponse<T>;
-export type ServerError<T = any> = AxiosError<T>;
+export type ServerError = AxiosError<DBError>;
 
 export type WithChildren = {
   children?: ReactNode;

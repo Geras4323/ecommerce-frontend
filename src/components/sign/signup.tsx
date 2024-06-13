@@ -8,7 +8,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
-import { ErrorSpan, FormInput, LoadableButton } from "../forms";
+import { ErrorAlert, ErrorSpan, FormInput, LoadableButton } from "../forms";
 import { Redo2, Undo } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -72,7 +72,7 @@ export function SignupForm({
 
   const mutation = useMutation<
     ServerSuccess<Session>,
-    ServerError<string>,
+    ServerError,
     NameInputs & PasswordsInputs
   >({
     mutationFn: async (data) => {
@@ -272,11 +272,7 @@ export function SignupForm({
         </div>
 
         <div className="flex w-full flex-col gap-4">
-          {mutation.isError && (
-            <div className="flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 text-base font-medium text-primary">
-              Ese email ya está en uso
-            </div>
-          )}
+          <ErrorAlert message={mutation.error?.response?.data.comment} />
 
           <button type="submit" className="btn btn-primary w-full">
             Siguiente

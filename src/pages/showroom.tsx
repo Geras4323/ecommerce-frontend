@@ -50,14 +50,20 @@ export default function Showroom() {
 
   const [visualizedProduct, setVisualizedProduct] = useState<Product>();
 
-  const categoriesQuery = useQuery({
+  const categoriesQuery = useQuery<
+    Awaited<ReturnType<typeof getCategories>>,
+    ServerError
+  >({
     queryKey: ["categories"],
     queryFn: getCategories,
     refetchOnWindowFocus: true,
     retry: false,
   });
 
-  const productsQuery = useQuery({
+  const productsQuery = useQuery<
+    Awaited<ReturnType<typeof getProducts>>,
+    ServerError
+  >({
     queryKey: ["products"],
     queryFn: getProducts,
     refetchOnWindowFocus: true,
@@ -81,7 +87,7 @@ export default function Showroom() {
               ) : categoriesQuery.isError ? (
                 <div className="flex w-full justify-center">
                   <ErrorSpan
-                    message="Ocurrió un error al cargar las categorías"
+                    message={categoriesQuery.error.response?.data.comment}
                     className="gap-3 text-lg"
                   />
                 </div>
@@ -104,7 +110,7 @@ export default function Showroom() {
                     <SelectOption value="all" className="h-11">
                       Todas las categorías
                     </SelectOption>
-                    {categoriesQuery.data?.map((category) => (
+                    {categoriesQuery.data.map((category) => (
                       <SelectOption key={category.id} value={category.name}>
                         <div className="flex items-center gap-3">
                           <Image
@@ -136,7 +142,7 @@ export default function Showroom() {
                 ))
               ) : categoriesQuery.isError ? (
                 <ErrorSpan
-                  message="Ocurrió un error al cargar las categorías"
+                  message={categoriesQuery.error.response?.data.comment}
                   className="gap-3 text-lg"
                 />
               ) : (
@@ -167,7 +173,7 @@ export default function Showroom() {
             ) : productsQuery.isError ? (
               <div className="col-span-2 flex justify-center">
                 <ErrorSpan
-                  message="Ocurrió un error al cargar los productos"
+                  message={productsQuery.error.response?.data.comment}
                   className="text-lg"
                 />
               </div>

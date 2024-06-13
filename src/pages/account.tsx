@@ -69,7 +69,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
 
   const changeGeneralMutation = useMutation<
     ServerSuccess<Session>,
-    ServerError<string>,
+    ServerError,
     GeneralInputs
   >({
     mutationFn: async (data) => {
@@ -118,7 +118,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
 
   const changePasswordMutation = useMutation<
     ServerSuccess<Session>,
-    ServerError<string>,
+    ServerError,
     PasswordsInputs
   >({
     mutationFn: async (data) => {
@@ -292,7 +292,9 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
                   <div className="flex w-full flex-col gap-3">
                     {changeGeneralMutation.isError ? (
                       <ErrorSpan
-                        message={changeGeneralMutation.error?.response?.data}
+                        message={
+                          changeGeneralMutation.error?.response?.data.comment
+                        }
                       />
                     ) : (
                       changeGeneralMutation.isSuccess && (
@@ -379,7 +381,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
                       <label htmlFor="re-password" className="text-primary/60">
-                        Reingresar contraseña actual
+                        Reingresar nueva contraseña
                       </label>
                     </div>
                     <input
@@ -408,7 +410,9 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
                   <div className="flex w-full flex-col gap-3">
                     {changePasswordMutation.isError ? (
                       <ErrorSpan
-                        message={changePasswordMutation.error?.response?.data}
+                        message={
+                          changePasswordMutation.error?.response?.data.comment
+                        }
                       />
                     ) : (
                       changePasswordMutation.isSuccess && (

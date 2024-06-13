@@ -1,4 +1,9 @@
-import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
+import {
+  ErrorAlert,
+  ErrorSpan,
+  LoadableButton,
+  MandatoryMark,
+} from "@/components/forms";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -135,7 +140,7 @@ export function SupplierDataAside() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col items-end gap-4"
+          className="flex flex-col items-end gap-8"
         >
           <div className="flex w-full items-center gap-4">
             {/* FIELDS */}
@@ -172,8 +177,14 @@ export function SupplierDataAside() {
             </section>
           </div>
 
+          <ErrorAlert
+            className="-mb-4"
+            message={dataMutation.error?.response?.data.comment}
+            showX
+          />
+
           {/* ACTIONS */}
-          <section className="mt-8 flex gap-4">
+          <section className="flex gap-4">
             <button
               type="button"
               className="btn btn-ghost w-32"

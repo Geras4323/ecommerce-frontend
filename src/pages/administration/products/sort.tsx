@@ -68,13 +68,17 @@ export default function ProductSorting() {
             >
               <ChevronLeft className="size-5" />
             </Link>
-            <h1 className="py-2 text-xl font-medium">ORDENAR PRODUCTOS</h1>
+            <span className="flex gap-2 py-2 text-xl font-medium">
+              ORDENAR <span className="hidden xxs:block">PRODUCTOS</span>
+            </span>
           </div>
 
           {productsQuery.isPending ? (
             <div className="h-8 w-32 animate-pulse rounded-md bg-secondary/20 xs:w-48" />
+          ) : productsQuery.isError ? (
+            <ErrorSpan message={productsQuery.error.response?.data.comment} />
           ) : (
-            !productsQuery.isError && (
+            <div className="flex flex-col items-end gap-3">
               <LoadableButton
                 onClick={() => mutation.mutate()}
                 isPending={mutation.isPending}
@@ -84,7 +88,12 @@ export default function ProductSorting() {
                 <span>Guardar</span>
                 <span className="-ml-1 hidden xs:block">cambios</span>
               </LoadableButton>
-            )
+
+              <ErrorSpan
+                className="mb-1.5"
+                message={mutation.error?.response?.data.comment}
+              />
+            </div>
           )}
         </div>
 
@@ -106,7 +115,7 @@ export default function ProductSorting() {
             animation={150}
             list={productList}
             setList={setProductList}
-            className="flex flex-wrap justify-center gap-3"
+            className="mx-auto grid grid-cols-1 justify-center gap-3 md:grid-cols-2 xl:grid-cols-3"
             direction="horizontal"
           >
             {productList?.map((product, i) => (

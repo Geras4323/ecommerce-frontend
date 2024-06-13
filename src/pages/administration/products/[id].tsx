@@ -1,4 +1,9 @@
-import { ErrorSpan, LoadableButton, MandatoryMark } from "@/components/forms";
+import {
+  ErrorAlert,
+  ErrorSpan,
+  LoadableButton,
+  MandatoryMark,
+} from "@/components/forms";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,7 +47,7 @@ export type ProductsFilters = {
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
-  name: z.string().min(1, { message: "Debe tener un nombre" }),
+  name: z.string().min(1, { message: "Debe tener un título" }),
   price: z
     .string()
     .min(1, { message: "Debe ingresar un precio" })
@@ -358,10 +363,14 @@ export default function ProductData() {
                     <ErrorSpan message="Ocurrió un error durante la carga del producto" />
                   )}
                   {categoriesQuery.isError && (
-                    <ErrorSpan message="Ocurrió un error durante la carga de las categorías" />
+                    <ErrorSpan
+                      message={categoriesQuery.error.response?.data.comment}
+                    />
                   )}
                   {suppliersQuery.isError && (
-                    <ErrorSpan message="Ocurrió un error durante la carga de los proveedores" />
+                    <ErrorSpan
+                      message={suppliersQuery.error.response?.data.comment}
+                    />
                   )}
                   <Link
                     href="/administration/products"
@@ -378,9 +387,9 @@ export default function ProductData() {
                   <div className="col-span-2 flex flex-col gap-1">
                     <label
                       htmlFor="name"
-                      className="text-md text-primary sm:text-lg"
+                      className="text-base tracking-wide text-primary sm:text-lg"
                     >
-                      <MandatoryMark /> Nombre:
+                      <MandatoryMark /> TÍTULO:
                     </label>
                     {productQuery.isPending ? (
                       <div className="h-12 w-full animate-pulse rounded-md bg-secondary/20" />
@@ -399,9 +408,9 @@ export default function ProductData() {
                   <div className="flex flex-col gap-1">
                     <label
                       htmlFor="price"
-                      className="text-md text-primary sm:text-lg"
+                      className="text-base tracking-wide text-primary"
                     >
-                      <MandatoryMark /> Precio:
+                      <MandatoryMark /> PRECIO:
                     </label>
                     {productQuery.isPending ? (
                       <div className="h-12 w-full animate-pulse rounded-md bg-secondary/20" />
@@ -422,9 +431,9 @@ export default function ProductData() {
                   <div className="flex h-full flex-col justify-start gap-1">
                     <label
                       htmlFor="code"
-                      className="text-md text-primary sm:text-lg"
+                      className="text-base tracking-wide text-primary"
                     >
-                      Código:
+                      CÓDIGO:
                     </label>
                     {productQuery.isPending ? (
                       <div className="h-12 w-full animate-pulse rounded-md bg-secondary/20" />
@@ -443,9 +452,9 @@ export default function ProductData() {
                   <div className="col-span-2 flex flex-col gap-1 md:col-span-1">
                     <label
                       htmlFor="category"
-                      className="text-md text-primary sm:text-lg"
+                      className="text-base tracking-wide text-primary"
                     >
-                      <MandatoryMark /> Categoría:
+                      <MandatoryMark /> CATEGORÍA:
                     </label>
                     {productQuery.isPending || categoriesQuery.isPending ? (
                       <div className="h-12 w-full animate-pulse rounded-md bg-secondary/20" />
@@ -481,9 +490,9 @@ export default function ProductData() {
                   <div className="col-span-2 flex flex-col gap-1 md:col-span-1">
                     <label
                       htmlFor="supplier"
-                      className="text-md text-primary sm:text-lg"
+                      className="text-base tracking-wide text-primary"
                     >
-                      Proveedor:
+                      PROVEEDOR:
                     </label>
                     {productQuery.isPending || suppliersQuery.isPending ? (
                       <div className="h-12 w-full animate-pulse rounded-md bg-secondary/20" />
@@ -528,9 +537,9 @@ export default function ProductData() {
                   <div className="col-span-2 flex flex-col gap-1">
                     <label
                       htmlFor="description"
-                      className="text-md text-primary sm:text-lg"
+                      className="text-base tracking-wide text-primary"
                     >
-                      <MandatoryMark /> Descripción:
+                      <MandatoryMark /> DESCRIPCIÓN:
                     </label>
                     {productQuery.isPending ? (
                       <div className="h-48 max-h-96 min-h-16 w-full animate-pulse rounded-md bg-secondary/20" />
@@ -548,8 +557,8 @@ export default function ProductData() {
 
                 {/* IMAGES */}
                 <div className="flex w-full min-w-80 flex-col gap-1 sm:w-80">
-                  <label className="text-md text-primary sm:text-lg">
-                    Imágenes:
+                  <label className="text-base tracking-wide text-primary">
+                    IMÁGENES:
                   </label>
                   <section className="flex min-w-fit flex-col gap-4">
                     {productQuery.isPending ? (
@@ -561,7 +570,7 @@ export default function ProductData() {
                           className="flex size-full cursor-pointer items-center justify-center gap-3 text-primary/80 hover:text-primary hover:shadow-md"
                         >
                           <Upload className="mt-1 size-5 animate-bounce sm:size-6" />
-                          <span className="sm:text-md text-sm">
+                          <span className="text-sm sm:text-sm">
                             Subir imágenes
                           </span>
                         </label>
@@ -665,8 +674,25 @@ export default function ProductData() {
               </div>
             )}
 
+            {anyError && (
+              <>
+                <ErrorAlert
+                  className="-mb-4 -mt-2"
+                  message={dataMutation.error?.response?.data.comment}
+                />
+                <ErrorAlert
+                  className="-mb-4 -mt-2"
+                  message={updateImagesMutation.error?.response?.data.comment}
+                />
+                <ErrorAlert
+                  className="-mb-4 -mt-2"
+                  message={uploadImagesMutation.error?.response?.data.comment}
+                />
+              </>
+            )}
+
             {!anyPending && !anyError && (
-              <section className="flex gap-4">
+              <div className="flex gap-4">
                 <button
                   type="button"
                   className="btn btn-ghost w-32"
@@ -686,7 +712,7 @@ export default function ProductData() {
                 >
                   Guardar
                 </LoadableButton>
-              </section>
+              </div>
             )}
           </form>
 

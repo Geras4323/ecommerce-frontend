@@ -10,6 +10,7 @@ import {
   OrdersItemSkeleton,
   OrdersItem,
 } from "@/components/administration/orders";
+import { ErrorSpan } from "@/components/forms";
 
 function Orders() {
   const ordersQuery = useQuery<
@@ -40,9 +41,7 @@ function Orders() {
               <OrdersItemSkeleton key={i} fromAdmin />
             ))
           ) : ordersQuery.isError ? (
-            <div className="flex h-16 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
-              Se ha producido un error
-            </div>
+            <ErrorSpan message={ordersQuery.error.response?.data.comment} />
           ) : ordersQuery.data.length === 0 ? (
             <div className="mx-auto mt-4 flex w-fit items-center justify-center gap-4">
               <p className="text-xl">Aún no hay pedidos</p>
@@ -52,7 +51,7 @@ function Orders() {
               </Link>
             </div>
           ) : (
-            ordersQuery.data?.map((item) => (
+            ordersQuery.data.map((item) => (
               <OrdersItem key={item.id} item={item} fromAdmin />
             ))
           )}

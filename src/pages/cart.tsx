@@ -23,7 +23,7 @@ import NoImage from "../../public/no_image.png";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import axios, { type AxiosError } from "axios";
-import { LoadableButton } from "@/components/forms";
+import { ErrorSpan, LoadableButton } from "@/components/forms";
 import { type OrderItem } from "@/functions/orders";
 import { type Session, withAuth } from "@/functions/session";
 import Link from "next/link";
@@ -34,13 +34,15 @@ import { getCategories } from "@/functions/categories";
 import { type ServerPage } from "@/types/session";
 
 const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
-  const cart = useShoppingCart();
-
   const queryClient = useQueryClient();
+  const cart = useShoppingCart();
 
   const [confirmedOrder, setConfirmedOrder] = useState<OrderItem | null>(null);
 
-  const productsQuery = useQuery({
+  const productsQuery = useQuery<
+    Awaited<ReturnType<typeof getProducts>>,
+    ServerError
+  >({
     queryKey: ["products"],
     queryFn: getProducts,
     refetchOnWindowFocus: true,
@@ -194,9 +196,15 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
               <CartItemSkeleton key={i} />
             ))
           ) : productsQuery.isError || cart.cartItems.isError ? (
-            <div className="col-span-2 flex h-12 w-full items-center rounded-lg bg-error px-4 py-2 font-semibold text-primary">
-              Se ha producido un error
-            </div>
+            <>
+              <ErrorSpan message="{productsQuery.error?.response?.data.comment}" />
+              <ErrorSpan
+                message={cart.cartItems.error?.response?.data.comment}
+              />
+              <ErrorSpan
+                message={categoriesQuery.error?.response?.data.comment}
+              />
+            </>
           ) : cart.cartItems.data.length === 0 ? (
             <div className="col-span-2 mx-auto mt-4 flex w-fit items-center justify-center gap-4">
               <p className="text-xl">El carrito está vacío</p>

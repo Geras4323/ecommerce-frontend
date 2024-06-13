@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type Speed = "slow" | "medium" | "fast";
 
 export function VerticalImageMarquee({
@@ -49,11 +51,13 @@ export function VerticalImageMarquee({
 }
 
 function MarqueeImage({ src }: { src: string }) {
-  return (
-    <img
+  return src === "" ? (
+    <div className="aspect-square w-full animate-pulse rounded-xl bg-secondary/20 shadow-md lg:rounded-2xl" />
+  ) : (
+    <Image
       alt="marquee image"
-      width={200}
-      height={200}
+      width={250}
+      height={250}
       src={src}
       draggable={false}
       className="aspect-square w-full select-none rounded-xl border border-secondary/30 object-cover shadow-md lg:rounded-2xl"

@@ -18,6 +18,7 @@ import { useShoppingCart } from "@/hooks/cart";
 import { useRouter } from "next/router";
 import { useTheme } from "next-themes";
 import { Arizonia } from "next/font/google";
+import { LoadableButton } from "./forms";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
@@ -186,13 +187,14 @@ export const Header = () => {
                 })}
 
                 <div className="flex justify-end">
-                  <button
+                  <LoadableButton
                     onClick={() => logoutMutation.mutate()}
+                    isPending={logoutMutation.isPending}
                     className="btn btn-ghost btn-sm flex w-44 gap-3 self-end"
                   >
                     <LogOut className="size-5" />
                     <span>Cerrar sesión</span>
-                  </button>
+                  </LoadableButton>
                 </div>
               </article>
             </PopoverContent>

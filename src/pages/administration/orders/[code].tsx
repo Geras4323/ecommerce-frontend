@@ -94,7 +94,10 @@ export default function Order() {
     });
   }
 
-  const productsQuery = useQuery({
+  const productsQuery = useQuery<
+    Awaited<ReturnType<typeof getProducts>>,
+    ServerError
+  >({
     queryKey: ["products"],
     queryFn: getProducts,
     refetchOnWindowFocus: true,
@@ -113,7 +116,7 @@ export default function Order() {
 
   const orderQuery = useQuery<
     Awaited<ReturnType<typeof getOrder>>,
-    ServerError<string>
+    ServerError
   >({
     queryKey: ["order", codeID],
     queryFn: () => getOrder(parseInt(codeID)),
@@ -162,7 +165,7 @@ export default function Order() {
         </div>
 
         {orderQuery.isError ? (
-          <ErrorSpan message={orderQuery.error.message} />
+          <ErrorSpan message={orderQuery.error.response?.data.comment} />
         ) : (
           <section className="flex h-full w-full flex-col gap-4 md:flex-row">
             <div className="flex w-full flex-col gap-4 md:w-1/2 xl:w-2/3 xl:flex-row">
@@ -313,6 +316,7 @@ export default function Order() {
                       )}
                     />
                   </div>
+
                   <div
                     className={cn(
                       !!openState.stage || mq >= mqs.md
@@ -375,6 +379,17 @@ export default function Order() {
                       <PackageOpen className="size-5" />
                     </div>
                   </div>
+
+                  {updateOrderStateMutation.isError && (
+                    <div className="w-full">
+                      <ErrorSpan
+                        className="self-start"
+                        message={
+                          updateOrderStateMutation.error.response?.data.comment
+                        }
+                      />
+                    </div>
+                  )}
                 </section>
 
                 <hr className="hidden h-px w-full border-none bg-secondary/20 xl:block" />
