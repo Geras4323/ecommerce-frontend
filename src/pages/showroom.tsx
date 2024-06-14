@@ -295,7 +295,7 @@ function CategoryItem({
           className={cn(
             category.id === selectedCategory?.id
               ? "text-primary"
-              : "text-primary/60",
+              : "text-primary/80",
             "truncate font-semibold"
           )}
         >
@@ -331,7 +331,7 @@ function ProductItemSkeleton() {
         </div>
 
         {/* Description */}
-        <div className="flex w-full flex-col gap-2 text-primary/60">
+        <div className="flex w-full flex-col gap-2">
           <div className="h-6 w-full rounded-md bg-secondary/20" />
           <div className="h-6 w-2/3 rounded-md bg-secondary/20" />
         </div>
@@ -428,7 +428,7 @@ function ProductItem({
 
       <div className="flex w-full flex-col justify-between gap-4 md:gap-2">
         <div className="flex items-start justify-between gap-6">
-          <span className="text-lg font-semibold text-primary/80">
+          <span className="text-lg font-semibold text-primary">
             {product.name}
           </span>
           <div className="flex items-end gap-1">
@@ -439,7 +439,7 @@ function ProductItem({
           </div>
         </div>
 
-        <div className="flex flex-col gap-0.5 text-primary/60">
+        <div className="flex flex-col gap-0.5 text-base text-primary/80">
           {product.description.split("\n").map((t, i) => {
             if (i < 2) return <p key={i}>{t}</p>;
           })}

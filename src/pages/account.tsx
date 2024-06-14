@@ -214,7 +214,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
                 >
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label className="text-primary/60">
+                      <label className="text-primary/80">
                         Nombre y apellido
                       </label>
                     </div>
@@ -240,7 +240,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
 
                   {/* <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label className="text-primary/60">Email</label>
+                      <label className="text-primary/80">Email</label>
                     </div>
                     <input
                       {...generalRegister("email")}
@@ -264,7 +264,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
 
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label className="text-primary/60">
+                      <label className="text-primary/80">
                         Teléfono{" "}
                         <span className="text-secondary">(opcional)</span>
                       </label>
@@ -323,7 +323,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
                 >
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label className="text-primary/60">
+                      <label className="text-primary/80">
                         Contraseña actual
                       </label>
                     </div>
@@ -351,7 +351,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
 
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label className="text-primary/60">
+                      <label className="text-primary/80">
                         Nueva contraseña
                       </label>
                     </div>
@@ -380,7 +380,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
 
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label htmlFor="re-password" className="text-primary/60">
+                      <label htmlFor="re-password" className="text-primary/80">
                         Reingresar nueva contraseña
                       </label>
                     </div>

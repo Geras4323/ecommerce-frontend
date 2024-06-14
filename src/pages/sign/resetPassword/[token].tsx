@@ -115,7 +115,7 @@ export default function ResetPassword() {
                 >
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label className="text-primary/60">
+                      <label className="text-primary/80">
                         Nueva contraseña
                       </label>
                     </div>
@@ -142,7 +142,7 @@ export default function ResetPassword() {
 
                   <FormInput className="relative">
                     <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-                      <label htmlFor="re-password" className="text-primary/60">
+                      <label htmlFor="re-password" className="text-primary/80">
                         Reingresar nueva contraseña
                       </label>
                     </div>

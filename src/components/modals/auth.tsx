@@ -130,7 +130,7 @@ export function PasswordResetModal({
         >
           <FormInput className="relative col-span-2 [&>*]:bg-base-300">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">
+              <label className="text-primary/80">
                 Email usado para tu cuenta
               </label>
             </div>

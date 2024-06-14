@@ -178,7 +178,7 @@ export function SignupForm({
         <div className="flex w-full flex-col gap-8">
           <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Nombre y apellido</label>
+              <label className="text-primary/80">Nombre y apellido</label>
             </div>
             <input
               {...nameRegister("name")}
@@ -200,7 +200,7 @@ export function SignupForm({
 
           {/* <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 z-20 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">
+              <label className="text-primary/80">
                 Teléfono <span className="text-secondary">(opcional)</span>
               </label>
             </div>
@@ -226,7 +226,7 @@ export function SignupForm({
 
           <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Email</label>
+              <label className="text-primary/80">Email</label>
             </div>
             <input
               {...nameRegister("email")}
@@ -248,7 +248,7 @@ export function SignupForm({
 
           <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">
+              <label className="text-primary/80">
                 Teléfono <span className="text-secondary">(opcional)</span>
               </label>
             </div>
@@ -303,7 +303,7 @@ export function SignupForm({
         <div className="flex w-full flex-col gap-8">
           <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Contraseña</label>
+              <label className="text-primary/80">Contraseña</label>
             </div>
             <input
               {...passwordRegister("password")}
@@ -327,7 +327,7 @@ export function SignupForm({
 
           <FormInput className="relative">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Reingresar contraseña</label>
+              <label className="text-primary/80">Reingresar contraseña</label>
             </div>
             <input
               id="re-password"

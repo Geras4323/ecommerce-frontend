@@ -42,7 +42,7 @@ export function SwitchCard({
           "absolute bottom-0 mb-6 flex w-full justify-center gap-1 transition-opacity delay-300 duration-1000"
         )}
       >
-        <p className="text-secondary">¿Aún no tiene cuenta?</p>
+        <p className="text-primary/80">¿Aún no tiene cuenta?</p>
         <button
           onClick={switchSide}
           className="text-primary no-underline underline-offset-2 hover:underline"
@@ -56,7 +56,7 @@ export function SwitchCard({
           "absolute bottom-0 mb-6 flex w-full justify-center gap-1 transition-opacity delay-300 duration-1000"
         )}
       >
-        <p className="text-secondary">¿Ya tiene una cuenta?</p>
+        <p className="text-primary/80">¿Ya tiene una cuenta?</p>
         <button
           onClick={switchSide}
           className="text-primary no-underline underline-offset-2 hover:underline"

@@ -92,7 +92,7 @@ export function LoginForm({
         <div className="flex w-full flex-col gap-8">
           <FormInput className="relative col-span-2">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Email</label>
+              <label className="text-primary/80">Email</label>
             </div>
             <input
               {...register("email")}
@@ -114,7 +114,7 @@ export function LoginForm({
 
           <FormInput className="relative col-span-2">
             <div className="absolute -top-2.5 left-3 flex items-center justify-between bg-base-100 px-2 text-sm">
-              <label className="text-primary/60">Contraseña</label>
+              <label className="text-primary/80">Contraseña</label>
             </div>
             <input
               {...register("password")}
@@ -146,7 +146,7 @@ export function LoginForm({
             className="flex select-none items-center justify-center gap-2 text-base text-secondary underline-offset-2 hover:cursor-pointer hover:underline"
           >
             <KeyRound className="size-4 min-w-4" />
-            <span>Olvidé mi contraseña</span>
+            <span className="text-primary/80">Olvidé mi contraseña</span>
           </div>
 
           <LoadableButton
