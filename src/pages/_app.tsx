@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import type { AppProps } from "next/app";
 import { useState } from "react";
 import { Comfortaa } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 
 const comfortaa = Comfortaa({ subsets: ["latin"] });
 
@@ -16,6 +17,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <div className={comfortaa.className}>
           <Component {...pageProps} />
+          <Analytics />
         </div>
       </ThemeProvider>
       <ReactQueryDevtools />
