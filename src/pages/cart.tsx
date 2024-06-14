@@ -136,7 +136,6 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
         }),
       });
     },
-    onError: (err) => console.log(err),
   });
 
   return (

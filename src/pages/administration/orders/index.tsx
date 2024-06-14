@@ -5,7 +5,6 @@ import type { ServerError } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Undo2, WalletCards } from "lucide-react";
-import { useEffect } from "react";
 import {
   OrdersItemSkeleton,
   OrdersItem,
@@ -22,10 +21,6 @@ function Orders() {
     refetchOnWindowFocus: true,
     retry: false,
   });
-
-  useEffect(() => {
-    if (ordersQuery.isError) console.log(ordersQuery.error);
-  }, [ordersQuery.isError, ordersQuery.error]);
 
   return (
     <AdministrationLayout active="Pedidos">
