@@ -5,7 +5,7 @@ import { type ProductImage } from "@/functions/images";
 import { Carousel, CarouselContent, CarouselItem } from "./shadcn/carousel";
 import Image from "next/image";
 import { removeScroll, restoreScroll } from "@/utils/miscellaneous";
-import { Package } from "lucide-react";
+import { Package, X } from "lucide-react";
 
 export const ImageVisualizer = ({
   isOpen,
@@ -30,10 +30,15 @@ export const ImageVisualizer = ({
         "fixed z-50 flex h-screen w-screen flex-col items-start justify-center gap-4 bg-black/80 px-4 backdrop-blur-[2px] transition-opacity sm:px-8"
       )}
     >
-      <div className="flex items-center gap-3 text-white">
-        <Package className="size-7 min-w-7 sm:size-8 sm:min-w-8" />
-        <span className="text-xl lg:text-2xl">{data.title}</span>
-      </div>
+      {isOpen && (
+        <div className="flex w-full items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            <Package className="size-7 min-w-7 sm:size-8 sm:min-w-8" />
+            <span className="text-xl lg:text-2xl">{data.title}</span>
+          </div>
+          <X className="size-8 min-w-8 cursor-pointer text-white/60" />
+        </div>
+      )}
       <Carousel
         opts={{
           axis: "x",
