@@ -16,12 +16,17 @@ import {
   UserRoundPlus,
 } from "lucide-react";
 import { LoadableButton } from "@/components/forms";
+import { type GetServerSideProps } from "next";
+import { type ServerPage } from "@/types/session";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
 const IMAGES_LIMIT = 16;
 
-export default function Home() {
+const Home: ServerPage<typeof getServerSideProps> = ({
+  title,
+  description,
+}) => {
   const { session, logoutMutation } = useSession();
 
   const imagesQuery = useQuery<
@@ -40,7 +45,7 @@ export default function Home() {
   const secondMarqueeUrls = imagesUrls?.slice(IMAGES_LIMIT / 2, IMAGES_LIMIT);
 
   return (
-    <GeneralLayout title="Home" description="This is the home">
+    <GeneralLayout title={title} description={description}>
       <div className="flex h-screen w-screen flex-row items-center justify-between">
         <div className="relative hidden h-full w-1/4 flex-row items-center justify-center gap-4 overflow-hidden px-3 shadow-2xl md:flex">
           {imagesQuery.isError ? (
@@ -147,7 +152,18 @@ export default function Home() {
       </div>
     </GeneralLayout>
   );
-}
+};
+
+export default Home;
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    props: {
+      title: "Home",
+      description:
+        "Nuestra tienda online oficial. Explorá nuestros productos y encargá los que necesites",
+    },
+  };
+};
 
 {
   /* <VerticalImageMarquee
