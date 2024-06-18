@@ -110,7 +110,7 @@ export default function Order() {
       <div className="mx-auto flex h-screen w-screen max-w-screen-sm flex-col gap-4 px-4 pb-24 pt-24 lg:max-w-5xl">
         <div className="flex w-full items-baseline justify-between gap-4 border-b border-b-secondary/20 text-primary">
           <div className="flex items-center gap-4">
-            <Link href="/orders" className="btn btn-ghost btn-sm">
+            <Link href="/account/orders" className="btn btn-ghost btn-sm">
               <ChevronLeft className="size-5" />
             </Link>
             <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>

@@ -9,17 +9,9 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  Check,
-  ChevronLeft,
-  Minus,
-  Plus,
-  ShoppingCart,
-  Trash2,
-  Undo2,
-} from "lucide-react";
+import { Check, Minus, Plus, Trash2, Undo2 } from "lucide-react";
 import Image from "next/image";
-import NoImage from "../../public/no_image.png";
+import NoImage from "../../../public/no_image.png";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";
 import axios, { type AxiosError } from "axios";
@@ -32,6 +24,7 @@ import { OrderConfirmationModal } from "@/components/modals/cart";
 import { useState } from "react";
 import { getCategories } from "@/functions/categories";
 import { type ServerPage } from "@/types/session";
+import { AccountLayout } from "@/components/layouts/account";
 
 const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   const queryClient = useQueryClient();
@@ -141,24 +134,21 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   return (
     <GeneralLayout title="Carrito" description="Carrito de compras">
       {/* ITEMS */}
-      <section className="mx-auto flex max-h-screen w-screen max-w-screen-sm flex-col gap-4 px-4 pb-4 pt-24 sm:max-w-screen-lg md:max-w-screen-xl">
-        <div className="flex h-fit flex-col items-end justify-between gap-6 border-b border-b-secondary/20 pb-3 pt-2 md:flex-row">
-          <div className="flex w-full items-center gap-4 text-primary md:w-fit">
-            <Link href="/showroom" className="btn btn-ghost btn-sm">
-              <ChevronLeft className="size-5" />
-            </Link>
-            <div className="flex items-center gap-4">
-              <ShoppingCart className="hidden size-6" />
-              <h1 className="text-xl font-medium tracking-wide">
-                CARRITO DE COMPRAS
-              </h1>
-            </div>
+      <AccountLayout active="Carrito">
+        <div className="flex h-full w-full max-w-2xl flex-col gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold uppercase tracking-wide text-primary">
+              Carrito de compras
+            </h1>
+            <p className="text-secondary">
+              Agrega o quita productos del carrito
+            </p>
           </div>
 
-          {cart.cartItems.data?.length !== 0 && (
-            <div className="flex w-full items-end justify-end gap-4 md:w-fit">
-              <span className="hidden text-lg font-medium text-primary xs:block">
-                TOTAL
+          <div className="flex items-center justify-end gap-3 pr-1">
+            <div className="flex gap-3">
+              <span className="hidden text-2xl uppercase text-primary/70 xxs:block">
+                Total
               </span>
               {cart.cartItems.isPending ? (
                 <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/20" />
@@ -170,72 +160,69 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
                   </span>
                 </div>
               )}
-
-              <span className="hidden pb-0.5 text-xl text-secondary">|</span>
-
-              {cart.cartItems.data?.length !== 0 && (
-                <LoadableButton
-                  onClick={() => createOrderMutation.mutate()}
-                  isPending={createOrderMutation.isPending}
-                  className="btn btn-primary btn-sm ml-1 w-48"
-                  animation="dots"
-                  disabled={cart.cartItems.isPending}
-                >
-                  <Check className="size-5" />
-                  Confirmar pedido
-                </LoadableButton>
-              )}
             </div>
-          )}
-        </div>
+            {cart.cartItems.data?.length !== 0 && (
+              <LoadableButton
+                onClick={() => createOrderMutation.mutate()}
+                isPending={createOrderMutation.isPending}
+                className="btn btn-primary btn-sm ml-1 w-48"
+                animation="dots"
+                disabled={cart.cartItems.isPending}
+              >
+                <Check className="size-5" />
+                Confirmar pedido
+              </LoadableButton>
+            )}
+          </div>
 
-        <div className="grid h-auto w-full grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
-          {productsQuery.isPending || cart.cartItems.isPending ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <CartItemSkeleton key={i} />
-            ))
-          ) : productsQuery.isError || cart.cartItems.isError ? (
-            <>
-              <ErrorSpan message="{productsQuery.error?.response?.data.comment}" />
-              <ErrorSpan
-                message={cart.cartItems.error?.response?.data.comment}
-              />
-              <ErrorSpan
-                message={categoriesQuery.error?.response?.data.comment}
-              />
-            </>
-          ) : cart.cartItems.data.length === 0 ? (
-            <div className="col-span-2 mx-auto mt-4 flex w-fit items-center justify-center gap-4">
-              <p className="text-xl">El carrito está vacío</p>
-              <Link href="/showroom" className="btn btn-primary btn-sm">
-                <Undo2 className="size-4" />
-                Volver al showroom
-              </Link>
-            </div>
-          ) : (
-            cart.cartItems.data.map((item) => {
-              const product = productsQuery.data.find(
-                (p) => p.id === item.productID
-              );
-              if (product)
-                return (
-                  <CartItem
-                    key={item.id}
-                    item={item}
-                    removeItem={cart.removeCartItem}
-                    updateItem={cart.modifyCartItem}
-                    product={product}
-                    category={
-                      categoriesQuery.data?.find(
-                        (category) => category.id === product.categoryID
-                      )?.name
-                    }
-                  />
+          <div className="grid h-auto w-full grid-cols-1 gap-3 overflow-y-auto pr-1">
+            {productsQuery.isPending || cart.cartItems.isPending ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <CartItemSkeleton key={i} />
+              ))
+            ) : productsQuery.isError || cart.cartItems.isError ? (
+              <>
+                <ErrorSpan message="{productsQuery.error?.response?.data.comment}" />
+                <ErrorSpan
+                  message={cart.cartItems.error?.response?.data.comment}
+                />
+                <ErrorSpan
+                  message={categoriesQuery.error?.response?.data.comment}
+                />
+              </>
+            ) : cart.cartItems.data.length === 0 ? (
+              <div className="col-span-2 mx-auto mt-4 flex w-fit items-center justify-center gap-4">
+                <p className="text-xl">El carrito está vacío</p>
+                <Link href="/showroom" className="btn btn-primary btn-sm">
+                  <Undo2 className="size-4" />
+                  Volver al showroom
+                </Link>
+              </div>
+            ) : (
+              cart.cartItems.data.map((item) => {
+                const product = productsQuery.data.find(
+                  (p) => p.id === item.productID
                 );
-            })
-          )}
+                if (product)
+                  return (
+                    <CartItem
+                      key={item.id}
+                      item={item}
+                      removeItem={cart.removeCartItem}
+                      updateItem={cart.modifyCartItem}
+                      product={product}
+                      category={
+                        categoriesQuery.data?.find(
+                          (category) => category.id === product.categoryID
+                        )?.name
+                      }
+                    />
+                  );
+              })
+            )}
+          </div>
         </div>
-      </section>
+      </AccountLayout>
 
       {confirmedOrder && (
         <OrderConfirmationModal
@@ -306,7 +293,7 @@ export function CartItem({
   const price = item.quantity * product.price;
 
   return (
-    <div className="relative flex h-40 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 lg:h-28 lg:flex-row">
+    <div className="relative flex h-36 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 lg:h-28 lg:flex-row">
       <Trash2
         onClick={() => removeItem.mutate({ id: item.id })}
         className="absolute right-2 top-2 size-5 cursor-pointer text-secondary/60 transition-all hover:text-error"
@@ -333,7 +320,7 @@ export function CartItem({
         </div>
       </div>
 
-      <div className="flex h-full flex-row items-end justify-end gap-4 lg:mr-6 lg:flex-col lg:justify-center lg:gap-2">
+      <div className="flex h-fit flex-row items-end justify-end gap-4 lg:mr-6 lg:flex-col lg:justify-center lg:gap-2">
         <div className="flex w-fit items-center justify-center gap-1 text-center lg:w-full lg:items-end">
           <span className="text-base text-primary/70">$</span>
           <span className="text-xl text-primary lg:text-lg">

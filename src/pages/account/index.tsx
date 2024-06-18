@@ -4,6 +4,7 @@ import {
   LoadableButton,
   SuccessAlert,
 } from "@/components/forms";
+import { AccountLayout } from "@/components/layouts/account";
 import { type Session, withAuth, getSession } from "@/functions/session";
 import { GeneralLayout } from "@/layouts/general";
 import { type ServerPage } from "@/types/session";
@@ -162,8 +163,8 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
 
   return (
     <GeneralLayout title="Mi cuenta" description="Información de mi cuenta">
-      <div className="flex min-h-screen w-screen flex-row items-start justify-center px-4 pt-32">
-        <div className="flex h-fit w-full max-w-xl flex-col gap-6 overflow-hidden">
+      <AccountLayout active="General">
+        <div className="flex h-fit w-full max-w-2xl flex-col gap-6 overflow-hidden">
           {/* Title */}
           <div>
             <h1 className="text-2xl font-semibold uppercase tracking-wide text-primary">
@@ -434,7 +435,7 @@ const Account: ServerPage<typeof getServerSideProps> = () => {
             </div>
           </div>
         </div>
-      </div>
+      </AccountLayout>
     </GeneralLayout>
   );
 };

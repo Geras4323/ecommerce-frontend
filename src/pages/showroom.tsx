@@ -504,7 +504,7 @@ function ProductItem({
           ) : (
             <Link
               onClick={(e) => e.stopPropagation()}
-              href="/cart"
+              href="/account/cart"
               className="btn btn-outline btn-secondary btn-sm flex min-w-48 items-center gap-3"
             >
               Ver en el carrito

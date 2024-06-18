@@ -10,6 +10,7 @@ import {
   WalletCards,
   LogOut,
   Home,
+  UserRoundCog,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useEffect, useState } from "react";
@@ -54,27 +55,13 @@ const sections = [
     url: "/showroom",
     disabled: false,
   },
-  {
-    title: "Mi cuenta",
-    description: "Ver información de mi cuenta",
-    Svg: User2,
-    url: "/account",
-    disabled: false,
-  },
-  {
-    title: "Mi carrito",
-    description: "Confirma tus pedidos",
-    Svg: ShoppingCartIcon,
-    url: "/cart",
-    disabled: false,
-  },
-  {
-    title: "Mis pedidos",
-    description: "Todos los pedidos que hiciste",
-    Svg: WalletCards,
-    url: "/orders",
-    disabled: false,
-  },
+  // {
+  //   title: "Mi cuenta",
+  //   description: "Ver información de mi cuenta",
+  //   Svg: User2,
+  //   url: "/account",
+  //   disabled: false,
+  // },
 ] as const satisfies readonly Section[];
 
 export const Header = () => {
@@ -171,10 +158,10 @@ export const Header = () => {
                       >
                         <div className="relative mt-0.5">
                           <section.Svg className="size-6" />
-                          {section.title === "Mi carrito" &&
+                          {/* {section.title === "Mi carrito" &&
                             cart.cartItems.data?.length !== 0 && (
                               <div className="absolute -right-2 -top-1 size-2 rounded-full bg-error" />
-                            )}
+                            )} */}
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className="text-lg">{section.title}</span>
@@ -185,6 +172,38 @@ export const Header = () => {
                       </Link>
                     );
                 })}
+
+                <div className="flex h-fit cursor-pointer items-start gap-3 text-base text-primary/80 transition-all hover:text-primary/90">
+                  <div className="relative mt-0.5">
+                    <User2 className="size-6" />
+                  </div>
+                  <div className="flex w-full flex-col gap-1">
+                    <span className="text-lg">Mi cuenta</span>
+                    <div className="flex h-9 items-center gap-2">
+                      <Link
+                        href="/account"
+                        className="flex h-full w-full items-center justify-center rounded-lg bg-secondary/15 hover:bg-secondary/30"
+                      >
+                        <UserRoundCog className="size-5 min-w-5" />
+                      </Link>
+                      <Link
+                        href="/account/cart"
+                        className="relative flex h-full w-full items-center justify-center rounded-lg bg-secondary/15 hover:bg-secondary/30"
+                      >
+                        <ShoppingCartIcon className="size-5 min-w-5" />
+                        {cart.cartItems.data?.length !== 0 && (
+                          <div className="absolute right-5 top-1 size-2 rounded-full bg-error" />
+                        )}
+                      </Link>
+                      <Link
+                        href="/account/orders"
+                        className="flex h-full w-full items-center justify-center rounded-lg bg-secondary/15 hover:bg-secondary/30"
+                      >
+                        <WalletCards className="size-5 min-w-5" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="flex justify-end">
                   <LoadableButton

@@ -28,7 +28,7 @@ import { vars } from "@/utils/vars";
 import {
   PaymentVoucher,
   PaymentVoucherSkeleton,
-} from "src/pages/orders/[code]";
+} from "src/pages/account/orders/[code]";
 import { ErrorSpan } from "@/components/forms";
 import Image from "next/image";
 import { cn } from "@/utils/lib";

@@ -162,8 +162,8 @@ export function OrdersItem({
 
   return (
     <div className="flex w-full flex-col items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 p-4">
-      <section className="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-6">
-        <article className="flex h-full w-full flex-col gap-4 md:w-1/2">
+      <section className="flex w-full flex-col items-center justify-between gap-4 lg:flex-row lg:gap-6">
+        <article className="flex h-full w-full flex-col gap-4 lg:w-1/2">
           <div className="flex items-center gap-2">
             <Hash className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Pedido Nro</span>
@@ -186,7 +186,7 @@ export function OrdersItem({
           </div>
         </article>
 
-        <article className="flex h-full w-full flex-col gap-4 md:w-1/2">
+        <article className="flex h-full w-full flex-col gap-4 lg:w-1/2">
           <div className="flex items-center gap-2">
             <DollarSign className="size-5 min-w-5 text-secondary" />
             <span className="text-lg text-secondary">Monto:</span>
@@ -285,7 +285,7 @@ export function OrdersItem({
           href={
             fromAdmin
               ? `/administration/orders/${item.id}`
-              : `/orders/${item.id}`
+              : `/account/orders/${item.id}`
           }
           className="btn btn-primary btn-sm w-48 self-end"
         >

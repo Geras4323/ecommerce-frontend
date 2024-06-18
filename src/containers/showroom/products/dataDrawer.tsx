@@ -239,7 +239,7 @@ export const ProductDataDrawer = ({
                       </LoadableButton>
                     ) : (
                       <Link
-                        href="/cart"
+                        href="/account/cart"
                         className="btn btn-outline btn-secondary w-full items-center gap-3"
                       >
                         Ver en el carrito
@@ -406,7 +406,7 @@ export const ProductDataDrawer = ({
                       </LoadableButton>
                     ) : (
                       <Link
-                        href="/cart"
+                        href="/account/cart"
                         className="btn btn-outline btn-secondary w-full items-center gap-3"
                       >
                         Ver en el carrito
