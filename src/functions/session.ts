@@ -6,7 +6,7 @@ import {
   dehydrate,
 } from "@tanstack/react-query";
 import axios from "axios";
-import { type GetServerSideProps } from "next";
+import type { GetServerSidePropsResult, GetServerSideProps } from "next";
 import { z } from "zod";
 
 export type Session = z.infer<typeof sessionSchema>;
@@ -118,4 +118,39 @@ export const leaveIfVerified: GetServerSideProps = async (c) => {
   if (!session) return { props: {} };
 
   return session.verified ? redirect("/") : { props: {} };
+};
+
+export const leaveIfCustomer: GetServerSideProps = async (c) => {
+  const queryClient = new QueryClient();
+  const sessionCookie = c.req.cookies.ec_session;
+
+  const defaultReturn: GetServerSidePropsResult<{
+    title: string;
+    description: string;
+  }> = {
+    props: {
+      title: "Inicio",
+      description:
+        "Nuestra tienda online oficial. Explorá nuestros productos y encargá los que necesites",
+    },
+  };
+
+  if (!sessionCookie) return defaultReturn;
+
+  const session = await queryClient
+    .fetchQuery<Session, ServerError, Session>({
+      queryKey: ["session"],
+      queryFn: () => getSession(sessionCookie),
+    })
+    .catch(() => undefined);
+
+  if (!session) return defaultReturn;
+
+  if (session.role !== "admin")
+    return {
+      ...defaultReturn,
+      redirect: { destination: "/showroom", permanent: false },
+    };
+
+  return defaultReturn;
 };

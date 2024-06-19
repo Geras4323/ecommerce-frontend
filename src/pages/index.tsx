@@ -16,8 +16,8 @@ import {
   UserRoundPlus,
 } from "lucide-react";
 import { LoadableButton } from "@/components/forms";
-import { type GetServerSideProps } from "next";
 import { type ServerPage } from "@/types/session";
+import { leaveIfCustomer } from "@/functions/session";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
@@ -155,15 +155,7 @@ const Home: ServerPage<typeof getServerSideProps> = ({
 };
 
 export default Home;
-export const getServerSideProps: GetServerSideProps = async () => {
-  return {
-    props: {
-      title: "Home",
-      description:
-        "Nuestra tienda online oficial. Explorá nuestros productos y encargá los que necesites",
-    },
-  };
-};
+export const getServerSideProps = leaveIfCustomer;
 
 {
   /* <VerticalImageMarquee
