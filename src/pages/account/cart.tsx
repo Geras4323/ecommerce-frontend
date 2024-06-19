@@ -145,35 +145,40 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
             </p>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pr-1">
-            <div className="flex gap-3">
-              <span className="hidden text-2xl uppercase text-primary/70 xxs:block">
-                Total
-              </span>
+          {cart.cartItems.data?.length !== 0 && (
+            <div className="flex items-center justify-end gap-3 pr-1">
+              <div className="flex gap-3">
+                <span className="hidden text-2xl uppercase text-primary/70 xxs:block">
+                  Total
+                </span>
+                {cart.cartItems.isPending ? (
+                  <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/20" />
+                ) : (
+                  <div className="flex items-end gap-1">
+                    <span className="text-xl text-primary/70">$</span>
+                    <span className="text-2xl text-primary">
+                      {total?.toLocaleString(vars.region)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
               {cart.cartItems.isPending ? (
-                <div className="flex h-8 w-32 animate-pulse rounded-lg bg-secondary/20" />
+                <div className="h-8 w-48 animate-pulse rounded-lg bg-secondary/20" />
               ) : (
-                <div className="flex items-end gap-1">
-                  <span className="text-xl text-primary/70">$</span>
-                  <span className="text-2xl text-primary">
-                    {total?.toLocaleString(vars.region)}
-                  </span>
-                </div>
+                <LoadableButton
+                  onClick={() => createOrderMutation.mutate()}
+                  isPending={createOrderMutation.isPending}
+                  className="btn btn-primary btn-sm ml-1 w-48"
+                  animation="dots"
+                  disabled={cart.cartItems.isPending}
+                >
+                  <Check className="size-5" />
+                  Confirmar pedido
+                </LoadableButton>
               )}
             </div>
-            {cart.cartItems.data?.length !== 0 && (
-              <LoadableButton
-                onClick={() => createOrderMutation.mutate()}
-                isPending={createOrderMutation.isPending}
-                className="btn btn-primary btn-sm ml-1 w-48"
-                animation="dots"
-                disabled={cart.cartItems.isPending}
-              >
-                <Check className="size-5" />
-                Confirmar pedido
-              </LoadableButton>
-            )}
-          </div>
+          )}
 
           <div className="grid h-auto w-full grid-cols-1 gap-3 overflow-y-auto pr-1">
             {productsQuery.isPending || cart.cartItems.isPending ? (
