@@ -6,43 +6,50 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      screens: {
+        xxs: "480px",
+        xs: "560px",
+      },
       size: {
         104: "26rem",
         120: "30rem",
         128: "32rem",
         144: "36rem",
+        152: "38rem",
+        160: "40rem",
       },
       width: {
         104: "26rem",
         120: "30rem",
         128: "32rem",
         144: "36rem",
+        152: "38rem",
+        160: "40rem",
+      },
+      minWidth: {
+        "screen-xxs": "480px",
+        "screen-xs": "560px",
+        "screen-sm": "640px",
+        "screen-md": "768px",
+        "screen-lg": "1024px",
       },
       height: {
         104: "26rem",
         120: "30rem",
         128: "32rem",
+        136: "34rem",
         144: "36rem",
-      },
-      minWidth: {
-        "screen-xxs": "480px",
-        "screen-xs": "560px",
-        "screen-md": "768px",
-        "screen-sm": "640px",
-        "screen-lg": "1024px",
+        152: "38rem",
+        160: "40rem",
       },
       maxHeight: {
         104: "26rem",
         120: "30rem",
         128: "32rem",
+        136: "34rem",
         144: "36rem",
         152: "38rem",
-        168: "42rem",
-        192: "48rem",
-      },
-      screens: {
-        xxs: "480px",
-        xs: "560px",
+        160: "40rem",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
@@ -117,7 +124,7 @@ const config: Config = {
   plugins: [
     require("daisyui"),
     require("tailwindcss-animate"),
-    require("tailwindcss-3d"),
+    // require("tailwindcss-3d"),
   ],
 };
 export default config;
