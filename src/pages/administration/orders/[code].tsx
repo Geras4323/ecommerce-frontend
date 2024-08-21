@@ -99,7 +99,7 @@ export default function Order() {
     ServerError
   >({
     queryKey: ["products"],
-    queryFn: getProducts,
+    queryFn: () => getProducts(true),
     refetchOnWindowFocus: true,
     retry: false,
   });

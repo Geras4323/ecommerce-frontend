@@ -79,7 +79,7 @@ function Products() {
     ServerError
   >({
     queryKey: ["products"],
-    queryFn: getProducts,
+    queryFn: () => getProducts(),
     refetchOnWindowFocus: true,
     retry: false,
   });

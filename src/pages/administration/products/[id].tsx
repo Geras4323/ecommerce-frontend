@@ -206,8 +206,13 @@ export default function ProductData() {
         withCredentials: true,
       });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast.success("Producto actualizado");
+      router.replace(`/administration/products/${res.data.id}`);
+      setTimeout(() => {
+        router.reload();
+      }, 100);
+
       refreshQuery();
     },
   });

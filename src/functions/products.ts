@@ -17,9 +17,12 @@ export const productSchema = z
   })
   .and(databaseEntrySchema);
 
-export async function getProducts() {
+export async function getProducts(showAll = false) {
   const url = `${vars.serverUrl}/api/v1/products`;
-  const res = await axios.get(url, { withCredentials: true });
+  const res = await axios.get(url, {
+    withCredentials: true,
+    params: { showAll },
+  });
   return productSchema.array().parse(res.data);
 }
 

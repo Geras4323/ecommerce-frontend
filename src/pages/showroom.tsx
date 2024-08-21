@@ -65,7 +65,7 @@ export default function Showroom() {
     ServerError
   >({
     queryKey: ["products"],
-    queryFn: getProducts,
+    queryFn: () => getProducts(),
     refetchOnWindowFocus: true,
     retry: false,
   });
@@ -281,7 +281,7 @@ function CategoryItem({
           height={200}
           className={cn(
             !category.image
-              ? "object-contain opacity-20 scale-90"
+              ? "scale-90 object-contain opacity-20"
               : "object-cover",
             category.id === selectedCategory?.id
               ? "saturate-100"

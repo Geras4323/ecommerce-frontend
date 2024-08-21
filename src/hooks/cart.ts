@@ -25,7 +25,8 @@ export function useShoppingCart() {
     queryFn: getCartItems,
     enabled: !!session.data,
     retry: false,
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 5,
+    refetchOnWindowFocus: true,
   });
 
   const addCartItem = useMutation<

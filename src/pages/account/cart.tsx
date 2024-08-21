@@ -37,7 +37,7 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
     ServerError
   >({
     queryKey: ["products"],
-    queryFn: getProducts,
+    queryFn: () => getProducts(true),
     refetchOnWindowFocus: true,
     retry: false,
   });
