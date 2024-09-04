@@ -11,6 +11,7 @@ import {
   LogOut,
   Home,
   UserRoundCog,
+  Palmtree,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
 import { useEffect, useState } from "react";
@@ -20,6 +21,9 @@ import { useRouter } from "next/router";
 import { useTheme } from "next-themes";
 import { Arizonia } from "next/font/google";
 import { LoadableButton } from "./forms";
+import { useQuery } from "@tanstack/react-query";
+import { getVacationState } from "@/functions/states";
+import { type ServerError } from "@/types/types";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
@@ -74,6 +78,17 @@ export const Header = () => {
   const [isSessionOpen, setIsSessionOpen] = useState(false);
   const [isNavBordered, setIsNavBordered] = useState(false);
 
+  const vacationStateQuery = useQuery<
+    Awaited<ReturnType<typeof getVacationState>>,
+    ServerError
+  >({
+    queryKey: ["vacation_header"],
+    queryFn: getVacationState,
+    retry: false,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
+  });
+
   useEffect(() => {
     function onScroll() {
       setIsNavBordered(window.scrollY > 1);
@@ -94,24 +109,36 @@ export const Header = () => {
         "fixed top-0 z-20 flex h-16 w-full items-center justify-between border border-secondary/20 px-6 py-2 backdrop-blur transition-all duration-500"
       )}
     >
-      <Link
-        href="/"
-        className={cn(
-          arizonia.className,
-          router.pathname === "/sign"
-            ? "block"
-            : "invisible w-0 sm:visible sm:w-fit",
-          "select-none text-3xl text-primary"
+      <div className="flex items-center gap-4">
+        <Link
+          href="/"
+          className={cn(
+            arizonia.className,
+            router.pathname === "/sign" ? "block" : "hidden sm:block",
+            "select-none text-3xl text-primary"
+          )}
+        >
+          Mis Ideas Pintadas
+        </Link>
+
+        {vacationStateQuery.data?.active && (
+          <div
+            className={cn(
+              theme === "dark" ? "text-warning" : "text-primary",
+              "flex items-center gap-2 text-sm font-semibold tracking-wide xs:text-base"
+            )}
+          >
+            <Palmtree className="mb-0.5 size-5 min-w-5" />
+            VACACIONES
+          </div>
         )}
-      >
-        Mis Ideas Pintadas
-      </Link>
+      </div>
 
       <div className="flex items-center">
         <ThemeSwitcher />
 
         {session.isPending ? (
-          <div className="ml-4 h-8 w-44 animate-pulse rounded-lg bg-secondary/30" />
+          <div className="h-8 w-44 animate-pulse rounded-lg bg-secondary/30 sm:ml-4" />
         ) : session.isError ? (
           <div>
             {!urlsShowLogin.some((i) => i === router.pathname) && (
@@ -128,7 +155,7 @@ export const Header = () => {
             open={isSessionOpen}
             onOpenChange={() => setIsSessionOpen((prev) => !prev)}
           >
-            <PopoverTrigger className="btn btn-ghost btn-sm relative ml-4 flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary">
+            <PopoverTrigger className="btn btn-ghost btn-sm relative flex cursor-pointer items-center gap-2 pl-3 pr-2 text-primary sm:ml-4">
               <span className="text-lg font-medium">{session.data.name}</span>
               <ChevronDown
                 className={cn(

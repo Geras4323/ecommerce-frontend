@@ -28,6 +28,7 @@ export const ProductDataDrawer = ({
   logged,
   verified,
   inCart,
+  vacationLocked,
   addToCart,
   setSelectedProduct,
   isVisualizingProduct,
@@ -37,6 +38,7 @@ export const ProductDataDrawer = ({
   logged: boolean;
   verified: boolean;
   inCart: boolean;
+  vacationLocked: boolean;
   addToCart: UseMutationResult<
     any,
     ServerError,
@@ -185,7 +187,7 @@ export const ProductDataDrawer = ({
 
                 {/* Add to cart */}
                 <div className="flex h-12 min-h-12 w-full flex-row justify-between gap-2">
-                  {!inCart && (
+                  {!inCart && !vacationLocked && (
                     <div className="flex h-12 w-full">
                       <button
                         onClick={() =>
@@ -230,8 +232,12 @@ export const ProductDataDrawer = ({
                             quantity: quantity,
                           });
                         }}
-                        className="btn btn-primary w-full min-w-80 max-w-80 items-center gap-3"
+                        className={cn(
+                          !vacationLocked && "max-w-80",
+                          "btn btn-primary w-full min-w-80 items-center gap-3"
+                        )}
                         isPending={addToCart.isPending}
+                        disabled={addToCart.isPending || vacationLocked}
                         animation="dots"
                       >
                         <ShoppingCart className="size-5" />
@@ -266,7 +272,7 @@ export const ProductDataDrawer = ({
             <DrawerPrimitive.Content
               className={cn(
                 comfortaa.className,
-                "fixed inset-x-0 bottom-0 z-20 flex h-auto max-h-192 flex-col rounded-t-xl border-t border-secondary/30 bg-base-100 p-4 focus:outline-none"
+                "max-h-192 fixed inset-x-0 bottom-0 z-20 flex h-auto flex-col rounded-t-xl border-t border-secondary/30 bg-base-100 p-4 focus:outline-none"
               )}
             >
               <div className="flex flex-col gap-4">
@@ -352,7 +358,7 @@ export const ProductDataDrawer = ({
                 </div>
 
                 <DrawerFooter className="flex w-full flex-row justify-between gap-3">
-                  {!inCart && (
+                  {!inCart && !vacationLocked && (
                     <div className="flex h-12 w-full">
                       <button
                         onClick={() =>
@@ -399,6 +405,7 @@ export const ProductDataDrawer = ({
                         }}
                         className="btn btn-primary w-full min-w-64 items-center gap-3"
                         isPending={addToCart.isPending}
+                        disabled={addToCart.isPending || vacationLocked}
                         animation="dots"
                       >
                         <ShoppingCart className="size-5" />

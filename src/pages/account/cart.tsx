@@ -25,12 +25,24 @@ import { useState } from "react";
 import { getCategories } from "@/functions/categories";
 import { type ServerPage } from "@/types/session";
 import { AccountLayout } from "@/components/layouts/account";
+import { getVacationState } from "@/functions/states";
 
 const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   const queryClient = useQueryClient();
   const cart = useShoppingCart();
 
   const [confirmedOrder, setConfirmedOrder] = useState<OrderItem | null>(null);
+
+  const vacationStateQuery = useQuery<
+    Awaited<ReturnType<typeof getVacationState>>,
+    ServerError
+  >({
+    queryKey: ["vacation_cart"],
+    queryFn: getVacationState,
+    retry: false,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
+  });
 
   const productsQuery = useQuery<
     Awaited<ReturnType<typeof getProducts>>,
@@ -171,7 +183,9 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
                   isPending={createOrderMutation.isPending}
                   className="btn btn-primary btn-sm ml-1 w-48"
                   animation="dots"
-                  disabled={cart.cartItems.isPending}
+                  disabled={
+                    cart.cartItems.isPending || vacationStateQuery.data?.active
+                  }
                 >
                   <Check className="size-5" />
                   Confirmar pedido

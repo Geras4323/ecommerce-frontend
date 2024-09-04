@@ -4,7 +4,7 @@ import { type UseMutationResult, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { type Product, getProducts } from "@/functions/products";
-import { cn } from "@/utils/lib";
+import { cn, withCbk } from "@/utils/lib";
 import {
   Boxes,
   ChevronLeft,
@@ -39,6 +39,8 @@ import {
 import { ProductDataDrawer } from "src/containers/showroom/products/dataDrawer";
 import { vars } from "@/utils/vars";
 import { ImageVisualizer } from "@/components/showroom";
+import { getVacationState } from "@/functions/states";
+import { VacationAlertModal } from "@/components/modals/states";
 
 export default function Showroom() {
   const { session } = useSession();
@@ -49,6 +51,22 @@ export default function Showroom() {
   const [selectedProduct, setSelectedProduct] = useState<Product>();
 
   const [visualizedProduct, setVisualizedProduct] = useState<Product>();
+
+  const [isVacationAlertOpen, setIsVacationAlertOpen] = useState(false);
+
+  const vacationStateQuery = useQuery<
+    Awaited<ReturnType<typeof getVacationState>>,
+    ServerError
+  >({
+    queryKey: ["vacation_showroom"],
+    queryFn: withCbk({
+      queryFn: getVacationState,
+      onSuccess: (res) => setIsVacationAlertOpen(res.active),
+    }),
+    retry: false,
+    staleTime: 1000,
+    refetchOnWindowFocus: true,
+  });
 
   const categoriesQuery = useQuery<
     Awaited<ReturnType<typeof getCategories>>,
@@ -195,6 +213,7 @@ export default function Showroom() {
                           (cI) => cI.productID === product.id
                         ) !== -1
                       }
+                      vacationLocked={vacationStateQuery.data?.active ?? false}
                       mediaQuery={mq}
                       selectProduct={(p: Product) => setSelectedProduct(p)}
                       openImageVisualizer={(p: Product) =>
@@ -218,6 +237,7 @@ export default function Showroom() {
             (cI) => cI.productID === selectedProduct?.id
           ) !== -1
         }
+        vacationLocked={vacationStateQuery.data?.active ?? false}
         setSelectedProduct={setSelectedProduct}
         isVisualizingProduct={!!visualizedProduct}
         setVisualizedProduct={setVisualizedProduct}
@@ -229,6 +249,10 @@ export default function Showroom() {
           title: visualizedProduct?.name,
           images: visualizedProduct?.images ?? [],
         }}
+      />
+      <VacationAlertModal
+        isOpen={isVacationAlertOpen}
+        onClose={() => setIsVacationAlertOpen(false)}
       />
     </GeneralLayout>
   );
@@ -352,6 +376,7 @@ function ProductItem({
   logged,
   verified,
   inCart,
+  vacationLocked,
   addToCart,
   mediaQuery,
   selectProduct,
@@ -361,6 +386,7 @@ function ProductItem({
   logged: boolean;
   verified: boolean;
   inCart: boolean;
+  vacationLocked: boolean;
   addToCart: UseMutationResult<
     any,
     ServerError,
@@ -446,7 +472,7 @@ function ProductItem({
         </div>
 
         <div className="flex w-full justify-end gap-4">
-          {!inCart && (
+          {!inCart && !vacationLocked && (
             <div className="flex h-8 w-full items-center rounded-lg">
               <button
                 onClick={(e) => {
@@ -495,7 +521,7 @@ function ProductItem({
               }}
               className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
               isPending={addToCart.isPending}
-              disabled={addToCart.isPending}
+              disabled={addToCart.isPending || vacationLocked}
               animation="dots"
             >
               <ShoppingCart className="size-5" />
