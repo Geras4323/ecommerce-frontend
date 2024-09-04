@@ -34,7 +34,8 @@ export function VacationAlertModal({ isOpen, onClose }: ModalProps) {
           <p className="text-primary/80">
             Volveremos a estar activos el día{" "}
             <span className="text-nowrap text-primary">
-              {format(new Date(), "dd-MM-yyyy")}
+              {/* {format(new Date(), "dd-MM-yyyy")} */}
+              20-09-2024
             </span>
           </p>
         </div>
