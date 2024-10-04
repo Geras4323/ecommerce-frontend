@@ -6,6 +6,8 @@ export type State = z.infer<typeof stateSchema>;
 export const stateSchema = z.object({
   name: z.enum(["vacation"]),
   active: z.boolean(),
+  from: z.string().nullable(),
+  to: z.string().nullable(),
 });
 
 export async function getVacationState() {

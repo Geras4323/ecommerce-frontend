@@ -1,8 +1,176 @@
-import { CalendarDays, CheckCheck, Palmtree } from "lucide-react";
+import { CalendarDays, CheckCheck, Palmtree, Timer } from "lucide-react";
 import { Modal, type ModalProps } from "../layouts/modal";
-import { format } from "date-fns";
 import { useTheme } from "next-themes";
 import { cn } from "@/utils/lib";
+import "react-day-picker/style.css";
+import { DateRangePicker } from "../datePicker/date-picker";
+import { useEffect, useState } from "react";
+import { type DateRange } from "react-day-picker";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type ServerError } from "@/types/types";
+import { vars } from "@/utils/vars";
+import axios from "axios";
+
+export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
+  const queryClient = useQueryClient();
+
+  const [selectedMode, setSelectedMode] = useState<"now" | "programmed">("now");
+  const [range, setRange] = useState<DateRange>({
+    from: new Date(),
+    to: new Date(),
+  });
+
+  useEffect(() => {
+    setSelectedMode("now");
+  }, [isOpen]);
+
+  const updateVacationStateMutation = useMutation<
+    void,
+    ServerError,
+    { active?: boolean; dates?: DateRange }
+  >({
+    mutationFn: async (data) => {
+      const url = `${vars.serverUrl}/api/v1/states/vacation`;
+
+      let payload;
+      if (data.active !== undefined) {
+        payload = { active: true };
+      } else if (data.dates) {
+        payload = {
+          from: data.dates?.from,
+          to: new Date(data.dates?.to?.setHours(23, 59, 59, 59) ?? new Date()),
+        };
+      }
+
+      return axios.patch(url, payload, { withCredentials: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vacation"] });
+      queryClient.invalidateQueries({ queryKey: ["vacation_showroom"] });
+      queryClient.invalidateQueries({ queryKey: ["vacation_header"] });
+      queryClient.invalidateQueries({ queryKey: ["vacation_cart"] });
+      onClose && onClose();
+    },
+  });
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Modo Vacaciones"
+      description={
+        <span>
+          Seleccione los días de las vacaciones. Después del último día, los
+          usuarios podrán volver a hacer pedidos con normalidad.
+        </span>
+      }
+    >
+      <div className="flex max-w-screen-sm flex-col gap-2">
+        <div
+          onClick={() => setSelectedMode("now")}
+          className={cn(
+            selectedMode === "now"
+              ? "border-primary/80"
+              : "cursor-pointer border-secondary/30 opacity-50",
+            "flex items-center gap-4 rounded-lg border p-3"
+          )}
+        >
+          <span className="flex items-center gap-2">
+            <Timer className="size-5 min-w-5 text-secondary" />
+            Desde ahora, indefinidamente
+          </span>
+        </div>
+        <div
+          onClick={() => setSelectedMode("programmed")}
+          className={cn(
+            selectedMode === "programmed"
+              ? "border-primary/80"
+              : "cursor-pointer border-secondary/30 opacity-50 [&>*]:pointer-events-none",
+            "flex items-center gap-2 rounded-lg border border-secondary/30 p-3 pr-0"
+          )}
+        >
+          <span className="flex items-center gap-2">
+            <CalendarDays className="size-5 min-w-5 text-secondary" />
+            Programar vacaciones:
+          </span>
+          <DateRangePicker
+            showCompare={false}
+            showDates={false}
+            showPresets={false}
+            locale="es-AR"
+            onUpdate={(v) => setRange(v.range)}
+            align="center"
+          />
+        </div>
+      </div>
+
+      <div className="flex h-auto w-full items-center justify-end gap-2">
+        <button className="btn btn-ghost w-28" onClick={onClose}>
+          Cancelar
+        </button>
+        <button
+          className="btn btn-primary w-56"
+          onClick={() =>
+            updateVacationStateMutation.mutate(
+              selectedMode === "now" ? { active: true } : { dates: range }
+            )
+          }
+        >
+          {selectedMode === "now" ? (
+            <>
+              <Palmtree className="size-5 min-w-5" />
+              Iniciar vacaiones
+            </>
+          ) : (
+            <>
+              <CalendarDays className="size-5 min-w-5" />
+              Programar vacaiones
+            </>
+          )}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+export function DisableVacationStateModal({ isOpen, onClose }: ModalProps) {
+  const queryClient = useQueryClient();
+
+  const endVacationMutation = useMutation<void, ServerError, void>({
+    mutationFn: async () => {
+      const url = `${vars.serverUrl}/api/v1/states/vacation`;
+      return axios.patch(url, { active: false }, { withCredentials: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vacation"] });
+      queryClient.invalidateQueries({ queryKey: ["vacation_showroom"] });
+      queryClient.invalidateQueries({ queryKey: ["vacation_header"] });
+      queryClient.invalidateQueries({ queryKey: ["vacation_cart"] });
+      onClose && onClose();
+    },
+  });
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Finalizar vacaciones"
+      description="¿Está seguro de que desea finalizar las vacaciones?"
+    >
+      <div className="flex h-auto w-full min-w-screen-xxs items-center justify-end gap-2">
+        <button className="btn btn-ghost w-28" onClick={onClose}>
+          Cancelar
+        </button>
+        <button
+          className="btn btn-primary w-28"
+          onClick={() => endVacationMutation.mutate()}
+        >
+          Finalizar
+        </button>
+      </div>
+    </Modal>
+  );
+}
 
 export function VacationAlertModal({ isOpen, onClose }: ModalProps) {
   const { theme } = useTheme();

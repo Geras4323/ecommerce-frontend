@@ -37,12 +37,12 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "pointer-events-none fixed left-1/2 top-1/2 z-50 flex w-full justify-center px-4 outline-none duration-200 -translate-x-1/2 -translate-y-1/2 focus:outline-none focus-visible:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-top-1/4 data-[state=open]:slide-in-from-top-1/4",
+        "pointer-events-none fixed left-1/2 top-1/2 z-50 flex w-fit -translate-x-1/2 -translate-y-1/2 justify-center outline-none duration-200 focus:outline-none focus-visible:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         !!className && className
       )}
       {...props}
     >
-      <div className="pointer-events-auto relative grid w-full max-w-xl gap-6 rounded-lg border border-secondary/30 bg-base-300 p-6 shadow-lg">
+      <div className="pointer-events-auto relative grid w-full max-w-2xl gap-6 rounded-lg border border-secondary/30 bg-base-300 p-6 shadow-lg">
         {children}
         {showXButton && (
           <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-primary transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none">

@@ -2,14 +2,19 @@ import { withAuth } from "@/functions/session";
 import { getVacationState } from "@/functions/states";
 import { sections } from "@/layouts/administration";
 import { GeneralLayout } from "@/layouts/general";
-import { vars } from "@/utils/vars";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { TreePalm } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  DisableVacationStateModal,
+  EnableVacationStateModal,
+} from "@/components/modals/states";
+import { cn } from "@/utils/lib";
+import { format } from "date-fns";
 
 export default function Administration() {
-  const queryClient = useQueryClient();
+  const [isVacationModalOpen, setIsVacationModalOpen] = useState(false);
 
   const vacationStateQuery = useQuery({
     queryKey: ["vacation"],
@@ -18,22 +23,14 @@ export default function Administration() {
     refetchOnWindowFocus: true,
   });
 
-  const updateVacationStateMutation = useMutation({
-    mutationFn: async () => {
-      const url = `${vars.serverUrl}/api/v1/states/vacation`;
-      return axios.patch(
-        url,
-        { active: !vacationStateQuery.data?.active },
-        { withCredentials: true }
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vacation"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_showroom"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_header"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_cart"] });
-    },
-  });
+  useEffect(() => {
+    if (vacationStateQuery.isError)
+      console.log(vacationStateQuery.error.message);
+  }, [vacationStateQuery.isError, vacationStateQuery.error]);
+
+  const vacationIsActiveOrProgrammed =
+    vacationStateQuery.data?.active ||
+    (!vacationStateQuery.data?.active && vacationStateQuery.data?.from);
 
   return (
     <GeneralLayout title="Administración" description="Administración">
@@ -61,7 +58,7 @@ export default function Administration() {
               )
           )}
           <div
-            className="flex aspect-square size-full flex-col items-center justify-center gap-4 rounded-lg border-4 border-double border-secondary/20 text-secondary transition-all hover:border-solid hover:border-primary/10 hover:text-primary"
+            className="flex aspect-square size-full flex-col items-center justify-center gap-4 rounded-lg border-4 border-double border-secondary/20 text-secondary transition-all"
             style={{
               boxShadow:
                 "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
@@ -71,17 +68,44 @@ export default function Administration() {
             <span className="text-md w-fit text-center xxs:text-lg xs:text-xl">
               Modo Vacaciones
             </span>
-            <input
-              type="checkbox"
-              className="checkbox"
-              readOnly
-              checked={vacationStateQuery.data?.active}
-              disabled={updateVacationStateMutation.isPending}
-              onChange={() => updateVacationStateMutation.mutate()}
-            />
+            {vacationStateQuery.data?.from && (
+              <span className="-mt-2">
+                {format(
+                  vacationStateQuery.data?.from ?? new Date(),
+                  "dd-MM-yyyy"
+                )}{" "}
+                -{" "}
+                {format(
+                  vacationStateQuery.data?.to ?? new Date(),
+                  "dd-MM-yyyy"
+                )}
+              </span>
+            )}
+            <button
+              onClick={() => setIsVacationModalOpen(true)}
+              className={cn(
+                vacationIsActiveOrProgrammed ? "btn-outline" : "btn-primary",
+                "btn btn-sm"
+              )}
+            >
+              {vacationIsActiveOrProgrammed ? "Desactivar" : "Activar"}
+            </button>
           </div>
         </section>
       </div>
+
+      {!vacationIsActiveOrProgrammed && (
+        <EnableVacationStateModal
+          isOpen={isVacationModalOpen}
+          onClose={() => setIsVacationModalOpen(false)}
+        />
+      )}
+      {vacationIsActiveOrProgrammed && (
+        <DisableVacationStateModal
+          isOpen={isVacationModalOpen}
+          onClose={() => setIsVacationModalOpen(false)}
+        />
+      )}
     </GeneralLayout>
   );
 }
