@@ -40,7 +40,7 @@ import { ProductDataDrawer } from "src/containers/showroom/products/dataDrawer";
 import { vars } from "@/utils/vars";
 import { ImageVisualizer } from "@/components/showroom";
 import { getVacationState } from "@/functions/states";
-import { VacationAlertModal } from "@/components/modals/states";
+import { VacationAlertModal } from "@/components/modals/administration/states";
 
 export default function Showroom() {
   const { session } = useSession();

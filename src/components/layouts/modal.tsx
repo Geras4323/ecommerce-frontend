@@ -1,4 +1,4 @@
-import { type WithChildren } from "@/types/types";
+import type { WithClassName, WithChildren } from "@/types/types";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,8 @@ export function Modal({
   title,
   description,
   children,
-}: ModalProps & WithChildren) {
+  className,
+}: ModalProps & WithChildren & WithClassName) {
   return (
     <Dialog
       open={isOpen}
@@ -33,6 +34,7 @@ export function Modal({
       <DialogContent showXButton={!!onClose}>
         <DialogHeader
           className={cn(
+            !!className && className,
             !(title || description) && "hidden",
             "flex flex-col gap-2"
           )}

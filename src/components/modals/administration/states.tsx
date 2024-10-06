@@ -1,15 +1,16 @@
 import { CalendarDays, CheckCheck, Palmtree, Timer } from "lucide-react";
-import { Modal, type ModalProps } from "../layouts/modal";
+import { Modal, type ModalProps } from "../../layouts/modal";
 import { useTheme } from "next-themes";
 import { cn } from "@/utils/lib";
 import "react-day-picker/style.css";
-import { DateRangePicker } from "../datePicker/date-picker";
+import { DateRangePicker } from "../../datePicker/date-picker";
 import { useEffect, useState } from "react";
 import { type DateRange } from "react-day-picker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type ServerError } from "@/types/types";
 import { vars } from "@/utils/vars";
 import axios from "axios";
+import { ErrorSpan, LoadableButton } from "@/components/forms";
 
 export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
   const queryClient = useQueryClient();
@@ -64,8 +65,9 @@ export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
           usuarios podrán volver a hacer pedidos con normalidad.
         </span>
       }
+      className="w-full max-w-screen-sm md:min-w-screen-xxs"
     >
-      <div className="flex max-w-screen-sm flex-col gap-2">
+      <div className="flex flex-col gap-2 ">
         <div
           onClick={() => setSelectedMode("now")}
           className={cn(
@@ -86,7 +88,7 @@ export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
             selectedMode === "programmed"
               ? "border-primary/80"
               : "cursor-pointer border-secondary/30 opacity-50 [&>*]:pointer-events-none",
-            "flex items-center gap-2 rounded-lg border border-secondary/30 p-3 pr-0"
+            "flex flex-col items-start gap-2 rounded-lg border border-secondary/30 p-3 pr-0 xl:flex-row xl:items-center"
           )}
         >
           <span className="flex items-center gap-2">
@@ -104,12 +106,24 @@ export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
         </div>
       </div>
 
+      {updateVacationStateMutation.isError && (
+        <div className="-mb-3 flex w-full justify-end">
+          <ErrorSpan
+            message={updateVacationStateMutation.error?.response?.data.comment}
+          />
+        </div>
+      )}
+
       <div className="flex h-auto w-full items-center justify-end gap-2">
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar
         </button>
-        <button
-          className="btn btn-primary w-56"
+        <LoadableButton
+          isPending={updateVacationStateMutation.isPending}
+          className={cn(
+            selectedMode === "now" ? "w-48" : "w-56",
+            "btn btn-primary"
+          )}
           onClick={() =>
             updateVacationStateMutation.mutate(
               selectedMode === "now" ? { active: true } : { dates: range }
@@ -127,7 +141,7 @@ export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
               Programar vacaiones
             </>
           )}
-        </button>
+        </LoadableButton>
       </div>
     </Modal>
   );
