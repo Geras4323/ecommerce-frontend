@@ -116,7 +116,7 @@ export const ProductDataDrawer = ({
 
                 {/* Content */}
                 <div className="flex h-fit w-full flex-col gap-4 overflow-y-auto">
-                  <DrawerDescription className="flex flex-col gap-2">
+                  <SheetPrimitive.Description className="flex flex-col gap-2">
                     <div className="relative w-full text-end">
                       <span className="text-lg">DESCRIPCIÓN</span>
                       <div className="absolute bottom-0 h-px w-full bg-gradient-to-l from-secondary via-secondary/70 to-transparent" />
@@ -124,7 +124,7 @@ export const ProductDataDrawer = ({
                     <p className="whitespace-pre-wrap text-secondary">
                       {product?.description}
                     </p>
-                  </DrawerDescription>
+                  </SheetPrimitive.Description>
 
                   <div className="flex flex-col gap-2">
                     <div className="relative w-full text-end">

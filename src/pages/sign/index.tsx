@@ -43,16 +43,16 @@ function Sign() {
         </div>
 
         {/* Flip container */}
-        <div className="h-120 w-full max-w-lg perspective-1000 md:hidden">
+        <div className="perspective-1000 h-120 w-full max-w-lg md:hidden">
           {/* Card */}
           <div
             className={cn(
               !isLogging && "rotate-y-180",
-              "relative size-full duration-1000 transform-style-3d"
+              "transform-style-3d relative size-full duration-1000"
             )}
           >
             {/* Front */}
-            <div className="absolute flex size-full items-center justify-center rounded-xl border border-secondary/20 text-2xl text-white shadow-lg backface-hidden">
+            <div className="backface-hidden absolute flex size-full items-center justify-center rounded-xl border border-secondary/20 text-2xl text-white shadow-lg">
               <LoginForm
                 isLogging={isLogging}
                 className="p-6"
@@ -60,7 +60,7 @@ function Sign() {
               />
             </div>
             {/* Back */}
-            <div className="absolute flex size-full items-center justify-center rounded-xl text-2xl text-white rotate-y-180 backface-hidden">
+            <div className="rotate-y-180 backface-hidden absolute flex size-full items-center justify-center rounded-xl text-2xl text-white">
               <SignupForm
                 isLogging={isLogging}
                 className="p-6"

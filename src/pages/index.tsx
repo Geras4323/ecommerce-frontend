@@ -114,7 +114,7 @@ const Home: ServerPage<typeof getServerSideProps> = ({
                   <LoadableButton
                     onClick={() => logoutMutation.mutate()}
                     isPending={logoutMutation.isPending}
-                    className="btn btn-outline btn-secondary w-96 gap-3 shadow-button"
+                    className="btn btn-outline btn-secondary gap-3 shadow-button"
                   >
                     <LogOut className="size-5" />
                     Cerrar sesión

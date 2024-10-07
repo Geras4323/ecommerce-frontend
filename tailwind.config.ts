@@ -124,7 +124,7 @@ const config: Config = {
   plugins: [
     require("daisyui"),
     require("tailwindcss-animate"),
-    // require("tailwindcss-3d"),
+    require("tailwindcss-3d"),
   ],
 };
 export default config;
