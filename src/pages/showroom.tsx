@@ -250,10 +250,13 @@ export default function Showroom() {
           images: visualizedProduct?.images ?? [],
         }}
       />
-      <VacationAlertModal
-        isOpen={isVacationAlertOpen}
-        onClose={() => setIsVacationAlertOpen(false)}
-      />
+      {vacationStateQuery.data && (
+        <VacationAlertModal
+          isOpen={isVacationAlertOpen}
+          onClose={() => setIsVacationAlertOpen(false)}
+          endDate={vacationStateQuery.data.to}
+        />
+      )}
     </GeneralLayout>
   );
 }

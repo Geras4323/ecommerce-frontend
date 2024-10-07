@@ -11,6 +11,8 @@ import { type ServerError } from "@/types/types";
 import { vars } from "@/utils/vars";
 import axios from "axios";
 import { ErrorSpan, LoadableButton } from "@/components/forms";
+import { type Day, days, type Month, months } from "@/utils/miscellaneous";
+import { format, isSameYear } from "date-fns";
 
 export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
   const queryClient = useQueryClient();
@@ -186,7 +188,11 @@ export function DisableVacationStateModal({ isOpen, onClose }: ModalProps) {
   );
 }
 
-export function VacationAlertModal({ isOpen, onClose }: ModalProps) {
+export function VacationAlertModal({
+  isOpen,
+  onClose,
+  endDate,
+}: ModalProps & { endDate: string | null }) {
   const { theme } = useTheme();
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Atención">
@@ -206,21 +212,31 @@ export function VacationAlertModal({ isOpen, onClose }: ModalProps) {
             .
           </p>
         </div>
-        <div className="flex items-start gap-3">
-          <CalendarDays
-            className={cn(
-              theme === "dark" ? "text-warning" : "text-primary",
-              "mt-0.5 size-5 min-w-5"
-            )}
-          />
-          <p className="text-primary/80">
-            Volveremos a estar activos el día{" "}
-            <span className="text-nowrap text-primary">
-              {/* {format(new Date(), "dd-MM-yyyy")} */}
-              20-09-2024
-            </span>
-          </p>
-        </div>
+        {endDate && (
+          <div className="flex items-start gap-3">
+            <CalendarDays
+              className={cn(
+                theme === "dark" ? "text-warning" : "text-primary",
+                "mt-0.5 size-5 min-w-5"
+              )}
+            />
+            <p className="text-primary/80">
+              Volveremos a estar activos el día{" "}
+              <span className="text-nowrap text-primary">
+                {days[format(new Date(endDate), "EEEE") as Day]}{" "}
+                {format(new Date(endDate), "dd")}
+                {" de "}
+                {months[format(new Date(endDate), "LLLL") as Month]}
+                {!isSameYear(new Date(endDate), new Date()) && (
+                  <span>
+                    {", "}
+                    {format(new Date(endDate), "yyyy")}
+                  </span>
+                )}
+              </span>
+            </p>
+          </div>
+        )}
       </div>
       <div className="flex h-auto w-full items-center justify-end gap-2">
         <button onClick={onClose} className="btn btn-primary">

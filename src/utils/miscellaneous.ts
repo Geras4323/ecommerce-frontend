@@ -9,6 +9,22 @@ export const days = {
   Saturday: "sábado",
 } as const;
 
+export type Month = keyof typeof months;
+export const months = {
+  January: "Enero",
+  February: "Febrero",
+  March: "Marzo",
+  April: "Abril",
+  May: "Mayo",
+  June: "Junio",
+  July: "Julio",
+  August: "Agosto",
+  September: "Septiembre",
+  October: "Octubre",
+  November: "Noviembre",
+  December: "Diciembre",
+} as const;
+
 export function removeScroll() {
   document.body.classList.add("h-100vh");
   document.body.classList.add("overflow-hidden");
