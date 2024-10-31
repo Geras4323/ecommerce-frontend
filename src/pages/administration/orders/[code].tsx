@@ -494,7 +494,7 @@ export default function Order() {
                 ) : (
                   orderQuery.data.orderProducts.map((item) => {
                     const product = productsQuery.data.find(
-                      (p) => p.id === item.productID
+                      (p) => p.id === item.product.id
                     );
                     if (product)
                       return (

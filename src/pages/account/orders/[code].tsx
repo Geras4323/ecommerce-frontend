@@ -24,7 +24,7 @@ import {
   SingleOrderItem,
   SingleOrderItemSkeleton,
 } from "@/components/administration/orders";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipArrow,
@@ -39,6 +39,12 @@ import { type Payment } from "@/functions/payments";
 import { checkMimetype, cn } from "@/utils/lib";
 import { getCategories } from "@/functions/categories";
 import Link from "next/link";
+import MercadoPago from "public/mercado_pago.svg";
+import Image from "next/image";
+import {
+  generateMercadopagoPayment,
+  type MPProduct,
+} from "@/functions/mercadopago";
 
 export default function Order() {
   const params = useParams();
@@ -49,12 +55,33 @@ export default function Order() {
 
   const [uploadedVoucher, setUploadedVoucher] = useState<File>();
 
+  // Functions /////////////////////////////////////////////////////////////////////////////
   function loadVoucher(voucher?: File) {
     if (!voucher) return;
     checkMimetype(voucher.type, ["image/png", "image/jpeg", "application/pdf"]);
     setUploadedVoucher(voucher);
   }
 
+  async function redirectToMP() {
+    if (orderQuery.isPending || orderQuery.isError) return;
+
+    const productsList: MPProduct[] = orderQuery.data.orderProducts.map(
+      (product) => ({
+        id: product.product.id,
+        name: product.product.name,
+        quantity: product.quantity,
+        price: product.product.price,
+      })
+    );
+    const url = await generateMercadopagoPayment(
+      parseInt(orderID),
+      productsList
+    );
+    if (url) window.open(url, "_blank");
+  }
+  // Functions /////////////////////////////////////////////////////////////////////////////
+
+  // Queries ///////////////////////////////////////////////////////////////////////////////
   const productsQuery = useQuery<
     Awaited<ReturnType<typeof getProducts>>,
     ServerError
@@ -85,6 +112,12 @@ export default function Order() {
     retry: false,
   });
 
+  useEffect(() => {
+    if (orderQuery.isError) console.log(orderQuery.error.message);
+  }, [orderQuery.isError, orderQuery.error]);
+  // Queries ///////////////////////////////////////////////////////////////////////////////
+
+  // Mutations /////////////////////////////////////////////////////////////////////////////
   const mutation = useMutation<ServerSuccess<CloudinarySuccess>, ServerError>({
     mutationFn: () => {
       const url = `${vars.serverUrl}/api/v1/payments/${orderID}`;
@@ -104,6 +137,7 @@ export default function Order() {
       queryClient.invalidateQueries({ queryKey: ["order"] });
     },
   });
+  // Mutations /////////////////////////////////////////////////////////////////////////////
 
   return (
     <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
@@ -142,24 +176,17 @@ export default function Order() {
                 <ErrorSpan message={orderQuery.error?.response?.data.comment} />
               </>
             ) : (
-              orderQuery.data.orderProducts.map((item) => {
-                const product = productsQuery.data.find(
-                  (p) => p.id === item.productID
-                );
-                if (product)
-                  return (
-                    <SingleOrderItem
-                      key={item.id}
-                      item={item}
-                      product={product}
-                      category={
-                        categoriesQuery.data?.find(
-                          (category) => category.id === product.categoryID
-                        )?.name
-                      }
-                    />
-                  );
-              })
+              orderQuery.data.orderProducts.map((item) => (
+                <SingleOrderItem
+                  key={item.id}
+                  item={item}
+                  category={
+                    categoriesQuery.data?.find(
+                      (category) => category.id === item.product.categoryID
+                    )?.name
+                  }
+                />
+              ))
             )}
           </article>
 
@@ -231,6 +258,21 @@ export default function Order() {
 
             {!orderQuery.isPending && !orderQuery.isError && (
               <div className="flex w-full flex-col gap-4">
+                <button
+                  onClick={redirectToMP}
+                  className="btn btn-outline btn-primary w-full border border-sky-500"
+                >
+                  <Image
+                    alt="mp"
+                    src={MercadoPago}
+                    className="size-9 min-w-9"
+                    unoptimized
+                  />
+                  Abonar con MercadoPago
+                </button>
+
+                {/* <hr className="border-b border-t-0 border-b-secondary/20" /> */}
+
                 <input
                   id="voucher"
                   type="file"
@@ -280,7 +322,7 @@ export default function Order() {
                   <div className="flex flex-col gap-2 border-t border-t-secondary/20 pt-3">
                     <span className="flex items-center gap-2 text-lg text-secondary">
                       <File className="size-5" />
-                      Comprobantes adjuntos
+                      Comprobantes
                     </span>
                     <div
                       className={cn(
@@ -319,7 +361,11 @@ export function PaymentVoucher({
   number: number;
 }) {
   return (
-    <div className="relative flex h-fit w-full items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 py-2 pl-11 pr-4">
+    <a
+      href={payment.url}
+      target="_blank"
+      className="relative flex h-fit w-full items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 py-2 pl-11 pr-4 hover:border-secondary/60"
+    >
       <span className="absolute left-1 top-1 flex items-center gap-0.5 text-sm text-secondary">
         <Hash className="size-3" />
         {number + 1}
@@ -335,7 +381,24 @@ export function PaymentVoucher({
           {format(new Date(payment.createdAt), "HH:mm")}
         </div>
       </div>
-      <a
+
+      {payment.platform === "attachment" ? (
+        <div className="flex items-center gap-2 text-sm uppercase tracking-wide">
+          <Paperclip className="size-4 min-w-4 text-primary/70" /> Adjunto
+        </div>
+      ) : (
+        <div className="flex flex-col items-center text-sm uppercase tracking-wide">
+          <Image
+            alt="mp"
+            src={MercadoPago}
+            className="size-8 min-w-8"
+            unoptimized
+          />
+          <span>$ {payment.received}</span>
+        </div>
+      )}
+
+      {/* <a
         href={payment.url}
         target="_blank"
         className="btn btn-outline btn-secondary btn-sm"
@@ -343,8 +406,8 @@ export function PaymentVoucher({
         <FilePieChart className="size-5" />
         <span className="xxs:hidden lg:block">Ver</span>
         <span className="hidden xxs:block lg:hidden">Ver comprobante</span>
-      </a>
-    </div>
+      </a> */}
+    </a>
   );
 }
 

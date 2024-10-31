@@ -6,6 +6,9 @@ export const paymentSchema = z
   .object({
     orderID: z.number(),
     url: z.string(),
-    name: z.string(),
+    name: z.string().nullable(),
+    payed: z.number().nullable(),
+    received: z.number().nullable(),
+    platform: z.enum(["attachment", "mercadopago"]),
   })
   .and(databaseEntrySchema);

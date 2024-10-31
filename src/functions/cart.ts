@@ -2,6 +2,7 @@ import { databaseEntrySchema } from "@/types/types";
 import { vars } from "@/utils/vars";
 import axios from "axios";
 import { z } from "zod";
+import { productSchema } from "./products";
 
 export type TCartItem = z.infer<typeof cartItemSchema>;
 export const cartItemSchema = z
