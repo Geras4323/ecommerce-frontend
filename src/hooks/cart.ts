@@ -29,6 +29,10 @@ export function useShoppingCart() {
     refetchOnWindowFocus: true,
   });
 
+  // useEffect(() => {
+  //   if (cartItems.isError) console.log(cartItems.error.message);
+  // }, [cartItems.isError, cartItems.error]);
+
   const addCartItem = useMutation<
     any,
     ServerError,

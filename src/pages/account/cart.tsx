@@ -79,10 +79,13 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   >({
     mutationFn: async () => {
       const url = `${vars.serverUrl}/api/v1/orders`;
-      const items = cart.cartItems.data?.map((d) => ({
-        productID: d.productID,
-        quantity: d.quantity,
-      }));
+      const items = cart.cartItems.data?.map((item) => {
+        console.log(item);
+        return {
+          productID: item.productID,
+          quantity: item.quantity,
+        };
+      });
       return axios.post(url, items, { withCredentials: true });
     },
     onSuccess: (order) => {
@@ -105,7 +108,7 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
 
       data.order.orderProducts?.map((item) => {
         return products.push({
-          name: productsQuery.data?.find((p) => p.id === item.productID)?.name,
+          name: productsQuery.data?.find((p) => p.id === item.product.id)?.name,
           value: `x ${item.quantity}`,
           inline: true,
         });
@@ -201,7 +204,9 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
               ))
             ) : productsQuery.isError || cart.cartItems.isError ? (
               <>
-                <ErrorSpan message="{productsQuery.error?.response?.data.comment}" />
+                <ErrorSpan
+                  message={productsQuery.error?.response?.data.comment}
+                />
                 <ErrorSpan
                   message={cart.cartItems.error?.response?.data.comment}
                 />

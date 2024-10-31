@@ -11,6 +11,8 @@ export const productSchema = z
     name: z.string(),
     description: z.string(),
     price: z.number(),
+    position: z.number(),
+    listed: z.boolean(),
     images: imageSchema.array(),
     categoryID: z.number(),
     supplierID: z.number(),

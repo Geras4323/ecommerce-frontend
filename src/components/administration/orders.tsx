@@ -2,7 +2,6 @@ import type {
   OrderProduct,
   OrdersItem as TOrdersItem,
 } from "@/functions/orders";
-import { type Product } from "@/functions/products";
 import { cn } from "@/utils/lib";
 import { type Day, days } from "@/utils/miscellaneous";
 import { format } from "date-fns";
@@ -320,15 +319,14 @@ export function SingleOrderItemSkeleton() {
 
 export function SingleOrderItem({
   item,
-  product,
   category,
   showCategory = true,
 }: {
   item: OrderProduct;
-  product: Product;
   category?: string;
   showCategory?: boolean;
 }) {
+  const product = item.product;
   const price = item.quantity * product.price;
 
   return (
