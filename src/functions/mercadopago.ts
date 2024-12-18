@@ -15,10 +15,13 @@ const mercadopago = new MercadoPagoConfig({
   accessToken: vars.mp_access_token!,
 });
 
-export async function generateMercadopagoPayment(
-  orderID: number,
-  items: MPProduct[]
-) {
+export async function generateMercadopagoPayment({
+  paymentID,
+  items,
+}: {
+  paymentID: number;
+  items: MPProduct[];
+}) {
   const response: ServerSuccess<PreferenceResponse> = await axios.post(
     "https://api.mercadopago.com/checkout/preferences",
     {
@@ -43,7 +46,7 @@ export async function generateMercadopagoPayment(
         unit_price: item.price,
       })),
       metadata: {
-        orderID,
+        paymentID,
       },
     },
     {

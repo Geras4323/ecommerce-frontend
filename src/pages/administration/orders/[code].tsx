@@ -442,7 +442,7 @@ export default function Order() {
                             <PaymentVoucher
                               key={payment.id}
                               payment={payment}
-                              number={i}
+                              position={i}
                             />
                           ))
                         )}

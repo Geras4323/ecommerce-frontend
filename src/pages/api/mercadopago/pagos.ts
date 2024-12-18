@@ -16,16 +16,20 @@ export default async function handler(
     // console.log("payment :", mpPayment);
     // console.log("payment :", mpPayment.metadata);
 
-    const dbPayment = await axios.post(
-      `${vars.serverUrl}/api/v1/payments/mercadopago/add`,
-      {
-        orderID: mpPayment.metadata.order_id,
-        paymentID: mpPayment.id,
-        payed: mpPayment.transaction_details?.total_paid_amount,
-        received: mpPayment.transaction_details?.net_received_amount,
-      },
-      { withCredentials: true }
-    );
+    try {
+      await axios.post(
+        `${vars.serverUrl}/api/v1/payments/mercadopago/${mpPayment.metadata.payment_id}/end`, // metadata "paymentID" is turned into "payment_id" by MP
+        {
+          paymentNumber: mpPayment.id,
+          paid: mpPayment.transaction_details?.total_paid_amount,
+          received: mpPayment.transaction_details?.net_received_amount,
+          status: mpPayment.status === "approved" ? "accepted" : "rejected",
+        },
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.error(err);
+    }
 
     // Respond immediately
     res.status(200).json({ message: "Webhook received successfully" });
