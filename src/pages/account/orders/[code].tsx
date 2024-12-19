@@ -7,7 +7,6 @@ import {
   Clock,
   DollarSign,
   File,
-  FilePieChart,
   FileUp,
   Hash,
   Info,
@@ -46,6 +45,7 @@ import {
   type MPProduct,
 } from "@/functions/mercadopago";
 import { toast, Toaster } from "sonner";
+import { AwaitingPaymentModal } from "@/components/modals/payment";
 
 export default function Order() {
   const params = useParams();
@@ -55,8 +55,12 @@ export default function Order() {
   const isValidCode = !isNaN(parseInt(orderID));
 
   const [uploadedVoucher, setUploadedVoucher] = useState<File>();
+
+  const [isAwaitingPaymentModalOpen, setIsAwaitingPaymentModal] =
+    useState(false);
   const [paymentToCheck, setPaymentToCheck] = useState<number>();
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const waitingForPaymentToast = useRef<ReturnType<typeof toast>>();
 
   // Queries ///////////////////////////////////////////////////////////////////////////////
   const productsQuery = useQuery<
@@ -101,18 +105,17 @@ export default function Order() {
     queryFn: withCbk({
       queryFn: () => getPaymentStatus(paymentToCheck ?? -1),
       onSuccess: (res) => {
-        if (res === "accepted") toast.success("Pago recibido!");
+        if (res === "accepted") {
+          setPaymentToCheck(undefined);
+          clearTimeout(timeoutRef.current);
+          queryClient.invalidateQueries({ queryKey: ["order"] });
+          toast.dismiss(waitingForPaymentToast.current);
+          toast.success("Pago recibido!");
+        }
       },
     }),
     enabled: !!paymentToCheck,
-    refetchInterval: (res) => {
-      if (res.state.data === "pending") {
-        return 2000;
-      }
-      // setPaymentToCheck(undefined);
-      // clearTimeout(timeoutRef.current);
-      return false;
-    },
+    refetchInterval: (res) => (res.state.data === "pending" ? 2000 : false),
   });
 
   useEffect(() => {
@@ -169,6 +172,8 @@ export default function Order() {
       });
       if (url) window.open(url, "_blank");
       timeoutRef.current = setTimeout(() => {
+        setIsAwaitingPaymentModal(true);
+        waitingForPaymentToast.current = toast.loading("Esperando pago...");
         setPaymentToCheck(res.data.id);
       }, 3000);
     },
@@ -420,6 +425,19 @@ export default function Order() {
           </section>
         </div>
       </GeneralLayout>
+
+      {paymentStatusQuery.isSuccess && (
+        <AwaitingPaymentModal
+          isOpen={isAwaitingPaymentModalOpen}
+          onClose={() => {
+            setIsAwaitingPaymentModal(false);
+            setTimeout(() => {
+              toast.dismiss(waitingForPaymentToast.current);
+            }, 5000);
+          }}
+          paymentStatus={paymentStatusQuery.data}
+        />
+      )}
     </>
   );
 }

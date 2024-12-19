@@ -1,6 +1,6 @@
 import type { WithClassName, WithChildren } from "@/types/types";
 import { cn } from "@/utils/lib";
-import { AlertCircle, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import {
   useEffect,
@@ -67,6 +67,7 @@ export function SuccessAlert({
 }) {
   const { theme } = useTheme();
   if (!message) return;
+
   return (
     <div
       className={cn(
@@ -74,7 +75,10 @@ export function SuccessAlert({
         "flex h-12 w-full items-center justify-between rounded-lg px-3 py-1"
       )}
     >
-      <span>{message}</span>
+      <div className="flex items-center gap-2">
+        <CheckCircle2 className="size-5 min-w-5" />
+        <span>{message}</span>
+      </div>
       {showRedirect && (
         <div className="flex animate-pulse items-center gap-2">
           <span>Redirigiendo...</span>
