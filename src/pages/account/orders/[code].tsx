@@ -109,12 +109,14 @@ export default function Order() {
           setPaymentToCheck(undefined);
           clearTimeout(timeoutRef.current);
           queryClient.invalidateQueries({ queryKey: ["order"] });
+          console.log("query");
           toast.dismiss(waitingForPaymentToast.current);
           toast.success("Pago recibido!");
         }
       },
     }),
     enabled: !!paymentToCheck,
+    refetchOnWindowFocus: false,
     refetchInterval: (res) => (res.state.data === "pending" ? 2000 : false),
   });
 
@@ -171,6 +173,8 @@ export default function Order() {
         items: variable,
       });
       if (url) window.open(url, "_blank");
+      console.log("mutation");
+      toast.dismiss(waitingForPaymentToast.current);
       timeoutRef.current = setTimeout(() => {
         setIsAwaitingPaymentModal(true);
         waitingForPaymentToast.current = toast.loading("Esperando pago...");
