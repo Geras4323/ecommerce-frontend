@@ -59,7 +59,6 @@ export default function Order() {
   const [isAwaitingPaymentModalOpen, setIsAwaitingPaymentModal] =
     useState(false);
   const [paymentToCheck, setPaymentToCheck] = useState<number>();
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const waitingForPaymentToast = useRef<ReturnType<typeof toast>>();
 
   // Queries ///////////////////////////////////////////////////////////////////////////////
@@ -107,9 +106,7 @@ export default function Order() {
       onSuccess: (res) => {
         if (res === "accepted") {
           setPaymentToCheck(undefined);
-          clearTimeout(timeoutRef.current);
           queryClient.invalidateQueries({ queryKey: ["order"] });
-          console.log("query");
           toast.dismiss(waitingForPaymentToast.current);
           toast.success("Pago recibido!");
         }
@@ -173,13 +170,10 @@ export default function Order() {
         items: variable,
       });
       if (url) window.open(url, "_blank");
-      console.log("mutation");
       toast.dismiss(waitingForPaymentToast.current);
-      timeoutRef.current = setTimeout(() => {
-        setIsAwaitingPaymentModal(true);
-        waitingForPaymentToast.current = toast.loading("Esperando pago...");
-        setPaymentToCheck(res.data.id);
-      }, 3000);
+      waitingForPaymentToast.current = toast.loading("Esperando pago...");
+      setIsAwaitingPaymentModal(true);
+      setPaymentToCheck(res.data.id);
     },
   });
   // Mutations /////////////////////////////////////////////////////////////////////////////
@@ -435,9 +429,9 @@ export default function Order() {
           isOpen={isAwaitingPaymentModalOpen}
           onClose={() => {
             setIsAwaitingPaymentModal(false);
-            setTimeout(() => {
-              toast.dismiss(waitingForPaymentToast.current);
-            }, 5000);
+            // setTimeout(() => {
+            //   toast.dismiss(waitingForPaymentToast.current);
+            // }, 5000);
           }}
           paymentStatus={paymentStatusQuery.data}
         />

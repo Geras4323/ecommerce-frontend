@@ -334,12 +334,12 @@ export function SingleOrderItem({
       <div className="flex flex-row gap-6">
         <Image
           alt="product"
-          width={50}
-          height={50}
+          width={120}
+          height={120}
           src={product.images[0]?.url ?? NoImage}
           className={cn(
             !product.images[0]?.url && "opacity-50 blur-[1px]",
-            "size-16 min-w-16 rounded-full border border-secondary/30"
+            "size-16 min-w-16 rounded-full border border-secondary/30 object-cover"
           )}
         />
         <div className="flex flex-col gap-2">

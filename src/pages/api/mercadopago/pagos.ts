@@ -9,12 +9,12 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const body = req.body;
-    // console.log(req.headers["x-signature"]);
-    // console.log(body);
+    // console.log("signature: ", req.headers["x-signature"]);
+    // console.log("body: ", body);
 
     const mpPayment = await getMercadoPagoPayment(body.data.id);
-    // console.log("payment :", mpPayment);
-    // console.log("payment :", mpPayment.metadata);
+    // console.log("payment: ", mpPayment);
+    // console.log("payment metadata: ", mpPayment.metadata);
 
     try {
       await axios.post(
