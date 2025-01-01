@@ -49,9 +49,6 @@ export function EnableVacationStateModal({ isOpen, onClose }: ModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vacation"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_showroom"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_header"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_cart"] });
       onClose && onClose();
     },
   });
@@ -159,9 +156,6 @@ export function DisableVacationStateModal({ isOpen, onClose }: ModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vacation"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_showroom"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_header"] });
-      queryClient.invalidateQueries({ queryKey: ["vacation_cart"] });
       onClose && onClose();
     },
   });
@@ -242,6 +236,53 @@ export function VacationAlertModal({
         <button onClick={onClose} className="btn btn-primary">
           <CheckCheck className="size-5" />
           Aceptar
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+// MercadoPago ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+export function MercadopagoStateModal({
+  isOpen,
+  onClose,
+  active,
+}: ModalProps & { active: boolean }) {
+  const queryClient = useQueryClient();
+
+  const alternateMercadpagoStateMutation = useMutation<void, ServerError, void>(
+    {
+      mutationFn: async () => {
+        const url = `${vars.serverUrl}/api/v1/states/mercadopago`;
+        return axios.patch(url, { active: !active }, { withCredentials: true });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["mercadopago"] });
+        onClose && onClose();
+      },
+    }
+  );
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Pagos por MercadoPago"
+      description={
+        active
+          ? "¿Está seguro de que ya no desea aceptar pagos por MercadoPago?"
+          : "¿Está seguro de que desea aceptar pagos por MercadoPago?"
+      }
+    >
+      <div className="flex h-auto w-full min-w-screen-xxs items-center justify-end gap-2">
+        <button className="btn btn-ghost w-28" onClick={onClose}>
+          Cancelar
+        </button>
+        <button
+          className="btn btn-primary w-28"
+          onClick={() => alternateMercadpagoStateMutation.mutate()}
+        >
+          Confirmar
         </button>
       </div>
     </Modal>

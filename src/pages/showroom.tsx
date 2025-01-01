@@ -39,7 +39,7 @@ import {
 import { ProductDataDrawer } from "src/containers/showroom/products/dataDrawer";
 import { vars } from "@/utils/vars";
 import { ImageVisualizer } from "@/components/showroom";
-import { getVacationState } from "@/functions/states";
+import { getState } from "@/functions/states";
 import { VacationAlertModal } from "@/components/modals/administration/states";
 
 export default function Showroom() {
@@ -55,12 +55,12 @@ export default function Showroom() {
   const [isVacationAlertOpen, setIsVacationAlertOpen] = useState(false);
 
   const vacationStateQuery = useQuery<
-    Awaited<ReturnType<typeof getVacationState>>,
+    Awaited<ReturnType<typeof getState>>,
     ServerError
   >({
-    queryKey: ["vacation_showroom"],
+    queryKey: ["vacation", "showroom"],
     queryFn: withCbk({
-      queryFn: getVacationState,
+      queryFn: () => getState("vacation"),
       onSuccess: (res) => setIsVacationAlertOpen(res.active),
     }),
     retry: false,
@@ -308,7 +308,7 @@ function CategoryItem({
           height={200}
           className={cn(
             !category.image
-              ? "scale-90 object-contain opacity-20"
+              ? "object-contain opacity-20 scale-90"
               : "object-cover",
             category.id === selectedCategory?.id
               ? "saturate-100"

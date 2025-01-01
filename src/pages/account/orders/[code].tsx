@@ -46,6 +46,7 @@ import {
 } from "@/functions/mercadopago";
 import { toast, Toaster } from "sonner";
 import { AwaitingPaymentModal } from "@/components/modals/payment";
+import { getState } from "@/functions/states";
 
 export default function Order() {
   const params = useParams();
@@ -62,6 +63,13 @@ export default function Order() {
   const waitingForPaymentToast = useRef<ReturnType<typeof toast>>();
 
   // Queries ///////////////////////////////////////////////////////////////////////////////
+  const mercadopagoStateQuery = useQuery({
+    queryKey: ["mercadopago"],
+    queryFn: () => getState("mercadopago"),
+    retry: false,
+    refetchOnWindowFocus: true,
+  });
+
   const productsQuery = useQuery<
     Awaited<ReturnType<typeof getProducts>>,
     ServerError
@@ -331,100 +339,105 @@ export default function Order() {
                 </>
               )}
 
-              {!orderQuery.isPending && !orderQuery.isError && (
-                <div className="flex w-full flex-col gap-4">
-                  <LoadableButton
-                    isPending={createMPPaymentMutation.isPending}
-                    onClick={redirectToMP}
-                    className="btn btn-outline btn-primary w-full border border-sky-500"
-                  >
-                    <Image
-                      alt="mp"
-                      src={MercadoPago}
-                      className="size-9 min-w-9"
-                      unoptimized
-                    />
-                    Abonar con MercadoPago
-                  </LoadableButton>
-
-                  {/* <hr className="border-b border-t-0 border-b-secondary/20" /> */}
-
-                  <input
-                    id="voucher"
-                    type="file"
-                    hidden
-                    onChange={(e) => {
-                      if (e.target.files) loadVoucher(e.target.files[0]);
-                    }}
-                  />
-                  <label
-                    htmlFor="voucher"
-                    className="btn btn-outline btn-primary w-full"
-                  >
-                    <Paperclip className="size-5" /> Adjuntar comprobante de
-                    pago
-                  </label>
-
-                  <ErrorAlert
-                    message={
-                      uploadVoucherMutation.error?.response?.data.comment
-                    }
-                  />
-
-                  {uploadedVoucher && (
-                    <div className="my-1.5 flex items-center justify-between gap-4">
-                      <Tooltip>
-                        <TooltipTrigger className="cursor-default truncate text-lg">
-                          {uploadedVoucher.name}
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="bottom"
-                          align="start"
-                          className="w-fit rounded-md border border-secondary/30 bg-base-100 px-2 py-1"
-                        >
-                          <TooltipArrow className="fill-secondary" />
-                          {uploadedVoucher.name}
-                        </TooltipContent>
-                      </Tooltip>
-
+              {!orderQuery.isPending &&
+                !orderQuery.isError &&
+                !mercadopagoStateQuery.isPending &&
+                !mercadopagoStateQuery.isError && (
+                  <div className="flex w-full flex-col gap-4">
+                    {mercadopagoStateQuery.data.active && (
                       <LoadableButton
-                        isPending={uploadVoucherMutation.isPending}
-                        onClick={() => uploadVoucherMutation.mutate()}
-                        className="btn btn-primary btn-sm w-52"
-                        animation="dots"
+                        isPending={createMPPaymentMutation.isPending}
+                        onClick={redirectToMP}
+                        className="btn btn-outline btn-primary w-full border border-sky-500"
                       >
-                        <FileUp className="size-5" />
-                        <span>Subir comprobante</span>
+                        <Image
+                          alt="mp"
+                          src={MercadoPago}
+                          className="size-9 min-w-9"
+                          unoptimized
+                        />
+                        Abonar con MercadoPago
                       </LoadableButton>
-                    </div>
-                  )}
+                    )}
 
-                  {orderQuery.data?.payments.length !== 0 && (
-                    <div className="flex flex-col gap-2 border-t border-t-secondary/20 pt-3">
-                      <span className="flex items-center gap-2 text-lg text-secondary">
-                        <File className="size-5" />
-                        Comprobantes
-                      </span>
-                      <div
-                        className={cn(
-                          uploadedVoucher
-                            ? "max-h-48 2xl:max-h-104"
-                            : "max-h-60 2xl:max-h-104",
-                          "flex flex-col gap-2 overflow-y-auto"
-                        )}
-                      >
-                        {orderQuery.data?.payments.map((payment, i) => (
-                          <PaymentVoucher
-                            key={payment.id}
-                            payment={payment}
-                            position={i}
-                          />
-                        ))}
+                    {/* <hr className="border-b border-t-0 border-b-secondary/20" /> */}
+
+                    <input
+                      id="voucher"
+                      type="file"
+                      hidden
+                      onChange={(e) => {
+                        if (e.target.files) loadVoucher(e.target.files[0]);
+                      }}
+                    />
+                    <label
+                      htmlFor="voucher"
+                      className="btn btn-outline btn-primary w-full"
+                    >
+                      <Paperclip className="size-5" /> Adjuntar comprobante de
+                      pago
+                    </label>
+
+                    <ErrorAlert
+                      message={
+                        uploadVoucherMutation.error?.response?.data.comment
+                      }
+                    />
+
+                    {uploadedVoucher && (
+                      <div className="my-1.5 flex items-center justify-between gap-4">
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-default truncate text-lg">
+                            {uploadedVoucher.name}
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="bottom"
+                            align="start"
+                            className="w-fit rounded-md border border-secondary/30 bg-base-100 px-2 py-1"
+                          >
+                            <TooltipArrow className="fill-secondary" />
+                            {uploadedVoucher.name}
+                          </TooltipContent>
+                        </Tooltip>
+
+                        <LoadableButton
+                          isPending={uploadVoucherMutation.isPending}
+                          onClick={() => uploadVoucherMutation.mutate()}
+                          className="btn btn-primary btn-sm w-52"
+                          animation="dots"
+                        >
+                          <FileUp className="size-5" />
+                          <span>Subir comprobante</span>
+                        </LoadableButton>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+
+                    {orderQuery.data?.payments.length !== 0 && (
+                      <div className="flex flex-col gap-2 border-t border-t-secondary/20 pt-3">
+                        <span className="flex items-center gap-2 text-lg text-secondary">
+                          <File className="size-5" />
+                          Comprobantes
+                        </span>
+                        <div
+                          className={cn(
+                            uploadedVoucher
+                              ? "max-h-48 2xl:max-h-104"
+                              : "max-h-60 2xl:max-h-104",
+                            "flex flex-col gap-2 overflow-y-auto"
+                          )}
+                        >
+                          {orderQuery.data?.payments.map((payment, i) => (
+                            <PaymentVoucher
+                              key={payment.id}
+                              payment={payment}
+                              position={i}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
             </article>
           </section>
         </div>

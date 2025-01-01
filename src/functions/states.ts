@@ -4,14 +4,14 @@ import { z } from "zod";
 
 export type State = z.infer<typeof stateSchema>;
 export const stateSchema = z.object({
-  name: z.enum(["vacation"]),
+  name: z.enum(["vacation", "mercadopago"]),
   active: z.boolean(),
   from: z.string().nullable(),
   to: z.string().nullable(),
 });
 
-export async function getVacationState() {
-  const url = `${vars.serverUrl}/api/v1/states/vacation`;
+export async function getState(state: State["name"]) {
+  const url = `${vars.serverUrl}/api/v1/states/${state}`;
   const res = await axios.get(url, { withCredentials: true });
   return stateSchema.parse(res.data);
 }

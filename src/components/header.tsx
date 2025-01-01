@@ -22,7 +22,7 @@ import { useTheme } from "next-themes";
 import { Arizonia } from "next/font/google";
 import { LoadableButton } from "./forms";
 import { useQuery } from "@tanstack/react-query";
-import { getVacationState } from "@/functions/states";
+import { getState } from "@/functions/states";
 import { type ServerError } from "@/types/types";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
@@ -79,11 +79,11 @@ export const Header = () => {
   const [isNavBordered, setIsNavBordered] = useState(false);
 
   const vacationStateQuery = useQuery<
-    Awaited<ReturnType<typeof getVacationState>>,
+    Awaited<ReturnType<typeof getState>>,
     ServerError
   >({
-    queryKey: ["vacation_header"],
-    queryFn: getVacationState,
+    queryKey: ["vacation", "header"],
+    queryFn: () => getState("vacation"),
     retry: false,
     staleTime: 1000,
     refetchOnWindowFocus: true,

@@ -25,7 +25,7 @@ import { useState } from "react";
 import { getCategories } from "@/functions/categories";
 import { type ServerPage } from "@/types/session";
 import { AccountLayout } from "@/components/layouts/account";
-import { getVacationState } from "@/functions/states";
+import { getState } from "@/functions/states";
 
 const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   const queryClient = useQueryClient();
@@ -34,11 +34,11 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   const [confirmedOrder, setConfirmedOrder] = useState<OrderItem | null>(null);
 
   const vacationStateQuery = useQuery<
-    Awaited<ReturnType<typeof getVacationState>>,
+    Awaited<ReturnType<typeof getState>>,
     ServerError
   >({
-    queryKey: ["vacation_cart"],
-    queryFn: getVacationState,
+    queryKey: ["vacation", "cart"],
+    queryFn: () => getState("vacation"),
     retry: false,
     staleTime: 1000,
     refetchOnWindowFocus: true,
