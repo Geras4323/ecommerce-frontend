@@ -16,6 +16,8 @@ export default async function handler(
     // console.log("payment: ", mpPayment);
     // console.log("payment metadata: ", mpPayment.metadata);
 
+    if (!mpPayment) return;
+
     try {
       await axios.post(
         `${vars.serverUrl}/api/v1/payments/mercadopago/${mpPayment.metadata.payment_id}/end`, // metadata "paymentID" is turned into "payment_id" by MP
