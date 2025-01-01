@@ -171,12 +171,13 @@ export function DisableVacationStateModal({ isOpen, onClose }: ModalProps) {
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar
         </button>
-        <button
+        <LoadableButton
+          isPending={endVacationMutation.isPending}
           className="btn btn-primary w-28"
           onClick={() => endVacationMutation.mutate()}
         >
           Finalizar
-        </button>
+        </LoadableButton>
       </div>
     </Modal>
   );
@@ -278,12 +279,13 @@ export function MercadopagoStateModal({
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar
         </button>
-        <button
+        <LoadableButton
+          isPending={alternateMercadpagoStateMutation.isPending}
           className="btn btn-primary w-28"
           onClick={() => alternateMercadpagoStateMutation.mutate()}
         >
           Confirmar
-        </button>
+        </LoadableButton>
       </div>
     </Modal>
   );
