@@ -2,6 +2,7 @@ import { GeneralLayout } from "@/layouts/general";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "@/functions/products";
 import {
+  ArrowRight,
   CalendarDaysIcon,
   ChevronLeft,
   Clock,
@@ -507,9 +508,11 @@ export const getServerSideProps = withAuth("noAdmin");
 export function PaymentVoucher({
   payment,
   position,
+  isAdmin = false,
 }: {
   payment: Payment;
   position: number;
+  isAdmin?: boolean;
 }) {
   return (
     <a
@@ -545,7 +548,25 @@ export function PaymentVoucher({
             className="size-8 min-w-8"
             unoptimized
           />
-          <span>$ {payment.received}</span>
+          {isAdmin ? (
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-0.5 text-primary">
+                <span className="text-xs text-primary/70">$</span>
+                {payment.paid?.toLocaleString("es-AR")}
+              </div>
+              <ArrowRight className="size-3 min-w-3" />
+              <div className="flex items-center gap-0.5 text-primary">
+                <span className="text-xs text-primary/70">$</span>
+                {payment.received?.toLocaleString("es-AR")}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-0.5">
+              <span className="text-xs text-primary/70">$</span>
+
+              {payment.received?.toLocaleString("es-AR")}
+            </div>
+          )}
         </div>
       )}
 
