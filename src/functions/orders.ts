@@ -4,12 +4,13 @@ import axios from "axios";
 import { z } from "zod";
 import { sessionSchema } from "./session";
 import { paymentSchema } from "./payments";
+import { productSchema } from "./products";
 
 export type OrderProduct = z.infer<typeof orderProductSchema>;
 export const orderProductSchema = z
   .object({
     quantity: z.number(),
-    productID: z.number(),
+    product: productSchema,
   })
   .and(databaseEntrySchema);
 

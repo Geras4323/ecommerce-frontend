@@ -7,7 +7,6 @@ import {
   DialogTitle,
 } from "../shadcn/dialog";
 import { type ReactNode } from "react";
-import { cn } from "@/utils/lib";
 
 export type ModalProps = {
   isOpen: boolean;
@@ -27,19 +26,18 @@ export function Modal({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={() => {
-        !!onClose && onClose();
-      }}
+      // onOpenChange={() => !locked && onClose && !closeDelay && onClose()}
+      onOpenChange={() => onClose && onClose()}
+      modal
     >
-      <DialogContent showXButton={!!onClose}>
-        <DialogHeader
-          className={cn(
-            !!className && className,
-            !(title || description) && "hidden",
-            "flex flex-col gap-2"
-          )}
-        >
-          {title && <DialogTitle>{title}</DialogTitle>}
+      <DialogContent
+        showXButton={!!onClose}
+        // showXButton={!!onClose || !closeDelay}
+        // closeDelay={closeDelay}
+        className={className}
+      >
+        <DialogHeader className="flex flex-col gap-2">
+          <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {children}

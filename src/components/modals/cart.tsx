@@ -18,7 +18,7 @@ export function OrderConfirmationModal({
         <div
           className={cn(
             theme === "dark" ? "bg-success/10" : "bg-primary/10",
-            "size-12 rounded-full p-2 sm:size-16"
+            "size-12 min-w-12 rounded-full p-2 sm:size-16 sm:min-w-16"
           )}
         >
           <CheckCircle2
@@ -54,7 +54,7 @@ export function OrderConfirmationModal({
         <Link href="/showroom" className="btn btn-ghost">
           Volver al showroom
         </Link>
-        <Link href={`/orders/${order.id}`} className="btn btn-primary">
+        <Link href={`/account/orders/${order.id}`} className="btn btn-primary">
           <PackageCheck className="size-5" />
           Ver pedido
         </Link>

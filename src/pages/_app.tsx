@@ -14,7 +14,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
+      <ThemeProvider defaultTheme="dark">
         <div className={comfortaa.className}>
           <Component {...pageProps} />
           <Analytics />

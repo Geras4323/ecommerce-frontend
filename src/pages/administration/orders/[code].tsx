@@ -36,6 +36,7 @@ import NoImage from "../../../../public/no_image.png";
 import { getCategories } from "@/functions/categories";
 import { mqs, useMediaQueries } from "@/hooks/screen";
 import Link from "next/link";
+import { type ServerPage } from "@/types/session";
 
 type OpenState = keyof OpenStates;
 export type OpenStates = {
@@ -53,7 +54,7 @@ export type OrderStates = {
   delivered: number;
 };
 
-export default function Order() {
+const Order: ServerPage<typeof getServerSideProps> = ({ session }) => {
   const params = useParams();
   const queryClient = useQueryClient();
 
@@ -442,7 +443,8 @@ export default function Order() {
                             <PaymentVoucher
                               key={payment.id}
                               payment={payment}
-                              number={i}
+                              position={i}
+                              isAdmin={session.role === "admin"}
                             />
                           ))
                         )}
@@ -494,7 +496,7 @@ export default function Order() {
                 ) : (
                   orderQuery.data.orderProducts.map((item) => {
                     const product = productsQuery.data.find(
-                      (p) => p.id === item.productID
+                      (p) => p.id === item.product.id
                     );
                     if (product)
                       return (
@@ -518,9 +520,10 @@ export default function Order() {
       </div>
     </GeneralLayout>
   );
-}
+};
 
-export const getServerSideProps = withAuth("noAdmin");
+export const getServerSideProps = withAuth("admin");
+export default Order;
 
 function OrderedProductSkeleton() {
   return (
@@ -567,12 +570,12 @@ function OrderedProduct({
       <div className="flex flex-row gap-6">
         <Image
           alt="product"
-          width={50}
-          height={50}
+          width={120}
+          height={120}
           src={product.images[0]?.url ?? NoImage}
           className={cn(
             !product.images[0]?.url && "opacity-50 blur-[1px]",
-            "size-16 min-w-16 rounded-full border border-secondary/30"
+            "size-16 min-w-16 rounded-full border border-secondary/30 object-cover"
           )}
         />
         <div className="flex flex-col gap-2">

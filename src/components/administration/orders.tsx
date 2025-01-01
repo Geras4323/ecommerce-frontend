@@ -2,7 +2,6 @@ import type {
   OrderProduct,
   OrdersItem as TOrdersItem,
 } from "@/functions/orders";
-import { type Product } from "@/functions/products";
 import { cn } from "@/utils/lib";
 import { type Day, days } from "@/utils/miscellaneous";
 import { format } from "date-fns";
@@ -320,28 +319,27 @@ export function SingleOrderItemSkeleton() {
 
 export function SingleOrderItem({
   item,
-  product,
   category,
   showCategory = true,
 }: {
   item: OrderProduct;
-  product: Product;
   category?: string;
   showCategory?: boolean;
 }) {
+  const product = item.product;
   const price = item.quantity * product.price;
 
   return (
-    <div className="flex h-40 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 xs:h-28 xs:flex-row xs:gap-6">
+    <div className="flex h-36 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 xs:h-28 xs:flex-row xs:gap-6">
       <div className="flex flex-row gap-6">
         <Image
           alt="product"
-          width={50}
-          height={50}
+          width={120}
+          height={120}
           src={product.images[0]?.url ?? NoImage}
           className={cn(
             !product.images[0]?.url && "opacity-50 blur-[1px]",
-            "size-16 min-w-16 rounded-full border border-secondary/30"
+            "size-16 min-w-16 rounded-full border border-secondary/30 object-cover"
           )}
         />
         <div className="flex flex-col gap-2">

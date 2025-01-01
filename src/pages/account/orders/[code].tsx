@@ -2,16 +2,19 @@ import { GeneralLayout } from "@/layouts/general";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "@/functions/products";
 import {
+  ArrowRight,
   CalendarDaysIcon,
   ChevronLeft,
   Clock,
   DollarSign,
   File,
-  FilePieChart,
   FileUp,
   Hash,
   Info,
+  Logs,
+  Package,
   Paperclip,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
@@ -24,7 +27,7 @@ import {
   SingleOrderItem,
   SingleOrderItemSkeleton,
 } from "@/components/administration/orders";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Tooltip,
   TooltipArrow,
@@ -35,25 +38,46 @@ import { type CloudinarySuccess } from "@/types/cloudinary";
 import { vars } from "@/utils/vars";
 import axios from "axios";
 import { ErrorAlert, ErrorSpan, LoadableButton } from "@/components/forms";
-import { type Payment } from "@/functions/payments";
-import { checkMimetype, cn } from "@/utils/lib";
+import { getPaymentStatus, type Payment } from "@/functions/payments";
+import { checkMimetype, cn, withCbk } from "@/utils/lib";
 import { getCategories } from "@/functions/categories";
 import Link from "next/link";
+import MercadoPago from "public/mercado_pago.svg";
+import Image from "next/image";
+import {
+  generateMercadopagoPayment,
+  type MPProduct,
+} from "@/functions/mercadopago";
+import { toast, Toaster } from "sonner";
+import { AwaitingPaymentModal } from "@/components/modals/payment";
+import { getState } from "@/functions/states";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 
 export default function Order() {
   const params = useParams();
   const queryClient = useQueryClient();
+
+  const mq = useMediaQueries();
+
+  const [isOrderDataShown, setIsOrderDataShown] = useState(true);
 
   const orderID = z.string().catch("").parse(params?.code);
   const isValidCode = !isNaN(parseInt(orderID));
 
   const [uploadedVoucher, setUploadedVoucher] = useState<File>();
 
-  function loadVoucher(voucher?: File) {
-    if (!voucher) return;
-    checkMimetype(voucher.type, ["image/png", "image/jpeg", "application/pdf"]);
-    setUploadedVoucher(voucher);
-  }
+  const [isAwaitingPaymentModalOpen, setIsAwaitingPaymentModal] =
+    useState(false);
+  const [paymentToCheck, setPaymentToCheck] = useState<number>();
+  const waitingForPaymentToast = useRef<ReturnType<typeof toast>>();
+
+  // Queries ///////////////////////////////////////////////////////////////////////////////
+  const mercadopagoStateQuery = useQuery({
+    queryKey: ["mercadopago"],
+    queryFn: () => getState("mercadopago"),
+    retry: false,
+    refetchOnWindowFocus: true,
+  });
 
   const productsQuery = useQuery<
     Awaited<ReturnType<typeof getProducts>>,
@@ -85,7 +109,52 @@ export default function Order() {
     retry: false,
   });
 
-  const mutation = useMutation<ServerSuccess<CloudinarySuccess>, ServerError>({
+  useEffect(() => {
+    if (orderQuery.isError) console.log(orderQuery.error.message);
+  }, [orderQuery.isError, orderQuery.error]);
+
+  const paymentStatusQuery = useQuery<
+    Awaited<ReturnType<typeof getPaymentStatus>>,
+    ServerError
+  >({
+    queryKey: ["order_payment"],
+    queryFn: withCbk({
+      queryFn: () => getPaymentStatus(paymentToCheck ?? -1),
+      onSuccess: (res) => {
+        if (res === "accepted") {
+          setPaymentToCheck(undefined);
+          toast.dismiss(waitingForPaymentToast.current);
+          queryClient.invalidateQueries({ queryKey: ["order"] });
+          toast.success("Pago recibido!");
+          return;
+        }
+        if (res === "rejected") {
+          setPaymentToCheck(undefined);
+          toast.dismiss(waitingForPaymentToast.current);
+          toast.error("Ocurrió un error");
+        }
+      },
+    }),
+    enabled: !!paymentToCheck,
+    refetchOnWindowFocus: false,
+    refetchInterval: (res) => (res.state.data === "pending" ? 2000 : false),
+  });
+
+  useEffect(() => {
+    if (paymentStatusQuery.isSuccess) console.log(paymentStatusQuery.data);
+  }, [paymentStatusQuery.isSuccess, paymentStatusQuery.data]);
+
+  useEffect(() => {
+    if (paymentStatusQuery.isError)
+      console.log(paymentStatusQuery.error.message);
+  }, [paymentStatusQuery.isError, paymentStatusQuery.error]);
+  // Queries ///////////////////////////////////////////////////////////////////////////////
+
+  // Mutations /////////////////////////////////////////////////////////////////////////////
+  const uploadVoucherMutation = useMutation<
+    ServerSuccess<CloudinarySuccess>,
+    ServerError
+  >({
     mutationFn: () => {
       const url = `${vars.serverUrl}/api/v1/payments/${orderID}`;
       return axios.post(
@@ -105,207 +174,332 @@ export default function Order() {
     },
   });
 
+  const createMPPaymentMutation = useMutation<
+    ServerSuccess<Payment>,
+    ServerError,
+    MPProduct[]
+  >({
+    mutationFn: () => {
+      const url = `${vars.serverUrl}/api/v1/payments/mercadopago/add`;
+      return axios.post(
+        url,
+        { orderID: parseInt(orderID) },
+        { withCredentials: true }
+      );
+    },
+    onSuccess: async (res, variable) => {
+      const url = await generateMercadopagoPayment({
+        paymentID: res.data.id,
+        items: variable,
+      });
+      if (url) window.open(url, "_blank");
+      toast.dismiss(waitingForPaymentToast.current);
+      waitingForPaymentToast.current = toast.loading("Esperando pago...");
+      setIsAwaitingPaymentModal(true);
+      setPaymentToCheck(res.data.id);
+    },
+  });
+  // Mutations /////////////////////////////////////////////////////////////////////////////
+
+  // Functions /////////////////////////////////////////////////////////////////////////////
+  function loadVoucher(voucher?: File) {
+    if (!voucher) return;
+    checkMimetype(voucher.type, ["image/png", "image/jpeg", "application/pdf"]);
+    setUploadedVoucher(voucher);
+  }
+
+  async function redirectToMP() {
+    if (orderQuery.isPending || orderQuery.isError) return;
+
+    const productsList: MPProduct[] = orderQuery.data.orderProducts.map(
+      (product) => ({
+        id: product.product.id,
+        name: product.product.name,
+        quantity: product.quantity,
+        price: product.product.price,
+      })
+    );
+
+    createMPPaymentMutation.mutate(productsList);
+  }
+  // Functions /////////////////////////////////////////////////////////////////////////////
+
+  console.log("token: ", vars.mp_access_token);
+
   return (
-    <GeneralLayout title="Detalle del pedido" description="Detalle del pedido">
-      <div className="mx-auto flex h-screen w-screen max-w-screen-sm flex-col gap-4 px-4 pb-24 pt-24 lg:max-w-5xl">
-        <div className="flex w-full items-baseline justify-between gap-4 border-b border-b-secondary/20 text-primary">
-          <div className="flex items-center gap-4">
-            <Link href="/account/orders" className="btn btn-ghost btn-sm">
-              <ChevronLeft className="size-5" />
-            </Link>
-            <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
-          </div>
-          {!orderQuery.isPending && !orderQuery.isError && (
-            <div className="hidden gap-2 text-info lg:flex">
-              <Info className="size-5" />
-              Nos pondremos en contacto a la brevedad
+    <>
+      <Toaster richColors />
+      <GeneralLayout
+        title="Detalle del pedido"
+        description="Detalle del pedido"
+      >
+        <div className="mx-auto flex h-screen w-screen max-w-screen-sm flex-col gap-4 px-4 py-20 lg:max-w-5xl lg:pb-8 lg:pt-24">
+          <div className="flex w-full items-baseline justify-between gap-4 border-b border-b-secondary/20 text-primary">
+            <div className="flex items-center gap-4">
+              <Link href="/account/orders" className="btn btn-ghost btn-sm">
+                <ChevronLeft className="size-5" />
+              </Link>
+              <h1 className="py-2 text-xl font-medium">DETALLE DEL PEDIDO</h1>
             </div>
-          )}
-        </div>
-
-        <section className="flex h-full w-full flex-col gap-4 lg:flex-row">
-          <article className="order-2 flex h-full w-full flex-col gap-2 overflow-y-auto lg:order-1 lg:w-3/5">
-            {productsQuery.isPending || orderQuery.isPending ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <SingleOrderItemSkeleton key={i} />
-              ))
-            ) : productsQuery.isError ||
-              categoriesQuery.isError ||
-              orderQuery.isError ? (
-              <>
-                <ErrorSpan
-                  message={productsQuery.error?.response?.data.comment}
-                />
-                <ErrorSpan
-                  message={categoriesQuery.error?.response?.data.comment}
-                />
-                <ErrorSpan message={orderQuery.error?.response?.data.comment} />
-              </>
-            ) : (
-              orderQuery.data.orderProducts.map((item) => {
-                const product = productsQuery.data.find(
-                  (p) => p.id === item.productID
-                );
-                if (product)
-                  return (
-                    <SingleOrderItem
-                      key={item.id}
-                      item={item}
-                      product={product}
-                      category={
-                        categoriesQuery.data?.find(
-                          (category) => category.id === product.categoryID
-                        )?.name
-                      }
-                    />
-                  );
-              })
-            )}
-          </article>
-
-          <article className="order-1 flex h-fit w-full flex-col gap-4 rounded-lg border-secondary/20 bg-secondary/5 p-4 pb-4 shadow-md lg:order-2 lg:h-full lg:w-2/5 lg:rounded-none lg:border-l lg:bg-transparent lg:pb-0 lg:pl-4 lg:shadow-none">
-            {orderQuery.isError ? (
-              <ErrorSpan message={orderQuery.error.response?.data.comment} />
-            ) : (
-              <>
-                <div className="flex items-center gap-2">
-                  <Hash className="size-5 text-secondary" />
-                  <span className="text-lg text-secondary">Pedido Nro</span>
-                  {orderQuery.isPending ? (
-                    <div className="h-6 w-20 animate-pulse rounded-lg bg-secondary/30" />
-                  ) : (
-                    <span className="text-xl font-medium text-primary">
-                      {orderQuery.data?.id}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <CalendarDaysIcon className="size-5 text-secondary" />
-                  <span className="text-lg text-secondary">Iniciado el</span>
-                  {orderQuery.isPending ? (
-                    <div className="h-6 w-48 animate-pulse rounded-lg bg-secondary/30" />
-                  ) : (
-                    !orderQuery.isError && (
-                      <>
-                        <span className="text-primary">
-                          {
-                            days[
-                              format(
-                                new Date(orderQuery.data?.createdAt),
-                                "EEEE"
-                              ) as Day
-                            ]
-                          }
-                        </span>
-                        <span className="text-lg text-primary">
-                          {format(new Date(), "dd-MM-yyyy")}
-                        </span>
-                      </>
-                    )
-                  )}
-                </div>
-
-                <hr className="border-b border-t-0 border-b-secondary/20" />
-
-                <div className="flex items-center gap-2">
-                  <DollarSign className="size-5 text-secondary" />
-                  <span className="text-lg text-secondary">
-                    Total a abonar:
-                  </span>
-                  {orderQuery.isPending ? (
-                    <div className="h-6 w-32 animate-pulse rounded-lg bg-secondary/30" />
-                  ) : (
-                    !orderQuery.isError && (
-                      <div className="flex items-end gap-1">
-                        <span className="text-lg text-primary">$</span>
-                        <span className="text-xl text-primary">
-                          {orderQuery.data.total.toLocaleString(vars.region)}
-                        </span>
-                      </div>
-                    )
-                  )}
-                </div>
-              </>
-            )}
-
             {!orderQuery.isPending && !orderQuery.isError && (
-              <div className="flex w-full flex-col gap-4">
-                <input
-                  id="voucher"
-                  type="file"
-                  hidden
-                  onChange={(e) => {
-                    if (e.target.files) loadVoucher(e.target.files[0]);
-                  }}
-                />
-                <label
-                  htmlFor="voucher"
-                  className="btn btn-outline btn-primary w-full"
-                >
-                  <Paperclip className="size-5" /> Adjuntar comprobante de pago
-                </label>
+              <div className="hidden gap-2 text-info lg:flex">
+                <Info className="size-5" />
+                Nos pondremos en contacto a la brevedad
+              </div>
+            )}
+          </div>
 
-                <ErrorAlert message={mutation.error?.response?.data.comment} />
+          <section className="flex h-full w-full flex-col gap-4 lg:flex-row">
+            {/* PRODUCT LIST */}
+            <article className="order-2 flex h-full w-full flex-col gap-2 overflow-y-auto lg:order-1 lg:w-3/5">
+              {productsQuery.isPending || orderQuery.isPending ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <SingleOrderItemSkeleton key={i} />
+                ))
+              ) : productsQuery.isError ||
+                categoriesQuery.isError ||
+                orderQuery.isError ? (
+                <>
+                  <ErrorSpan
+                    message={productsQuery.error?.response?.data.comment}
+                  />
+                  <ErrorSpan
+                    message={categoriesQuery.error?.response?.data.comment}
+                  />
+                  <ErrorSpan
+                    message={orderQuery.error?.response?.data.comment}
+                  />
+                </>
+              ) : (
+                orderQuery.data.orderProducts.map((item) => (
+                  <SingleOrderItem
+                    key={item.id}
+                    item={item}
+                    category={
+                      categoriesQuery.data?.find(
+                        (category) => category.id === item.product.categoryID
+                      )?.name
+                    }
+                  />
+                ))
+              )}
+            </article>
 
-                {uploadedVoucher && (
-                  <div className="my-1.5 flex items-center justify-between gap-4">
-                    <Tooltip>
-                      <TooltipTrigger className="cursor-default truncate text-lg">
-                        {uploadedVoucher.name}
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="bottom"
-                        align="start"
-                        className="w-fit rounded-md border border-secondary/30 bg-base-100 px-2 py-1"
-                      >
-                        <TooltipArrow className="fill-secondary" />
-                        {uploadedVoucher.name}
-                      </TooltipContent>
-                    </Tooltip>
+            {/* DATA & PAYMENT */}
+            <article
+              className={cn(
+                isOrderDataShown || mq >= mqs.lg
+                  ? "h-full"
+                  : "h-14 overflow-hidden",
+                "relative order-1 flex w-full flex-col gap-4 rounded-lg bg-secondary/5 p-4 pb-4 shadow-md lg:order-2 lg:h-full lg:w-2/5 lg:rounded-none lg:pb-0 lg:pl-4 lg:shadow-none"
+              )}
+            >
+              {orderQuery.isError ? (
+                <ErrorSpan message={orderQuery.error.response?.data.comment} />
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setIsOrderDataShown((prev) => !prev)}
+                    className="btn btn-outline btn-sm absolute right-2.5 top-2.5 lg:hidden"
+                  >
+                    {isOrderDataShown ? (
+                      <Package className="size-5 min-w-5" />
+                    ) : (
+                      <Logs className="size-5 min-w-5" />
+                    )}
+                  </button>
 
-                    <LoadableButton
-                      isPending={mutation.isPending}
-                      onClick={() => mutation.mutate()}
-                      className="btn btn-primary btn-sm w-52"
-                      animation="dots"
-                    >
-                      <FileUp className="size-5" />
-                      <span>Subir comprobante</span>
-                    </LoadableButton>
+                  {/* Order number & date */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <Hash className="size-5 text-secondary" />
+                      <span className="text-lg text-secondary">Pedido Nro</span>
+                      {orderQuery.isPending ? (
+                        <div className="h-6 w-20 animate-pulse rounded-lg bg-secondary/30" />
+                      ) : (
+                        <span className="text-xl font-medium text-primary">
+                          {orderQuery.data?.id}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <CalendarDaysIcon className="size-5 text-secondary" />
+                      <span className="text-lg text-secondary">
+                        Iniciado el
+                      </span>
+                      {orderQuery.isPending ? (
+                        <div className="h-6 w-48 animate-pulse rounded-lg bg-secondary/30" />
+                      ) : (
+                        !orderQuery.isError && (
+                          <>
+                            <span className="text-primary">
+                              {
+                                days[
+                                  format(
+                                    new Date(orderQuery.data?.createdAt),
+                                    "EEEE"
+                                  ) as Day
+                                ]
+                              }
+                            </span>
+                            <span className="text-lg text-primary">
+                              {format(new Date(), "dd-MM-yyyy")}
+                            </span>
+                          </>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  <hr className="border-b border-t-0 border-b-secondary/20" />
+
+                  {/* Order total & payment buttons */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="size-5 text-secondary" />
+                      <span className="text-lg text-secondary">
+                        Total a abonar:
+                      </span>
+                      {orderQuery.isPending ? (
+                        <div className="h-6 w-32 animate-pulse rounded-lg bg-secondary/30" />
+                      ) : (
+                        !orderQuery.isError && (
+                          <div className="flex items-end gap-1">
+                            <span className="text-lg text-primary">$</span>
+                            <span className="text-xl text-primary">
+                              {orderQuery.data.total.toLocaleString(
+                                vars.region
+                              )}
+                            </span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {!orderQuery.isPending &&
+                !orderQuery.isError &&
+                !mercadopagoStateQuery.isPending &&
+                !mercadopagoStateQuery.isError && (
+                  <div className="flex w-full flex-col gap-2">
+                    {mercadopagoStateQuery.data.active &&
+                      !!vars.mp_access_token && (
+                        <LoadableButton
+                          isPending={createMPPaymentMutation.isPending}
+                          onClick={redirectToMP}
+                          className="btn btn-outline btn-primary w-full border border-sky-500"
+                        >
+                          <Image
+                            alt="mp"
+                            src={MercadoPago}
+                            className="size-9 min-w-9"
+                            unoptimized
+                          />
+                          Abonar con MercadoPago
+                        </LoadableButton>
+                      )}
+
+                    {!uploadedVoucher && (
+                      <>
+                        <input
+                          id="voucher"
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files) loadVoucher(e.target.files[0]);
+                          }}
+                        />
+                        <label
+                          htmlFor="voucher"
+                          className="btn btn-outline btn-primary w-full"
+                        >
+                          <Paperclip className="size-5" /> Adjuntar comprobante
+                          de pago
+                        </label>
+
+                        <ErrorAlert
+                          message={
+                            uploadVoucherMutation.error?.response?.data.comment
+                          }
+                        />
+                      </>
+                    )}
+
+                    {uploadedVoucher && (
+                      <div className="my-1.5 flex items-center justify-between gap-2">
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-default truncate text-lg">
+                            {uploadedVoucher.name}
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="bottom"
+                            align="start"
+                            className="w-fit rounded-md border border-secondary/30 bg-base-100 px-2 py-1"
+                          >
+                            <TooltipArrow className="fill-secondary" />
+                            {uploadedVoucher.name}
+                          </TooltipContent>
+                        </Tooltip>
+
+                        <button
+                          type="button"
+                          onClick={() => setUploadedVoucher(undefined)}
+                          className="btn btn-outline btn-sm"
+                        >
+                          <Trash2 className="size-4 min-w-4" />
+                        </button>
+
+                        <LoadableButton
+                          isPending={uploadVoucherMutation.isPending}
+                          onClick={() => uploadVoucherMutation.mutate()}
+                          className="btn btn-primary btn-sm w-52"
+                          animation="dots"
+                        >
+                          <FileUp className="size-5" />
+                          <span>Subir comprobante</span>
+                        </LoadableButton>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {orderQuery.data?.payments.length !== 0 && (
-                  <div className="flex flex-col gap-2 border-t border-t-secondary/20 pt-3">
+              {/* Payment Vouchers */}
+              {!orderQuery.isPending &&
+                !orderQuery.isError &&
+                orderQuery.data?.payments.length !== 0 && (
+                  <div className="flex h-full flex-col gap-2 overflow-y-auto border-t border-t-secondary/20 pt-3">
                     <span className="flex items-center gap-2 text-lg text-secondary">
                       <File className="size-5" />
-                      Comprobantes adjuntos
+                      Comprobantes
                     </span>
-                    <div
-                      className={cn(
-                        uploadedVoucher
-                          ? "max-h-48 2xl:max-h-104"
-                          : "max-h-60 2xl:max-h-104",
-                        "flex flex-col gap-2 overflow-y-auto"
-                      )}
-                    >
+                    <div className="flex flex-col gap-2 overflow-y-auto">
                       {orderQuery.data?.payments.map((payment, i) => (
                         <PaymentVoucher
                           key={payment.id}
                           payment={payment}
-                          number={i}
+                          position={orderQuery.data.payments.length - i - 1}
                         />
                       ))}
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-          </article>
-        </section>
-      </div>
-    </GeneralLayout>
+            </article>
+          </section>
+        </div>
+      </GeneralLayout>
+
+      {paymentStatusQuery.isSuccess && (
+        <AwaitingPaymentModal
+          isOpen={isAwaitingPaymentModalOpen}
+          onClose={() => setIsAwaitingPaymentModal(false)}
+          paymentStatus={paymentStatusQuery.data}
+        />
+      )}
+    </>
   );
 }
 
@@ -313,16 +507,22 @@ export const getServerSideProps = withAuth("noAdmin");
 
 export function PaymentVoucher({
   payment,
-  number,
+  position,
+  isAdmin = false,
 }: {
   payment: Payment;
-  number: number;
+  position: number;
+  isAdmin?: boolean;
 }) {
   return (
-    <div className="relative flex h-fit w-full items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 py-2 pl-11 pr-4">
+    <a
+      href={payment.url ?? ""}
+      target="_blank"
+      className="relative flex h-fit w-full items-center justify-between gap-4 rounded-xl border-2 border-secondary/20 py-2 pl-11 pr-4 hover:border-secondary/60"
+    >
       <span className="absolute left-1 top-1 flex items-center gap-0.5 text-sm text-secondary">
         <Hash className="size-3" />
-        {number + 1}
+        {position + 1}
       </span>
 
       <div className="flex flex-col gap-1">
@@ -335,7 +535,42 @@ export function PaymentVoucher({
           {format(new Date(payment.createdAt), "HH:mm")}
         </div>
       </div>
-      <a
+
+      {payment.platform === "attachment" ? (
+        <div className="flex items-center gap-2 text-sm uppercase tracking-wide">
+          <Paperclip className="size-4 min-w-4 text-primary/70" /> Adjunto
+        </div>
+      ) : (
+        <div className="flex flex-col items-center text-sm uppercase tracking-wide">
+          <Image
+            alt="mp"
+            src={MercadoPago}
+            className="size-8 min-w-8"
+            unoptimized
+          />
+          {isAdmin ? (
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-0.5 text-primary">
+                <span className="text-xs text-primary/70">$</span>
+                {payment.paid?.toLocaleString("es-AR")}
+              </div>
+              <ArrowRight className="size-3 min-w-3" />
+              <div className="flex items-center gap-0.5 text-primary">
+                <span className="text-xs text-primary/70">$</span>
+                {payment.received?.toLocaleString("es-AR")}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-0.5">
+              <span className="text-xs text-primary/70">$</span>
+
+              {payment.received?.toLocaleString("es-AR")}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* <a
         href={payment.url}
         target="_blank"
         className="btn btn-outline btn-secondary btn-sm"
@@ -343,8 +578,8 @@ export function PaymentVoucher({
         <FilePieChart className="size-5" />
         <span className="xxs:hidden lg:block">Ver</span>
         <span className="hidden xxs:block lg:hidden">Ver comprobante</span>
-      </a>
-    </div>
+      </a> */}
+    </a>
   );
 }
 
