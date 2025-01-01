@@ -10,7 +10,10 @@ import {
   FileUp,
   Hash,
   Info,
+  Logs,
+  Package,
   Paperclip,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useParams } from "next/navigation";
@@ -47,10 +50,15 @@ import {
 import { toast, Toaster } from "sonner";
 import { AwaitingPaymentModal } from "@/components/modals/payment";
 import { getState } from "@/functions/states";
+import { mqs, useMediaQueries } from "@/hooks/screen";
 
 export default function Order() {
   const params = useParams();
   const queryClient = useQueryClient();
+
+  const mq = useMediaQueries();
+
+  const [isOrderDataShown, setIsOrderDataShown] = useState(true);
 
   const orderID = z.string().catch("").parse(params?.code);
   const isValidCode = !isNaN(parseInt(orderID));
@@ -222,7 +230,7 @@ export default function Order() {
         title="Detalle del pedido"
         description="Detalle del pedido"
       >
-        <div className="mx-auto flex h-screen w-screen max-w-screen-sm flex-col gap-4 px-4 pb-24 pt-24 lg:max-w-5xl">
+        <div className="mx-auto flex h-screen w-screen max-w-screen-sm flex-col gap-4 px-4 py-20 lg:max-w-5xl lg:pb-8 lg:pt-24">
           <div className="flex w-full items-baseline justify-between gap-4 border-b border-b-secondary/20 text-primary">
             <div className="flex items-center gap-4">
               <Link href="/account/orders" className="btn btn-ghost btn-sm">
@@ -239,6 +247,7 @@ export default function Order() {
           </div>
 
           <section className="flex h-full w-full flex-col gap-4 lg:flex-row">
+            {/* PRODUCT LIST */}
             <article className="order-2 flex h-full w-full flex-col gap-2 overflow-y-auto lg:order-1 lg:w-3/5">
               {productsQuery.isPending || orderQuery.isPending ? (
                 Array.from({ length: 3 }).map((_, i) => (
@@ -273,68 +282,98 @@ export default function Order() {
               )}
             </article>
 
-            <article className="order-1 flex h-fit w-full flex-col gap-4 rounded-lg border-secondary/20 bg-secondary/5 p-4 pb-4 shadow-md lg:order-2 lg:h-full lg:w-2/5 lg:rounded-none lg:border-l lg:bg-transparent lg:pb-0 lg:pl-4 lg:shadow-none">
+            {/* DATA & PAYMENT */}
+            <article
+              className={cn(
+                isOrderDataShown || mq >= mqs.lg
+                  ? "h-full"
+                  : "h-14 overflow-hidden",
+                "relative order-1 flex w-full flex-col gap-4 rounded-lg bg-secondary/5 p-4 pb-4 shadow-md lg:order-2 lg:h-full lg:w-2/5 lg:rounded-none lg:pb-0 lg:pl-4 lg:shadow-none"
+              )}
+            >
               {orderQuery.isError ? (
                 <ErrorSpan message={orderQuery.error.response?.data.comment} />
               ) : (
                 <>
-                  <div className="flex items-center gap-2">
-                    <Hash className="size-5 text-secondary" />
-                    <span className="text-lg text-secondary">Pedido Nro</span>
-                    {orderQuery.isPending ? (
-                      <div className="h-6 w-20 animate-pulse rounded-lg bg-secondary/30" />
+                  <button
+                    type="button"
+                    onClick={() => setIsOrderDataShown((prev) => !prev)}
+                    className="btn btn-outline btn-sm absolute right-2.5 top-2.5 lg:hidden"
+                  >
+                    {isOrderDataShown ? (
+                      <Package className="size-5 min-w-5" />
                     ) : (
-                      <span className="text-xl font-medium text-primary">
-                        {orderQuery.data?.id}
-                      </span>
+                      <Logs className="size-5 min-w-5" />
                     )}
-                  </div>
+                  </button>
 
-                  <div className="flex items-center gap-2">
-                    <CalendarDaysIcon className="size-5 text-secondary" />
-                    <span className="text-lg text-secondary">Iniciado el</span>
-                    {orderQuery.isPending ? (
-                      <div className="h-6 w-48 animate-pulse rounded-lg bg-secondary/30" />
-                    ) : (
-                      !orderQuery.isError && (
-                        <>
-                          <span className="text-primary">
-                            {
-                              days[
-                                format(
-                                  new Date(orderQuery.data?.createdAt),
-                                  "EEEE"
-                                ) as Day
-                              ]
-                            }
-                          </span>
-                          <span className="text-lg text-primary">
-                            {format(new Date(), "dd-MM-yyyy")}
-                          </span>
-                        </>
-                      )
-                    )}
+                  {/* Order number & date */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <Hash className="size-5 text-secondary" />
+                      <span className="text-lg text-secondary">Pedido Nro</span>
+                      {orderQuery.isPending ? (
+                        <div className="h-6 w-20 animate-pulse rounded-lg bg-secondary/30" />
+                      ) : (
+                        <span className="text-xl font-medium text-primary">
+                          {orderQuery.data?.id}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <CalendarDaysIcon className="size-5 text-secondary" />
+                      <span className="text-lg text-secondary">
+                        Iniciado el
+                      </span>
+                      {orderQuery.isPending ? (
+                        <div className="h-6 w-48 animate-pulse rounded-lg bg-secondary/30" />
+                      ) : (
+                        !orderQuery.isError && (
+                          <>
+                            <span className="text-primary">
+                              {
+                                days[
+                                  format(
+                                    new Date(orderQuery.data?.createdAt),
+                                    "EEEE"
+                                  ) as Day
+                                ]
+                              }
+                            </span>
+                            <span className="text-lg text-primary">
+                              {format(new Date(), "dd-MM-yyyy")}
+                            </span>
+                          </>
+                        )
+                      )}
+                    </div>
                   </div>
 
                   <hr className="border-b border-t-0 border-b-secondary/20" />
 
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="size-5 text-secondary" />
-                    <span className="text-lg text-secondary">
-                      Total a abonar:
-                    </span>
-                    {orderQuery.isPending ? (
-                      <div className="h-6 w-32 animate-pulse rounded-lg bg-secondary/30" />
-                    ) : (
-                      !orderQuery.isError && (
-                        <div className="flex items-end gap-1">
-                          <span className="text-lg text-primary">$</span>
-                          <span className="text-xl text-primary">
-                            {orderQuery.data.total.toLocaleString(vars.region)}
-                          </span>
-                        </div>
-                      )
-                    )}
+                  {/* Order total & payment buttons */}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="size-5 text-secondary" />
+                      <span className="text-lg text-secondary">
+                        Total a abonar:
+                      </span>
+                      {orderQuery.isPending ? (
+                        <div className="h-6 w-32 animate-pulse rounded-lg bg-secondary/30" />
+                      ) : (
+                        !orderQuery.isError && (
+                          <div className="flex items-end gap-1">
+                            <span className="text-lg text-primary">$</span>
+                            <span className="text-xl text-primary">
+                              {orderQuery.data.total.toLocaleString(
+                                vars.region
+                              )}
+                            </span>
+                          </div>
+                        )
+                      )}
+                    </div>
                   </div>
                 </>
               )}
@@ -343,7 +382,7 @@ export default function Order() {
                 !orderQuery.isError &&
                 !mercadopagoStateQuery.isPending &&
                 !mercadopagoStateQuery.isError && (
-                  <div className="flex w-full flex-col gap-4">
+                  <div className="flex w-full flex-col gap-2">
                     {mercadopagoStateQuery.data.active && (
                       <LoadableButton
                         isPending={createMPPaymentMutation.isPending}
@@ -360,32 +399,34 @@ export default function Order() {
                       </LoadableButton>
                     )}
 
-                    {/* <hr className="border-b border-t-0 border-b-secondary/20" /> */}
+                    {!uploadedVoucher && (
+                      <>
+                        <input
+                          id="voucher"
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files) loadVoucher(e.target.files[0]);
+                          }}
+                        />
+                        <label
+                          htmlFor="voucher"
+                          className="btn btn-outline btn-primary w-full"
+                        >
+                          <Paperclip className="size-5" /> Adjuntar comprobante
+                          de pago
+                        </label>
 
-                    <input
-                      id="voucher"
-                      type="file"
-                      hidden
-                      onChange={(e) => {
-                        if (e.target.files) loadVoucher(e.target.files[0]);
-                      }}
-                    />
-                    <label
-                      htmlFor="voucher"
-                      className="btn btn-outline btn-primary w-full"
-                    >
-                      <Paperclip className="size-5" /> Adjuntar comprobante de
-                      pago
-                    </label>
-
-                    <ErrorAlert
-                      message={
-                        uploadVoucherMutation.error?.response?.data.comment
-                      }
-                    />
+                        <ErrorAlert
+                          message={
+                            uploadVoucherMutation.error?.response?.data.comment
+                          }
+                        />
+                      </>
+                    )}
 
                     {uploadedVoucher && (
-                      <div className="my-1.5 flex items-center justify-between gap-4">
+                      <div className="my-1.5 flex items-center justify-between gap-2">
                         <Tooltip>
                           <TooltipTrigger className="cursor-default truncate text-lg">
                             {uploadedVoucher.name}
@@ -400,6 +441,14 @@ export default function Order() {
                           </TooltipContent>
                         </Tooltip>
 
+                        <button
+                          type="button"
+                          onClick={() => setUploadedVoucher(undefined)}
+                          className="btn btn-outline btn-sm"
+                        >
+                          <Trash2 className="size-4 min-w-4" />
+                        </button>
+
                         <LoadableButton
                           isPending={uploadVoucherMutation.isPending}
                           onClick={() => uploadVoucherMutation.mutate()}
@@ -411,31 +460,27 @@ export default function Order() {
                         </LoadableButton>
                       </div>
                     )}
+                  </div>
+                )}
 
-                    {orderQuery.data?.payments.length !== 0 && (
-                      <div className="flex flex-col gap-2 border-t border-t-secondary/20 pt-3">
-                        <span className="flex items-center gap-2 text-lg text-secondary">
-                          <File className="size-5" />
-                          Comprobantes
-                        </span>
-                        <div
-                          className={cn(
-                            uploadedVoucher
-                              ? "max-h-48 2xl:max-h-104"
-                              : "max-h-60 2xl:max-h-104",
-                            "flex flex-col gap-2 overflow-y-auto"
-                          )}
-                        >
-                          {orderQuery.data?.payments.map((payment, i) => (
-                            <PaymentVoucher
-                              key={payment.id}
-                              payment={payment}
-                              position={i}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
+              {/* Payment Vouchers */}
+              {!orderQuery.isPending &&
+                !orderQuery.isError &&
+                orderQuery.data?.payments.length !== 0 && (
+                  <div className="flex h-full flex-col gap-2 overflow-y-auto border-t border-t-secondary/20 pt-3">
+                    <span className="flex items-center gap-2 text-lg text-secondary">
+                      <File className="size-5" />
+                      Comprobantes
+                    </span>
+                    <div className="flex flex-col gap-2 overflow-y-auto">
+                      {orderQuery.data?.payments.map((payment, i) => (
+                        <PaymentVoucher
+                          key={payment.id}
+                          payment={payment}
+                          position={orderQuery.data.payments.length - i - 1}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
             </article>
@@ -446,12 +491,7 @@ export default function Order() {
       {paymentStatusQuery.isSuccess && (
         <AwaitingPaymentModal
           isOpen={isAwaitingPaymentModalOpen}
-          onClose={() => {
-            setIsAwaitingPaymentModal(false);
-            // setTimeout(() => {
-            //   toast.dismiss(waitingForPaymentToast.current);
-            // }, 5000);
-          }}
+          onClose={() => setIsAwaitingPaymentModal(false)}
           paymentStatus={paymentStatusQuery.data}
         />
       )}

@@ -330,7 +330,7 @@ export function SingleOrderItem({
   const price = item.quantity * product.price;
 
   return (
-    <div className="flex h-40 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 xs:h-28 xs:flex-row xs:gap-6">
+    <div className="flex h-36 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 xs:h-28 xs:flex-row xs:gap-6">
       <div className="flex flex-row gap-6">
         <Image
           alt="product"
