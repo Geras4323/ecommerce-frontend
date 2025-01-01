@@ -1,7 +1,7 @@
 import { type PaymentStatus } from "@/functions/payments";
 import { Modal, type ModalProps } from "../layouts/modal";
 import { LoadingSpinner } from "../loading";
-import { SuccessAlert } from "../forms";
+import { ErrorAlert, SuccessAlert } from "../forms";
 import { Info } from "lucide-react";
 
 const statusInfo: Record<
@@ -49,7 +49,7 @@ export function AwaitingPaymentModal({
           </div>
         </div>
       ) : (
-        <></>
+        <ErrorAlert message="Ocurrió un error durante el pago" />
       )}
     </Modal>
   );

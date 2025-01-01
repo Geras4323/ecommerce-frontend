@@ -106,9 +106,15 @@ export default function Order() {
       onSuccess: (res) => {
         if (res === "accepted") {
           setPaymentToCheck(undefined);
-          queryClient.invalidateQueries({ queryKey: ["order"] });
           toast.dismiss(waitingForPaymentToast.current);
+          queryClient.invalidateQueries({ queryKey: ["order"] });
           toast.success("Pago recibido!");
+          return;
+        }
+        if (res === "rejected") {
+          setPaymentToCheck(undefined);
+          toast.dismiss(waitingForPaymentToast.current);
+          toast.error("Ocurrió un error");
         }
       },
     }),
