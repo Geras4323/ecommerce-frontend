@@ -11,9 +11,11 @@ export type MPProduct = {
   price: number;
 };
 
-const mercadopago = new MercadoPagoConfig({
-  accessToken: vars.mp_access_token!,
-});
+const mercadopago = !!vars.mp_access_token // with this nothing will explode if the access token was not set (see lines 27 & 66)
+  ? new MercadoPagoConfig({
+      accessToken: vars.mp_access_token,
+    })
+  : undefined;
 
 export async function generateMercadopagoPayment({
   paymentID,
@@ -22,6 +24,7 @@ export async function generateMercadopagoPayment({
   paymentID: number;
   items: MPProduct[];
 }) {
+  if (!mercadopago) return;
   const response: ServerSuccess<PreferenceResponse> = await axios.post(
     "https://api.mercadopago.com/checkout/preferences",
     {
@@ -60,6 +63,7 @@ export async function generateMercadopagoPayment({
 }
 
 export async function getMercadoPagoPayment(paymentID: string) {
+  if (!mercadopago) return;
   const payment = await new Payment(mercadopago).get({ id: paymentID });
   return payment;
 }

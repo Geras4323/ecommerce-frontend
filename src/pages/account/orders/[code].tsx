@@ -223,6 +223,8 @@ export default function Order() {
   }
   // Functions /////////////////////////////////////////////////////////////////////////////
 
+  console.log("token: ", vars.mp_access_token);
+
   return (
     <>
       <Toaster richColors />
@@ -383,21 +385,22 @@ export default function Order() {
                 !mercadopagoStateQuery.isPending &&
                 !mercadopagoStateQuery.isError && (
                   <div className="flex w-full flex-col gap-2">
-                    {mercadopagoStateQuery.data.active && (
-                      <LoadableButton
-                        isPending={createMPPaymentMutation.isPending}
-                        onClick={redirectToMP}
-                        className="btn btn-outline btn-primary w-full border border-sky-500"
-                      >
-                        <Image
-                          alt="mp"
-                          src={MercadoPago}
-                          className="size-9 min-w-9"
-                          unoptimized
-                        />
-                        Abonar con MercadoPago
-                      </LoadableButton>
-                    )}
+                    {mercadopagoStateQuery.data.active &&
+                      !!vars.mp_access_token && (
+                        <LoadableButton
+                          isPending={createMPPaymentMutation.isPending}
+                          onClick={redirectToMP}
+                          className="btn btn-outline btn-primary w-full border border-sky-500"
+                        >
+                          <Image
+                            alt="mp"
+                            src={MercadoPago}
+                            className="size-9 min-w-9"
+                            unoptimized
+                          />
+                          Abonar con MercadoPago
+                        </LoadableButton>
+                      )}
 
                     {!uploadedVoucher && (
                       <>

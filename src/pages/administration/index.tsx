@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   AlarmClock,
   AlarmClockOff,
+  AlertCircle,
   CalendarDays,
   Handshake,
   TreePalm,
@@ -21,6 +22,12 @@ import { cn } from "@/utils/lib";
 import { format } from "date-fns";
 import MercadoPago from "public/mercado_pago.svg";
 import Image from "next/image";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import { vars } from "@/utils/vars";
 
 export default function Administration() {
   const [isVacationModalOpen, setIsVacationModalOpen] = useState(false);
@@ -57,7 +64,7 @@ export default function Administration() {
         <h1 className="text-xl font-medium tracking-wide">ADMINISTRACIÓN</h1>
 
         <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {/* Sections */}
+          {/* SECTIONS */}
           {sections.map(
             (section) =>
               !section.disabled && (
@@ -77,8 +84,7 @@ export default function Administration() {
                 </Link>
               )
           )}
-
-          {/* States */}
+          {/* STATES - Vacation Mode */}
           <div
             className={cn(
               vacationIsActiveOrProgrammed
@@ -153,18 +159,35 @@ export default function Administration() {
             </button>
           </div>
 
+          {/* STATES - MercadoPago */}
           <div
             className={cn(
               mercadopago?.active
                 ? "border-solid border-primary/20"
                 : "border-double border-secondary/20",
-              "col-span-2 flex size-full h-52 flex-col items-center justify-center gap-4 rounded-lg border-4 text-secondary transition-all"
+              "relative col-span-2 flex size-full h-52 flex-col items-center justify-center gap-4 rounded-lg border-4 text-secondary transition-all"
             )}
             style={{
               boxShadow:
                 "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
             }}
           >
+            {!vars.mp_access_token && (
+              <Tooltip>
+                <TooltipTrigger className="absolute right-2.5 top-2.5">
+                  <AlertCircle className="size-5 min-w-5 text-error" />
+                  <TooltipContent
+                    side="left"
+                    align="center"
+                    sideOffset={5}
+                    className="flex h-8 w-fit items-center rounded-md border border-error bg-base-100 px-3 text-sm font-semibold"
+                  >
+                    Sin Access Token de MP
+                  </TooltipContent>
+                </TooltipTrigger>
+              </Tooltip>
+            )}
+
             <Image
               alt="mp"
               src={MercadoPago}
