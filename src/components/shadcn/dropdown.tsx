@@ -18,8 +18,11 @@ const DropdownTrigger = forwardRef<
   return (
     <RadixDropdown.Trigger
       ref={ref}
-      className={cn(props.className ?? "w-fit")}
-      {...props}
+      className={cn(
+        !!props.className && props.className,
+        "w-fit data-[state=open]:rounded-b-none"
+      )}
+      // {...props}
     >
       {children}
     </RadixDropdown.Trigger>
@@ -32,7 +35,14 @@ const DropdownContent = forwardRef<
   ComponentPropsWithoutRef<typeof RadixDropdown.Content>
 >(({ children, ...props }, ref) => {
   return (
-    <RadixDropdown.Content ref={ref} className="z-50 w-auto" {...props}>
+    <RadixDropdown.Content
+      ref={ref}
+      className={cn(
+        !!props.className && props.className,
+        "z-50 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-hidden data-[state=open]:rounded-b-lg"
+      )}
+      // {...props}
+    >
       {children}
     </RadixDropdown.Content>
   );

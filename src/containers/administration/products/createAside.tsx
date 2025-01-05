@@ -23,7 +23,13 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { PanelRightClose, Trash2, Upload } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  PanelRightClose,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
@@ -31,6 +37,36 @@ import { ReactSortable } from "react-sortablejs";
 import { toast } from "sonner";
 import { z } from "zod";
 import imageCompression from "browser-image-compression";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcn/popover";
+
+const measurementUnits = [
+  {
+    value: "u",
+    label: "Unidades",
+  },
+  {
+    value: "g",
+    label: "Gramos",
+  },
+  {
+    value: "kg",
+    label: "Kilos",
+  },
+  {
+    value: "ml",
+    label: "Mililitros",
+  },
+  {
+    value: "l",
+    label: "Litros",
+  },
+] as const;
+const measurementUnitsValues = measurementUnits.map((unit) => unit.value);
+// const measurementUnitsLabels = measurementUnits.map((unit) => unit.label);
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -47,6 +83,13 @@ const inputSchema = z.object({
     .string()
     .optional()
     .transform((id) => (id ? parseInt(id) : undefined)),
+  units: z
+    .enum(measurementUnits.map((unit) => unit.value) as [string, ...string[]])
+    .array()
+    .min(1, { message: "Unidad/es requerida/s" })
+    .transform((s) =>
+      measurementUnitsValues.filter((value) => s.includes(value)).join(",")
+    ),
   description: z.string().min(10, { message: "Mínimo 10 caracteres" }),
 });
 
@@ -92,7 +135,7 @@ export function ProductCreateAside() {
     retry: false,
   });
 
-  function checkChange() {
+  function anyChangeMade() {
     const values = getValues();
     return (
       values.name !== "" ||
@@ -100,7 +143,8 @@ export function ProductCreateAside() {
       values.description !== "" ||
       values.price !== "" ||
       values.categoryID !== undefined ||
-      values.supplierID !== undefined
+      values.supplierID !== undefined ||
+      values.units.length !== 0
     );
   }
 
@@ -117,7 +161,7 @@ export function ProductCreateAside() {
   }
 
   function handleCancel() {
-    if (uploadedFiles.length === 0 && !checkChange()) {
+    if (uploadedFiles.length === 0 && !anyChangeMade()) {
       create_close();
       return;
     }
@@ -140,11 +184,11 @@ export function ProductCreateAside() {
     getValues,
   } = useForm<Input>({
     resolver: zodResolver(inputSchema),
-    defaultValues: { code: "", name: "", price: "" },
+    defaultValues: { code: "", name: "", price: "", units: [] },
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
-    if (checkChange()) {
+    if (anyChangeMade()) {
       dataMutation.mutate(data);
       return;
     }
@@ -369,6 +413,71 @@ export function ProductCreateAside() {
                       />
                     )}
                     <ErrorSpan message={errors.supplierID?.message} />
+                  </div>
+
+                  <div className="col-span-2 flex h-full flex-col justify-start gap-1 xs:col-span-1">
+                    <label
+                      htmlFor="units"
+                      className="text-base tracking-wide text-primary"
+                    >
+                      <MandatoryMark /> UNIDADES DE MEDIDA:
+                    </label>
+                    {suppliersQuery.isPending ? (
+                      <div className="h-12 w-full animate-pulse rounded-lg bg-secondary/20" />
+                    ) : (
+                      <Controller
+                        name="units"
+                        control={control}
+                        render={({ field }) => (
+                          <Popover>
+                            <PopoverTrigger className="input input-bordered flex w-full items-center justify-between border text-left shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none data-[state=open]:rounded-b-none">
+                              {field.value.length === 0 ? (
+                                <span>Seleccionar unidades</span>
+                              ) : (
+                                measurementUnits
+                                  .filter((unit) =>
+                                    field.value.includes(unit.value)
+                                  )
+                                  .map((unit) => unit.label)
+                                  .join(", ")
+                              )}
+                              <ChevronDown className="size-6 min-w-6 text-secondary" />
+                            </PopoverTrigger>
+                            <PopoverContent
+                              sideOffset={0}
+                              className="border border-secondary/30 bg-base-100"
+                            >
+                              {measurementUnits?.map((unit) => (
+                                <div
+                                  key={unit.value}
+                                  onClick={() => {
+                                    const newUnits = !field.value.includes(
+                                      unit.value
+                                    )
+                                      ? [...field.value, unit.value]
+                                      : field.value.filter(
+                                          (item) => item !== unit.value
+                                        );
+                                    field.onChange(newUnits);
+                                  }}
+                                  className="flex h-8 w-full cursor-pointer items-center gap-2.5 px-3 hover:bg-secondary/15"
+                                >
+                                  <Check
+                                    className={cn(
+                                      !field.value.includes(unit.value) &&
+                                        "opacity-0",
+                                      "size-4 min-w-4 text-secondary"
+                                    )}
+                                  />
+                                  {unit.label}
+                                </div>
+                              ))}
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      />
+                    )}
+                    <ErrorSpan message={errors.units?.message} />
                   </div>
                 </>
               )}
