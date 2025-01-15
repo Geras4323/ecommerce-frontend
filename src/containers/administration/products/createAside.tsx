@@ -42,31 +42,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
-
-const measurementUnits = [
-  {
-    value: "u",
-    label: "Unidades",
-  },
-  {
-    value: "g",
-    label: "Gramos",
-  },
-  {
-    value: "kg",
-    label: "Kilos",
-  },
-  {
-    value: "ml",
-    label: "Mililitros",
-  },
-  {
-    value: "l",
-    label: "Litros",
-  },
-] as const;
-const measurementUnitsValues = measurementUnits.map((unit) => unit.value);
-// const measurementUnitsLabels = measurementUnits.map((unit) => unit.label);
+import { measurementUnits, measurementUnitsValues } from "@/utils/measurement";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({

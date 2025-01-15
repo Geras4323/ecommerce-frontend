@@ -12,7 +12,7 @@ import {
   Tag,
   X,
 } from "lucide-react";
-import { getProducts, type Product } from "@/functions/products";
+import { getProducts } from "@/functions/products";
 import { useProductStore } from "@/hooks/states/products";
 import { ProductCreateAside } from "src/containers/administration/products/createAside";
 import { type Category, getCategories } from "@/functions/categories";
@@ -132,7 +132,7 @@ function Products() {
     );
   }, [nameFilter, selectedCategory, selectedSupplier]);
 
-  let filteredProducts: Product[] = productsQuery.data ?? [];
+  let filteredProducts = productsQuery.data ?? [];
 
   if (nameFilter) {
     filteredProducts = filteredProducts?.filter(

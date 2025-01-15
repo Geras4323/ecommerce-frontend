@@ -9,6 +9,24 @@ import axios from "axios";
 import type { GetServerSidePropsResult, GetServerSideProps } from "next";
 import { z } from "zod";
 
+const redirectToLanding = {
+  redirect: {
+    permanent: false,
+    destination: "/",
+  },
+};
+
+const defaultReturn: GetServerSidePropsResult<{
+  title: string;
+  description: string;
+}> = {
+  props: {
+    title: "Inicio",
+    description:
+      "Nuestra tienda online oficial. Explorá nuestros productos y encargá los que necesites",
+  },
+};
+
 export type Session = z.infer<typeof sessionSchema>;
 export const sessionSchema = z.object({
   id: z.number(),
@@ -40,13 +58,6 @@ type X = (desiredRole: "admin" | "noAdmin") => GetServerSideProps<{
 export const withAuth: X = (desiredRole) => async (c) => {
   const queryClient = new QueryClient();
   const sessionCookie = c.req.cookies.ec_session;
-
-  const redirectToLanding = {
-    redirect: {
-      permanent: false,
-      destination: "/",
-    },
-  };
 
   if (!sessionCookie) return redirectToLanding;
 
@@ -123,17 +134,6 @@ export const leaveIfVerified: GetServerSideProps = async (c) => {
 export const leaveIfCustomer: GetServerSideProps = async (c) => {
   const queryClient = new QueryClient();
   const sessionCookie = c.req.cookies.ec_session;
-
-  const defaultReturn: GetServerSidePropsResult<{
-    title: string;
-    description: string;
-  }> = {
-    props: {
-      title: "Inicio",
-      description:
-        "Nuestra tienda online oficial. Explorá nuestros productos y encargá los que necesites",
-    },
-  };
 
   if (!sessionCookie) return defaultReturn;
 

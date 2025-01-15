@@ -16,6 +16,7 @@ export const productSchema = z
     images: imageSchema.array(),
     categoryID: z.number(),
     supplierID: z.number(),
+    measurementUnits: z.string(),
   })
   .and(databaseEntrySchema);
 
