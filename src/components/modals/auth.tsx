@@ -11,6 +11,8 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { vars } from "@/utils/vars";
 import { type ServerError } from "@/types/types";
+import { LoginForm } from "../sign/login";
+import { useRouter } from "next/router";
 
 type Email = z.infer<typeof emailSchema>;
 const emailSchema = z.object({
@@ -173,6 +175,28 @@ export function PasswordResetModal({
             </LoadableButton>
           </div>
         </form>
+      </div>
+    </Modal>
+  );
+}
+
+export function ReloginModal({
+  isOpen,
+  setIsOpen,
+}: ModalProps & { setIsOpen: (s: boolean) => void }) {
+  const router = useRouter();
+
+  return (
+    <Modal isOpen={isOpen} className="max-w-lg">
+      <div className="flex h-96 flex-col gap-8">
+        <LoginForm
+          isLogging
+          className="p-4"
+          onSuccess={() => {
+            setIsOpen(false);
+            router.reload();
+          }}
+        />
       </div>
     </Modal>
   );

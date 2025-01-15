@@ -23,7 +23,12 @@ export function LoginForm({
   isLogging,
   switchSide: switchSideProp,
   className,
-}: { isLogging: boolean; switchSide?: () => void } & WithClassName) {
+  onSuccess,
+}: {
+  isLogging: boolean;
+  switchSide?: () => void;
+  onSuccess?: () => void;
+} & WithClassName) {
   const router = useRouter();
 
   const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] =
@@ -34,13 +39,15 @@ export function LoginForm({
       const url = `${vars.serverUrl}/api/v1/auth/login`;
       return axios.post(url, data, { withCredentials: true });
     },
-    onSuccess: (res) => {
-      res.data.verified
-        ? res.data.role === "admin"
-          ? router.push("/")
-          : router.push("/showroom")
-        : router.push("/sign/verifyEmail");
-    },
+    onSuccess: !!onSuccess
+      ? () => onSuccess()
+      : (res) => {
+          res.data.verified
+            ? res.data.role === "admin"
+              ? router.push("/")
+              : router.push("/showroom")
+            : router.push("/sign/verifyEmail");
+        },
   });
 
   const {
