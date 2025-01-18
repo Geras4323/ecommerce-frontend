@@ -135,7 +135,7 @@ export function ProductsItem({
           </article>
 
           {/* Measurement Units */}
-          <section className="flex gap-1.5 text-sm text-primary">
+          {/* <section className="flex gap-1.5 text-sm text-primary">
             <Weight className="mb-1 size-4" />
             {product.measurementUnits
               .split(",")
@@ -144,7 +144,7 @@ export function ProductsItem({
                   measurementUnits.find((mU) => mU.value === unit)?.label
               )
               .join(", ")}
-          </section>
+          </section> */}
 
           <p className="truncate text-base text-secondary">
             {product.description}
