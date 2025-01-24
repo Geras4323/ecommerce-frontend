@@ -1,7 +1,8 @@
 "use client";
 
-// import * as React from "react";
-import useEmblaCarousel from "embla-carousel-react";
+import useEmblaCarousel, {
+  type UseEmblaCarouselType,
+} from "embla-carousel-react";
 
 import type {
   EmblaOptionsType,
@@ -34,6 +35,8 @@ type CarouselContextProps = {
   canScrollPrev: boolean;
   canScrollNext: boolean;
 } & CarouselProps;
+
+export type CarouselApi = UseEmblaCarouselType[1];
 
 const Button = forwardRef<
   HTMLButtonElement,

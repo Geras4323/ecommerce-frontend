@@ -194,9 +194,9 @@ export default function ProductData() {
       code: productQuery.data?.code ?? "",
       name: productQuery.data?.name ?? "",
       description: productQuery.data?.description ?? "",
-      price: `${round(productQuery.data?.price ?? 0, 2)}` ?? `${-1}`,
-      categoryID: `${productQuery.data?.categoryID}` ?? `${-1}`,
-      supplierID: `${productQuery.data?.supplierID}` ?? `${-1}`,
+      price: `${round(productQuery.data?.price ?? 0, 2)}`,
+      categoryID: `${productQuery.data?.categoryID}`,
+      supplierID: `${productQuery.data?.supplierID}`,
     },
   });
 

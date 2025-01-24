@@ -26,7 +26,8 @@
       "@/utils/*": ["src/utils/*"],
       "@/styles/*": ["src/styles/*"],
       "@/types/*": ["src/types/*"],
-      "@/functions/*": ["src/functions/*"]
+      "@/functions/*": ["src/functions/*"],
+      "@/public/*": ["/public/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.mjs"],

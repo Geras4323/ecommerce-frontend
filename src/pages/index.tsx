@@ -18,6 +18,13 @@ import {
 import { LoadableButton } from "@/components/forms";
 import { type ServerPage } from "@/types/session";
 import { leaveIfCustomer } from "@/functions/session";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/shadcn/carousel";
+import Image from "next/image";
+import Autoplay from "embla-carousel-autoplay";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
@@ -76,8 +83,9 @@ const Home: ServerPage<typeof getServerSideProps> = ({
           )}
         </div>
 
-        <div className="flex h-auto w-full flex-row justify-center md:w-3/4">
-          <div className="flex w-full flex-col items-center">
+        <div className="relative flex size-full flex-col items-center justify-center md:w-3/4 md:justify-center">
+          {/* Form */}
+          <div className="flex flex-col items-center">
             <h1
               className={cn(
                 arizonia.className,
@@ -147,6 +155,44 @@ const Home: ServerPage<typeof getServerSideProps> = ({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Mobile Horizontal Carousels */}
+          <div className="absolute bottom-0 flex w-full flex-col gap-3 py-3 shadow-inner-lg md:hidden">
+            <Carousel
+              className="relative flex w-full cursor-grab items-center active:cursor-grabbing"
+              plugins={[
+                Autoplay({
+                  delay: 2500,
+                  stopOnFocusIn: false,
+                  stopOnInteraction: false,
+                }),
+                // Autoscroll({
+                //   speed: 3,
+                //   direction: "backward",
+                // }),
+              ]}
+              opts={{ dragFree: true, loop: true, align: "center" }}
+            >
+              <CarouselContent className="w-full items-center">
+                {firstMarqueeUrls?.map((url, index) => (
+                  <CarouselItem
+                    key={index}
+                    className="ml-3 select-none rounded-lg border border-secondary/30 shadow-md"
+                  >
+                    <div className="size-20">
+                      <Image
+                        width={120}
+                        height={120}
+                        src={url}
+                        alt="no_image"
+                        className="size-full rounded-lg object-cover"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
         </div>
       </div>
