@@ -53,7 +53,7 @@ const Home: ServerPage<typeof getServerSideProps> = ({
 
   return (
     <GeneralLayout title={title} description={description}>
-      <div className="flex h-screen w-screen flex-row items-center justify-between">
+      <div className="flex h-full w-screen flex-row items-center justify-between">
         <div className="relative hidden h-full w-1/4 flex-row items-center justify-center gap-4 overflow-hidden px-3 shadow-2xl md:flex">
           {imagesQuery.isError ? (
             <div className="relative flex w-full flex-col items-center justify-center gap-4 px-4 text-error">
@@ -180,7 +180,7 @@ const Home: ServerPage<typeof getServerSideProps> = ({
                     key={index}
                     className="ml-3 select-none rounded-lg border border-secondary/30 shadow-md"
                   >
-                    <div className="size-20">
+                    <div className="size-24">
                       <Image
                         width={120}
                         height={120}

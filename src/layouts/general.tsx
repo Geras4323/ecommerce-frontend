@@ -15,7 +15,7 @@ export const GeneralLayout = ({
         <meta name="description" content={description} />
       </Head>
       <Header />
-      <div className="relative flex min-h-screen w-full bg-base-100">
+      <div className="relative flex h-svh w-full bg-base-100">
         {children}
 
         <a
