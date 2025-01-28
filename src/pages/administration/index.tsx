@@ -9,7 +9,9 @@ import {
   AlertCircle,
   CalendarDays,
   Handshake,
+  Scale,
   TreePalm,
+  Weight,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -17,6 +19,7 @@ import {
   DisableVacationStateModal,
   EnableVacationStateModal,
   MercadopagoStateModal,
+  UnitsStateModal,
 } from "@/components/modals/administration/states";
 import { cn } from "@/utils/lib";
 import { format } from "date-fns";
@@ -32,6 +35,7 @@ import { vars } from "@/utils/vars";
 export default function Administration() {
   const [isVacationModalOpen, setIsVacationModalOpen] = useState(false);
   const [isMercadopagoModalOpen, setIsMercadopagoModalOpen] = useState(false);
+  const [isUnitsModalOpen, setIsUnitsModalOpen] = useState(false);
 
   const vacationStateQuery = useQuery({
     queryKey: ["vacation"],
@@ -47,6 +51,13 @@ export default function Administration() {
     refetchOnWindowFocus: true,
   });
 
+  const unitsStateQuery = useQuery({
+    queryKey: ["units"],
+    queryFn: () => getState("units"),
+    retry: false,
+    refetchOnWindowFocus: true,
+  });
+
   useEffect(() => {
     if (vacationStateQuery.isError)
       console.log(vacationStateQuery.error.message);
@@ -54,13 +65,14 @@ export default function Administration() {
 
   const vacation = vacationStateQuery.data;
   const mercadopago = mercadopagoStateQuery.data;
+  const units = unitsStateQuery.data;
 
   const vacationIsActiveOrProgrammed =
     vacation?.active || (!vacation?.active && vacation?.from);
 
   return (
     <GeneralLayout title="Administración" description="Administración">
-      <div className="mx-auto flex h-screen w-screen max-w-screen-sm flex-col place-content-start gap-4 px-12 pt-24 lg:max-w-screen-lg">
+      <div className="mx-auto flex w-screen max-w-screen-sm flex-col place-content-start gap-4 px-8 pb-8 pt-24 lg:max-w-screen-lg">
         <h1 className="text-xl font-medium tracking-wide">ADMINISTRACIÓN</h1>
 
         <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -74,7 +86,7 @@ export default function Administration() {
                   className="flex aspect-square size-full flex-col items-center justify-center gap-4 rounded-lg border-4 border-double border-secondary/20 text-secondary transition-all hover:border-solid hover:border-primary/10 hover:text-primary"
                   style={{
                     boxShadow:
-                      "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
+                      "0 1px 3px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
                   }}
                 >
                   <section.icon className="size-7 sm:size-8 md:size-9" />
@@ -84,6 +96,7 @@ export default function Administration() {
                 </Link>
               )
           )}
+
           {/* STATES - Vacation Mode */}
           <div
             className={cn(
@@ -94,7 +107,7 @@ export default function Administration() {
             )}
             style={{
               boxShadow:
-                "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
+                "0 1px 3px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
             }}
           >
             <TreePalm
@@ -169,7 +182,7 @@ export default function Administration() {
             )}
             style={{
               boxShadow:
-                "0 3px 5px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
+                "0 1px 3px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
             }}
           >
             {!vars.mp_access_token && (
@@ -201,10 +214,12 @@ export default function Administration() {
 
             <div>
               {mercadopago?.active && (
-                <span className="-mt-2 flex items-center gap-2 text-primary/80">
+                <div className="flex w-full items-start justify-center gap-2 text-primary/80">
                   <Handshake className="size-5 min-w-5" />
-                  Aceptando pagos por MercadoPago
-                </span>
+                  <span className="w-48 text-center xxs:w-fit">
+                    Aceptando pagos por MercadoPago
+                  </span>
+                </div>
               )}
             </div>
 
@@ -216,6 +231,51 @@ export default function Administration() {
               )}
             >
               {mercadopago?.active ? "Desactivar" : "Activar"}
+            </button>
+          </div>
+
+          {/* STATES - Units */}
+          <div
+            className={cn(
+              units?.active
+                ? "border-solid border-primary/20"
+                : "border-double border-secondary/20",
+              "relative col-span-2 flex size-full h-52 flex-col items-center justify-center gap-4 rounded-lg border-4 text-secondary transition-all"
+            )}
+            style={{
+              boxShadow:
+                "0 1px 3px rgba(0,0,0, .2), 0 5px 10px rgba(0,0,0, .1)",
+            }}
+          >
+            <Scale
+              className={cn(
+                vacationIsActiveOrProgrammed
+                  ? "text-primary/80"
+                  : "text-secondary",
+                "size-7 sm:size-8 md:size-9"
+              )}
+            />
+            <span className="text-md w-fit text-center xxs:text-lg xs:text-xl">
+              Unidades de medida
+            </span>
+
+            <div>
+              {units?.active && (
+                <span className="-mt-2 flex items-center gap-2 text-primary/80">
+                  <Weight className="size-5 min-w-5" />
+                  Unidades de medida activas
+                </span>
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsUnitsModalOpen(true)}
+              className={cn(
+                units?.active ? "btn-outline" : "btn-primary -mt-4",
+                "btn btn-sm"
+              )}
+            >
+              {units?.active ? "Desactivar" : "Activar"}
             </button>
           </div>
         </section>
@@ -237,6 +297,11 @@ export default function Administration() {
         isOpen={isMercadopagoModalOpen}
         onClose={() => setIsMercadopagoModalOpen(false)}
         active={mercadopago?.active ?? false}
+      />
+      <UnitsStateModal
+        isOpen={isUnitsModalOpen}
+        onClose={() => setIsUnitsModalOpen(false)}
+        active={units?.active ?? false}
       />
     </GeneralLayout>
   );

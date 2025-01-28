@@ -145,8 +145,8 @@ export const ProductDataDrawer = ({
                             <Image
                               alt={`${image.id}`}
                               src={image.url}
-                              width={70}
-                              height={70}
+                              width={100}
+                              height={100}
                               className={cn(
                                 "aspect-square h-full w-full cursor-pointer rounded-md object-cover"
                               )}
@@ -164,8 +164,8 @@ export const ProductDataDrawer = ({
                       <div className="relative aspect-square h-80 max-h-80 w-full rounded-lg border-none outline-none">
                         <Image
                           alt={product?.name ?? ""}
-                          width={260}
-                          height={260}
+                          width={300}
+                          height={300}
                           src={selectedImage?.image?.url ?? ""}
                           className="aspect-square h-80 max-h-80 w-full min-w-80 max-w-80 cursor-pointer rounded-lg border-none object-cover outline-none"
                           onClick={() => setVisualizedProduct(product)}

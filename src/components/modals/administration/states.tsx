@@ -166,8 +166,9 @@ export function DisableVacationStateModal({ isOpen, onClose }: ModalProps) {
       onClose={onClose}
       title="Finalizar vacaciones"
       description="¿Está seguro de que desea finalizar las vacaciones?"
+      className="w-full max-w-screen-sm md:min-w-screen-xxs"
     >
-      <div className="flex h-auto w-full min-w-screen-xxs items-center justify-end gap-2">
+      <div className="flex h-auto w-full items-center justify-end gap-2">
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar
         </button>
@@ -274,8 +275,9 @@ export function MercadopagoStateModal({
           ? "¿Está seguro de que ya no desea aceptar pagos por MercadoPago?"
           : "¿Está seguro de que desea aceptar pagos por MercadoPago?"
       }
+      className="w-full max-w-screen-sm md:min-w-screen-xxs"
     >
-      <div className="flex h-auto w-full min-w-screen-xxs items-center justify-end gap-2">
+      <div className="flex h-auto w-full items-center justify-end gap-2">
         <button className="btn btn-ghost w-28" onClick={onClose}>
           Cancelar
         </button>
@@ -283,6 +285,53 @@ export function MercadopagoStateModal({
           isPending={alternateMercadpagoStateMutation.isPending}
           className="btn btn-primary w-28"
           onClick={() => alternateMercadpagoStateMutation.mutate()}
+        >
+          Confirmar
+        </LoadableButton>
+      </div>
+    </Modal>
+  );
+}
+
+// Units ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+export function UnitsStateModal({
+  isOpen,
+  onClose,
+  active,
+}: ModalProps & { active: boolean }) {
+  const queryClient = useQueryClient();
+
+  const alternateUnitsStateMutation = useMutation<void, ServerError, void>({
+    mutationFn: async () => {
+      const url = `${vars.serverUrl}/api/v1/states/units`;
+      return axios.patch(url, { active: !active }, { withCredentials: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["units"] });
+      onClose && onClose();
+    },
+  });
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Unidades de medida"
+      description={
+        active
+          ? "¿Está seguro de que desea desactivar las unidades de medida?"
+          : "¿Está seguro de que desea activar las unidades de medida?"
+      }
+      className="w-full max-w-screen-sm md:min-w-screen-xxs"
+    >
+      <div className="flex h-auto w-full items-center justify-end gap-2">
+        <button className="btn btn-ghost w-28" onClick={onClose}>
+          Cancelar
+        </button>
+        <LoadableButton
+          isPending={alternateUnitsStateMutation.isPending}
+          className="btn btn-primary w-28"
+          onClick={() => alternateUnitsStateMutation.mutate()}
         >
           Confirmar
         </LoadableButton>
