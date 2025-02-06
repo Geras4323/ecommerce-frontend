@@ -16,7 +16,7 @@ import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { getCategories } from "@/functions/categories";
 import { type Product } from "@/functions/products";
 import { getSuppliers } from "@/functions/suppliers";
-import { useProductStore } from "@/hooks/states/products";
+import { useProductStore } from "@/hooks/zustand/products";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { vars } from "@/utils/vars";

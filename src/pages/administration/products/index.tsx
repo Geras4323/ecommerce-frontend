@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { getProducts } from "@/functions/products";
-import { useProductStore } from "@/hooks/states/products";
+import { useProductStore } from "@/hooks/zustand/products";
 import { ProductCreateAside } from "src/containers/administration/products/createAside";
 import { type Category, getCategories } from "@/functions/categories";
 import { type Supplier, getSuppliers } from "@/functions/suppliers";

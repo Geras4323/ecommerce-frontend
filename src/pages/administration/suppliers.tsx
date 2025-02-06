@@ -18,7 +18,7 @@ import {
 } from "@tanstack/react-table";
 import { ClipboardEdit, Search } from "lucide-react";
 import { getSuppliers, type Supplier } from "@/functions/suppliers";
-import { useSupplierStore } from "@/hooks/states/suppliers";
+import { useSupplierStore } from "@/hooks/zustand/suppliers";
 import { SupplierCreateAside } from "src/containers/administration/suppliers/createAside";
 import { SupplierDataAside } from "src/containers/administration/suppliers/dataAside";
 import { ErrorSpan } from "@/components/forms";

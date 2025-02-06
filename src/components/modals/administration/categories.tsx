@@ -1,7 +1,7 @@
 import { ErrorAlert, LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import type { Category } from "@/functions/categories";
-import { useCategoryStore } from "@/hooks/states/categories";
+import { useCategoryStore } from "@/hooks/zustand/categories";
 import type { CloudinarySuccess } from "@/types/cloudinary";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";

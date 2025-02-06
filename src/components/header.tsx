@@ -21,9 +21,7 @@ import { useRouter } from "next/router";
 import { useTheme } from "next-themes";
 import { Arizonia } from "next/font/google";
 import { LoadableButton } from "./forms";
-import { useQuery } from "@tanstack/react-query";
-import { getState } from "@/functions/states";
-import { type ServerError } from "@/types/types";
+import { useVacation } from "@/hooks/states";
 
 const arizonia = Arizonia({ weight: ["400"], subsets: ["latin"] });
 
@@ -75,19 +73,10 @@ export const Header = () => {
   const router = useRouter();
   const { theme } = useTheme();
 
+  const vacationState = useVacation();
+
   const [isSessionOpen, setIsSessionOpen] = useState(false);
   const [isNavBordered, setIsNavBordered] = useState(false);
-
-  const vacationStateQuery = useQuery<
-    Awaited<ReturnType<typeof getState>>,
-    ServerError
-  >({
-    queryKey: ["vacation", "header"],
-    queryFn: () => getState("vacation"),
-    retry: false,
-    staleTime: 1000,
-    refetchOnWindowFocus: true,
-  });
 
   useEffect(() => {
     function onScroll() {
@@ -121,7 +110,7 @@ export const Header = () => {
           Mis Ideas Pintadas
         </Link>
 
-        {vacationStateQuery.data?.active && (
+        {vacationState.data?.active && (
           <div
             className={cn(
               theme === "dark" ? "text-warning" : "text-primary",

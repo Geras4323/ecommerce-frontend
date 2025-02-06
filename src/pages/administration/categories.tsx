@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, Tag } from "lucide-react";
 import { CategoryDataAside } from "src/containers/administration/categories/dataAside";
 import { CategoryCreateAside } from "src/containers/administration/categories/createAside";
-import { useCategoryStore } from "@/hooks/states/categories";
+import { useCategoryStore } from "@/hooks/zustand/categories";
 import { useState } from "react";
 import {
   CategoriesItem,

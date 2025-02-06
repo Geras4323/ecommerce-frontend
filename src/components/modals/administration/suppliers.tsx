@@ -1,7 +1,7 @@
 import { ErrorAlert, LoadableButton } from "@/components/forms";
 import { Modal } from "@/components/layouts/modal";
 import { type Supplier } from "@/functions/suppliers";
-import { useSupplierStore } from "@/hooks/states/suppliers";
+import { useSupplierStore } from "@/hooks/zustand/suppliers";
 import { type ServerError } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

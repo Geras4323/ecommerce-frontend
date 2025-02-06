@@ -8,7 +8,7 @@ import { DiscardCategoryChangesModal } from "@/components/modals/administration/
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { type Category } from "@/functions/categories";
 import { mqs, useMediaQueries } from "@/hooks/screen";
-import { useCategoryStore } from "@/hooks/states/categories";
+import { useCategoryStore } from "@/hooks/zustand/categories";
 import { type CloudinarySuccess } from "@/types/cloudinary";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { checkMimetype, cn } from "@/utils/lib";

@@ -14,7 +14,7 @@ import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useSupplierStore } from "@/hooks/states/suppliers";
+import { useSupplierStore } from "@/hooks/zustand/suppliers";
 import { type Supplier } from "@/functions/suppliers";
 import {
   DeleteSupplierModal,

@@ -8,7 +8,7 @@ import { DiscardSupplierChangesModal } from "@/components/modals/administration/
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { type Category } from "@/functions/categories";
 import { mqs, useMediaQueries } from "@/hooks/screen";
-import { useSupplierStore } from "@/hooks/states/suppliers";
+import { useSupplierStore } from "@/hooks/zustand/suppliers";
 import type { ServerError, ServerSuccess } from "@/types/types";
 import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
