@@ -43,7 +43,8 @@ export function useShoppingCart() {
       unit: MeasurementUnitsValue;
     }
   >({
-    mutationFn: (data) => createCartItem(data.productID, data.quantity),
+    mutationFn: (data) =>
+      createCartItem(data.productID, data.quantity, data.unit),
     onSuccess: refetchProducts,
   });
 
