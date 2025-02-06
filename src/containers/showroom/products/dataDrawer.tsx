@@ -12,7 +12,13 @@ import { mqs, useMediaQueries } from "@/hooks/screen";
 import { type ServerError } from "@/types/types";
 import { cn } from "@/utils/lib";
 import { type UseMutationResult } from "@tanstack/react-query";
-import { Minus, PanelRightClose, Plus, ShoppingCart } from "lucide-react";
+import {
+  Minus,
+  PanelRightClose,
+  Plus,
+  ShoppingCart,
+  Weight,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -20,8 +26,30 @@ import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { Comfortaa } from "next/font/google";
 import { vars } from "@/utils/vars";
+import { useUnits } from "@/hooks/states";
+import {
+  Select,
+  SelectContent,
+  SelectOption,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/select";
+import {
+  measurementUnits,
+  type MeasurementUnitsValue,
+} from "@/utils/measurement";
+import { useRouter } from "next/router";
 
 const comfortaa = Comfortaa({ subsets: ["latin"] });
+
+type PurchaseWithoutUnits = {
+  unit: MeasurementUnitsValue;
+  quantity: number;
+};
+
+type PurchaseWithUnits = Partial<PurchaseWithoutUnits>;
+
+const defaultPurchase = { quantity: 1 } as const;
 
 export const ProductDataDrawer = ({
   product,
@@ -45,6 +73,7 @@ export const ProductDataDrawer = ({
     {
       productID: number;
       quantity: number;
+      unit: MeasurementUnitsValue;
     },
     unknown
   >;
@@ -52,9 +81,24 @@ export const ProductDataDrawer = ({
   isVisualizingProduct: boolean;
   setVisualizedProduct: (p?: Product) => void;
 }) => {
+  const router = useRouter();
+
   const mq = useMediaQueries();
 
-  const [quantity, setQuantity] = useState(1);
+  const unitsEnabled = useUnits().data?.active;
+
+  // const [quantity, setQuantity] = useState(1);
+
+  const [purchase, setPurchase] = useState<
+    PurchaseWithUnits | PurchaseWithoutUnits
+  >({});
+
+  useEffect(() => {
+    setPurchase(
+      unitsEnabled ? defaultPurchase : { ...defaultPurchase, unit: "u" }
+    );
+  }, [unitsEnabled]);
+
   const [selectedImage, setSelectedImage] = useState<{
     image?: ProductImage;
     position: number;
@@ -65,10 +109,27 @@ export const ProductDataDrawer = ({
   }, [setSelectedProduct]);
 
   useEffect(() => {
-    if (!product) return;
+    if (!product) {
+      setPurchase(defaultPurchase); // clear purchase state
+      return;
+    }
 
     setSelectedImage({ image: product.images[0], position: 0 });
   }, [product, deselectProduct]);
+
+  const checkValidSession = useCallback(() => {
+    if (!logged) {
+      router.push("/sign");
+      return;
+    }
+    if (!verified) {
+      router.push("/sign/verifyEmail");
+    }
+  }, [logged, verified, router]);
+
+  const correspondingPrice = product?.units.find(
+    (u) => u.unit === purchase.unit
+  )?.price;
 
   return (
     <>
@@ -102,12 +163,14 @@ export const ProductDataDrawer = ({
                     >
                       <PanelRightClose className="size-6" />
                     </button>
-                    <div className="flex w-full items-end justify-end gap-1">
-                      <span className="text-2xl text-primary/70">$</span>
-                      <span className="text-3xl text-primary">
-                        {product?.price.toLocaleString(vars.region)}
-                      </span>
-                    </div>
+                    {!unitsEnabled && (
+                      <div className="flex w-full items-end justify-end gap-1">
+                        <span className="text-2xl text-primary/70">$</span>
+                        <span className="text-3xl text-primary">
+                          {product?.price.toLocaleString(vars.region)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <DrawerTitle className="text-2xl font-semibold">
                     {product?.name}
@@ -186,73 +249,219 @@ export const ProductDataDrawer = ({
                 />
 
                 {/* Add to cart */}
-                <div className="flex h-12 min-h-12 w-full flex-row justify-between gap-2">
-                  {!inCart && !vacationLocked && (
-                    <div className="flex h-12 w-full">
-                      <button
-                        onClick={() =>
-                          setQuantity((prev) => (prev > 1 ? --prev : prev))
+                {/* Yes, you'll find a bunch of "!" (Non Nullish Assertions). Fuck it. Fucking TS can't see that values won't be null where I used it */}
+                {/* Womp womp, stfu */}
+                {unitsEnabled ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex h-12 min-h-12 w-full items-center gap-2">
+                      {/* <Select onValueChange={(v) => setValue(v)} value={value}> */}
+                      <Select
+                        onValueChange={(v) =>
+                          setPurchase((prev) => ({
+                            ...prev,
+                            unit: v as MeasurementUnitsValue,
+                          }))
                         }
-                        className="flex h-12 w-7 min-w-7 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
                       >
-                        <Minus className="size-4" />
-                      </button>
-                      <input
-                        value={quantity}
-                        onChange={(e) => {
-                          const num = Number(e.target.value);
-                          if (!isNaN(num)) setQuantity(num);
-                        }}
-                        className="btn-sm m-0 h-12 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center text-base font-semibold outline-none"
-                      />
-                      <button
-                        onClick={() => setQuantity((prev) => ++prev)}
-                        className="flex h-12 w-7 min-w-7 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
-                      >
-                        <Plus className="size-4" />
-                      </button>
-                    </div>
-                  )}
+                        <SelectTrigger className="input input-bordered h-full w-full text-lg focus-within:outline-none">
+                          <div className="flex items-center gap-2">
+                            <Weight className="size-4 min-w-4 text-secondary/80" />
+                            <SelectValue
+                              placeholder="Seleccionar unidad"
+                              className="text-base text-secondary"
+                            />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="rounded-md border-l border-secondary/30 data-[state=open]:rounded-t-none">
+                          {product?.units.map((unit) => (
+                            <SelectOption
+                              key={unit.unit}
+                              value={`${unit.unit}`}
+                              className="w-full !text-base"
+                            >
+                              <div className="flex w-full items-center justify-between gap-3">
+                                <div className="flex w-24 items-center">
+                                  {
+                                    measurementUnits.find(
+                                      (mU) => mU.value === unit.unit
+                                    )?.label
+                                  }
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg text-secondary">
+                                    $
+                                  </span>
+                                  {unit.price}
+                                </div>
+                              </div>
+                            </SelectOption>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-                  <div className="h-12 min-h-12 w-full">
-                    {!inCart || !logged ? (
-                      <LoadableButton
-                        onClick={() => {
-                          if (!product) return;
-                          if (!logged) {
-                            // router.push("/sign");
-                            return;
+                      <div className="flex h-12">
+                        <button
+                          onClick={() =>
+                            // setQuantity((prev) => (prev > 1 ? --prev : prev))
+                            setPurchase((prev) =>
+                              prev.quantity! > 1
+                                ? { ...prev, quantity: --prev.quantity! }
+                                : prev
+                            )
                           }
-                          if (!verified) {
-                            // router.push("/sign/verifyEmail");
-                            return;
+                          className="flex h-12 w-9 min-w-9 items-center justify-center rounded-l-lg rounded-r-none border border-secondary/30 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
+                        >
+                          <Minus className="size-4" />
+                        </button>
+                        <input
+                          value={purchase.quantity}
+                          onChange={(e) => {
+                            const num = Number(e.target.value);
+                            // if (!isNaN(num)) setQuantity(num);
+                            if (!isNaN(num))
+                              setPurchase((prev) => ({
+                                ...prev,
+                                quantity: num,
+                              }));
+                          }}
+                          className="btn-sm m-0 h-12 w-20 min-w-20 rounded-none border-y border-y-secondary/30 bg-base-100/70 p-1 text-center text-base font-semibold outline-none"
+                        />
+                        <button
+                          // onClick={() => setQuantity((prev) => ++prev)}
+                          onClick={() =>
+                            setPurchase((prev) => ({
+                              ...prev,
+                              quantity: ++prev.quantity!,
+                            }))
                           }
-                          addToCart.mutate({
-                            productID: product.id,
-                            quantity: quantity,
-                          });
-                        }}
-                        className={cn(
-                          !vacationLocked && "max-w-80",
-                          "btn btn-primary w-full min-w-80 items-center gap-3"
-                        )}
-                        isPending={addToCart.isPending}
-                        disabled={addToCart.isPending || vacationLocked}
-                        animation="dots"
-                      >
-                        <ShoppingCart className="size-5" />
-                        Añadir al carrito
-                      </LoadableButton>
-                    ) : (
-                      <Link
-                        href="/account/cart"
-                        className="btn btn-outline btn-secondary w-full items-center gap-3"
-                      >
-                        Ver en el carrito
-                      </Link>
+                          className="flex h-12 w-9 min-w-9 items-center justify-center rounded-l-none rounded-r-lg border border-secondary/30 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
+                        >
+                          <Plus className="size-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {purchase.unit && (
+                      <div className="flex h-12 w-full items-center gap-2">
+                        <div className="flex h-full w-40 min-w-40 items-center justify-center gap-1.5 text-2xl">
+                          <span className="text-xl text-secondary">$</span>
+                          {correspondingPrice && (
+                            <span>
+                              {correspondingPrice * purchase.quantity!}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="size-full">
+                          <LoadableButton
+                            onClick={() => {
+                              if (!product) return;
+                              checkValidSession();
+
+                              addToCart.mutate({
+                                productID: product.id,
+                                quantity: purchase.quantity!,
+                                unit: purchase.unit!,
+                              });
+                            }}
+                            className={cn(
+                              "btn btn-primary w-full items-center gap-3"
+                            )}
+                            isPending={addToCart.isPending}
+                            disabled={addToCart.isPending || vacationLocked}
+                            animation="dots"
+                          >
+                            <ShoppingCart className="size-5" />
+                            Añadir al carrito
+                          </LoadableButton>
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
+                ) : (
+                  <div className="flex h-12 min-h-12 w-full flex-row justify-between gap-2">
+                    {!inCart && !vacationLocked && (
+                      <div className="flex h-12 w-full">
+                        <button
+                          onClick={() =>
+                            // setQuantity((prev) => (prev > 1 ? --prev : prev))
+                            setPurchase((prev) =>
+                              prev.quantity! > 1
+                                ? { ...prev, quantity: --prev.quantity! }
+                                : prev
+                            )
+                          }
+                          className="flex h-12 w-7 min-w-7 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
+                        >
+                          <Minus className="size-4" />
+                        </button>
+                        <input
+                          value={purchase.quantity}
+                          onChange={(e) => {
+                            const num = Number(e.target.value);
+                            // if (!isNaN(num)) setQuantity(num);
+                            if (!isNaN(num))
+                              setPurchase((prev) => ({
+                                ...prev,
+                                quantity: num,
+                              }));
+                          }}
+                          className="btn-sm m-0 h-12 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center text-base font-semibold outline-none"
+                        />
+                        <button
+                          onClick={() =>
+                            setPurchase((prev) => ({
+                              ...prev,
+                              quantity: ++prev.quantity!,
+                            }))
+                          }
+                          className="flex h-12 w-7 min-w-7 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
+                        >
+                          <Plus className="size-4" />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="h-12 min-h-12 w-full">
+                      {!inCart || !logged ? (
+                        <LoadableButton
+                          onClick={() => {
+                            if (
+                              !product ||
+                              !purchase.quantity ||
+                              !purchase.unit
+                            )
+                              return;
+                            checkValidSession();
+
+                            addToCart.mutate({
+                              productID: product.id,
+                              quantity: purchase.quantity,
+                              unit: "u",
+                            });
+                          }}
+                          className={cn(
+                            !vacationLocked && "max-w-80",
+                            "btn btn-primary w-full min-w-80 items-center gap-3"
+                          )}
+                          isPending={addToCart.isPending}
+                          disabled={addToCart.isPending || vacationLocked}
+                          animation="dots"
+                        >
+                          <ShoppingCart className="size-5" />
+                          Añadir al carrito
+                        </LoadableButton>
+                      ) : (
+                        <Link
+                          href="/account/cart"
+                          className="btn btn-outline btn-secondary w-full items-center gap-3"
+                        >
+                          Ver en el carrito
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </SheetPrimitive.Content>
           </SheetPrimitive.Portal>
@@ -362,22 +571,38 @@ export const ProductDataDrawer = ({
                     <div className="flex h-12 w-full">
                       <button
                         onClick={() =>
-                          setQuantity((prev) => (prev > 1 ? --prev : prev))
+                          // setQuantity((prev) => (prev > 1 ? --prev : prev))
+                          setPurchase((prev) =>
+                            prev.quantity! > 1
+                              ? { ...prev, quantity: --prev.quantity! }
+                              : prev
+                          )
                         }
                         className="flex h-12 w-7 min-w-7 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
                       >
                         <Minus className="size-4" />
                       </button>
                       <input
-                        value={quantity}
+                        value={purchase.quantity}
                         onChange={(e) => {
                           const num = Number(e.target.value);
-                          if (!isNaN(num)) setQuantity(num);
+                          // if (!isNaN(num)) setQuantity(num);
+                          if (!isNaN(num))
+                            setPurchase((prev) => ({
+                              ...prev,
+                              quantity: num,
+                            }));
                         }}
                         className="btn-sm m-0 h-12 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center text-base font-semibold outline-none"
                       />
                       <button
-                        onClick={() => setQuantity((prev) => ++prev)}
+                        // onClick={() => setQuantity((prev) => ++prev)}
+                        onClick={() =>
+                          setPurchase((prev) => ({
+                            ...prev,
+                            quantity: ++prev.quantity!,
+                          }))
+                        }
                         className="flex h-12 w-7 min-w-7 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0 transition-all duration-200 hover:bg-secondary/25"
                       >
                         <Plus className="size-4" />
@@ -400,7 +625,8 @@ export const ProductDataDrawer = ({
                           }
                           addToCart.mutate({
                             productID: product.id,
-                            quantity: quantity,
+                            quantity: purchase.quantity!,
+                            unit: purchase.unit!,
                           });
                         }}
                         className="btn btn-primary w-full min-w-64 items-center gap-3"

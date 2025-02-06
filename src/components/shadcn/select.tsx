@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDownIcon } from "lucide-react";
 import { cn } from "@/utils/lib";
 
 const Select = SelectPrimitive.Root;
@@ -16,14 +16,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex w-full items-center justify-between bg-base-100 px-4 py-2",
+      "flex h-10 w-full items-center justify-between gap-3 truncate bg-base-100 px-3 py-2 data-[state=open]:rounded-b-none",
       !!className && className
     )}
     {...props}
   >
-    {children}
+    <span className="truncate">{children}</span>
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="size-6 min-w-6 text-secondary" />
+      <ChevronDownIcon className="size-5 min-w-5 text-secondary" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -38,14 +38,14 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         !!className && className,
-        "relative z-50 rounded-lg border border-secondary/20 bg-base-100 shadow-md"
+        "relative z-50 border border-secondary/40 bg-base-100 shadow-md"
       )}
       position={position}
       {...props}
     >
       <SelectPrimitive.Viewport
         className={cn(
-          "p-1",
+          // "p-1",
           position === "popper" &&
             "h-[var(--radix-select-trigger-height)] w-full min-w-[calc(var(--radix-select-trigger-width)-2px)]"
         )}
@@ -79,7 +79,7 @@ const SelectOption = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:cursor-pointer hover:bg-secondary/30 hover:text-primary",
+      "relative flex w-full items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:cursor-pointer hover:bg-secondary/20 hover:text-primary",
       !!className && className
     )}
     {...props}
@@ -90,7 +90,9 @@ const SelectOption = React.forwardRef<
       </SelectPrimitive.ItemIndicator>
     </span>
 
-    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    <SelectPrimitive.ItemText className="!w-full">
+      {children}
+    </SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ));
 SelectOption.displayName = SelectPrimitive.Item.displayName;

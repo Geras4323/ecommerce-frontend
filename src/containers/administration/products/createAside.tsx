@@ -14,7 +14,7 @@ import {
 } from "@/components/shadcn/select";
 import { Sheet, SheetContent } from "@/components/shadcn/sheet";
 import { getCategories } from "@/functions/categories";
-import { type Product } from "@/functions/products";
+import { unitSchema, type Product } from "@/functions/products";
 import { getSuppliers } from "@/functions/suppliers";
 import { useProductStore } from "@/hooks/zustand/products";
 import type { ServerError, ServerSuccess } from "@/types/types";
@@ -57,12 +57,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .transform((id) => (id ? parseInt(id) : undefined)),
-  units: z
-    .object({
-      unit: z.enum(measurementUnitsValues as [string, ...string[]]),
-      price: z.number(),
-    })
-    .array(),
+  units: unitSchema.array(),
   // .enum(measurementUnits.map((unit) => unit.value) as [string, ...string[]])
   // .array()
   // .min(1, { message: "Unidad/es requerida/s" }),

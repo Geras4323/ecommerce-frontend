@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Minus,
+  Package,
   Plus,
   ShoppingCart,
   Tags,
@@ -41,11 +42,15 @@ import { vars } from "@/utils/vars";
 import { ImageVisualizer } from "@/components/showroom";
 import { getState } from "@/functions/states";
 import { VacationAlertModal } from "@/components/modals/administration/states";
+import { useUnits } from "@/hooks/states";
+import { type MeasurementUnitsValue } from "@/utils/measurement";
 
 export default function Showroom() {
   const { session } = useSession();
   const cart = useShoppingCart();
   const mq = useMediaQueries();
+
+  const unitsState = useUnits();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedProduct, setSelectedProduct] = useState<Product>();
@@ -214,6 +219,7 @@ export default function Showroom() {
                         ) !== -1
                       }
                       vacationLocked={vacationStateQuery.data?.active ?? false}
+                      unitsEnabled={unitsState.data?.active}
                       mediaQuery={mq}
                       selectProduct={(p: Product) => setSelectedProduct(p)}
                       openImageVisualizer={(p: Product) =>
@@ -380,6 +386,7 @@ function ProductItem({
   verified,
   inCart,
   vacationLocked,
+  unitsEnabled = false,
   addToCart,
   mediaQuery,
   selectProduct,
@@ -390,12 +397,14 @@ function ProductItem({
   verified: boolean;
   inCart: boolean;
   vacationLocked: boolean;
+  unitsEnabled?: boolean;
   addToCart: UseMutationResult<
     any,
     ServerError,
     {
       productID: number;
       quantity: number;
+      unit: MeasurementUnitsValue;
     },
     unknown
   >;
@@ -460,12 +469,14 @@ function ProductItem({
           <span className="text-lg font-semibold text-primary">
             {product.name}
           </span>
-          <div className="flex items-end gap-1">
-            <span className="text-xl text-primary/70">$</span>
-            <span className="text-2xl text-primary">
-              {product.price?.toLocaleString(vars.region)}
-            </span>
-          </div>
+          {!unitsEnabled && (
+            <div className="flex items-end gap-1">
+              <span className="text-xl text-primary/70">$</span>
+              <span className="text-2xl text-primary">
+                {product.price?.toLocaleString(vars.region)}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-0.5 text-base text-primary/80">
@@ -475,7 +486,7 @@ function ProductItem({
         </div>
 
         <div className="flex w-full justify-end gap-4">
-          {!inCart && !vacationLocked && (
+          {!inCart && !vacationLocked && !unitsEnabled && (
             <div className="flex h-8 w-full items-center rounded-lg">
               <button
                 onClick={(e) => {
@@ -512,6 +523,11 @@ function ProductItem({
               onClick={(e) => {
                 e.stopPropagation();
 
+                if (unitsEnabled) {
+                  openDrawer();
+                  return;
+                }
+
                 if (!logged) {
                   router.push("/sign");
                   return;
@@ -520,15 +536,28 @@ function ProductItem({
                   router.push("/sign/verifyEmail");
                   return;
                 }
-                addToCart.mutate({ productID: product.id, quantity });
+                addToCart.mutate({
+                  productID: product.id,
+                  quantity,
+                  unit: "u",
+                });
               }}
               className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
               isPending={addToCart.isPending}
               disabled={addToCart.isPending || vacationLocked}
               animation="dots"
             >
-              <ShoppingCart className="size-5" />
-              Añadir al carrito
+              {unitsEnabled ? (
+                <>
+                  <Package className="size-5" />
+                  Ver producto
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="size-5" />
+                  Añadir al carrito
+                </>
+              )}
             </LoadableButton>
           ) : (
             <Link

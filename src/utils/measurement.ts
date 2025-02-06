@@ -20,6 +20,8 @@ export const measurementUnits = [
     label: "Litros",
   },
 ] as const;
+
+export type MeasurementUnitsValue = (typeof measurementUnitsValues)[number];
 export const measurementUnitsValues = measurementUnits.map(
   (unit) => unit.value
 );

@@ -61,7 +61,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <Analytics />
         </div>
       </ThemeProvider>
-      <ReactQueryDevtools />
+      {/* <ReactQueryDevtools /> */}
     </QueryClientProvider>
   );
 }

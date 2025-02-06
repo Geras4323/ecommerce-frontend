@@ -3,6 +3,13 @@ import { vars } from "@/utils/vars";
 import axios from "axios";
 import { z } from "zod";
 import { imageSchema } from "./images";
+import { measurementUnitsValues } from "@/utils/measurement";
+
+export type Unit = z.infer<typeof unitSchema>;
+export const unitSchema = z.object({
+  unit: z.enum(measurementUnitsValues as [string, ...string[]]),
+  price: z.number(),
+});
 
 export type Product = z.infer<typeof productSchema>;
 export const productSchema = z
@@ -16,6 +23,7 @@ export const productSchema = z
     images: imageSchema.array(),
     categoryID: z.number(),
     supplierID: z.number(),
+    units: unitSchema.array(),
   })
   .and(databaseEntrySchema);
 

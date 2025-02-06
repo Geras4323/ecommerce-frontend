@@ -25,24 +25,15 @@ import { useState } from "react";
 import { getCategories } from "@/functions/categories";
 import { type ServerPage } from "@/types/session";
 import { AccountLayout } from "@/components/layouts/account";
-import { getState } from "@/functions/states";
+import { useVacation } from "@/hooks/states";
 
 const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   const queryClient = useQueryClient();
   const cart = useShoppingCart();
 
-  const [confirmedOrder, setConfirmedOrder] = useState<OrderItem | null>(null);
+  const vacationState = useVacation();
 
-  const vacationStateQuery = useQuery<
-    Awaited<ReturnType<typeof getState>>,
-    ServerError
-  >({
-    queryKey: ["vacation", "cart"],
-    queryFn: () => getState("vacation"),
-    retry: false,
-    staleTime: 1000,
-    refetchOnWindowFocus: true,
-  });
+  const [confirmedOrder, setConfirmedOrder] = useState<OrderItem | null>(null);
 
   const productsQuery = useQuery<
     Awaited<ReturnType<typeof getProducts>>,
@@ -187,7 +178,7 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
                   className="btn btn-primary btn-sm ml-1 w-48"
                   animation="dots"
                   disabled={
-                    cart.cartItems.isPending || vacationStateQuery.data?.active
+                    cart.cartItems.isPending || vacationState.data?.active
                   }
                 >
                   <Check className="size-5" />

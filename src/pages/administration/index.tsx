@@ -1,8 +1,6 @@
 import { withAuth } from "@/functions/session";
-import { getState } from "@/functions/states";
 import { sections } from "@/layouts/administration";
 import { GeneralLayout } from "@/layouts/general";
-import { useQuery } from "@tanstack/react-query";
 import {
   AlarmClock,
   AlarmClockOff,
@@ -14,7 +12,7 @@ import {
   Weight,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   DisableVacationStateModal,
   EnableVacationStateModal,
@@ -31,41 +29,20 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { vars } from "@/utils/vars";
+import { useMercadopago, useUnits, useVacation } from "@/hooks/states";
 
 export default function Administration() {
+  const vacationState = useVacation();
+  const mercadopagoState = useMercadopago();
+  const unitsState = useUnits();
+
   const [isVacationModalOpen, setIsVacationModalOpen] = useState(false);
   const [isMercadopagoModalOpen, setIsMercadopagoModalOpen] = useState(false);
   const [isUnitsModalOpen, setIsUnitsModalOpen] = useState(false);
 
-  const vacationStateQuery = useQuery({
-    queryKey: ["vacation"],
-    queryFn: () => getState("vacation"),
-    retry: false,
-    refetchOnWindowFocus: true,
-  });
-
-  const mercadopagoStateQuery = useQuery({
-    queryKey: ["mercadopago"],
-    queryFn: () => getState("mercadopago"),
-    retry: false,
-    refetchOnWindowFocus: true,
-  });
-
-  const unitsStateQuery = useQuery({
-    queryKey: ["units"],
-    queryFn: () => getState("units"),
-    retry: false,
-    refetchOnWindowFocus: true,
-  });
-
-  useEffect(() => {
-    if (vacationStateQuery.isError)
-      console.log(vacationStateQuery.error.message);
-  }, [vacationStateQuery.isError, vacationStateQuery.error]);
-
-  const vacation = vacationStateQuery.data;
-  const mercadopago = mercadopagoStateQuery.data;
-  const units = unitsStateQuery.data;
+  const vacation = vacationState.data;
+  const mercadopago = mercadopagoState.data;
+  const units = unitsState.data;
 
   const vacationIsActiveOrProgrammed =
     vacation?.active || (!vacation?.active && vacation?.from);

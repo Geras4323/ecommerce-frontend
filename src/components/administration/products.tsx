@@ -1,7 +1,6 @@
 import type { Category } from "@/functions/categories";
 import type { Product } from "@/functions/products";
 import type { Supplier } from "@/functions/suppliers";
-import { measurementUnits } from "@/utils/measurement";
 import { vars } from "@/utils/vars";
 import {
   Barcode,
@@ -9,7 +8,6 @@ import {
   GripVertical,
   ListOrdered,
   Tag,
-  Weight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

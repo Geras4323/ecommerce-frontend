@@ -7,6 +7,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "./session";
 import type { ServerError } from "@/types/types";
+import { type MeasurementUnitsValue } from "@/utils/measurement";
 
 export function useShoppingCart() {
   const { session } = useSession();
@@ -36,7 +37,11 @@ export function useShoppingCart() {
   const addCartItem = useMutation<
     any,
     ServerError,
-    { productID: number; quantity: number }
+    {
+      productID: number;
+      quantity: number;
+      unit: MeasurementUnitsValue;
+    }
   >({
     mutationFn: (data) => createCartItem(data.productID, data.quantity),
     onSuccess: refetchProducts,
