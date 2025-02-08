@@ -3,13 +3,15 @@ import { type MeasurementUnitsValue } from "@/utils/measurement";
 import { vars } from "@/utils/vars";
 import axios from "axios";
 import { z } from "zod";
+import { unitSchema } from "./products";
 
 export type TCartItem = z.infer<typeof cartItemSchema>;
 export const cartItemSchema = z
   .object({
+    quantity: z.number(),
     userID: z.number(),
     productID: z.number(),
-    quantity: z.number(),
+    unit: unitSchema.merge(databaseEntrySchema),
   })
   .and(databaseEntrySchema);
 

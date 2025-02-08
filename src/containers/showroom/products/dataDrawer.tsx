@@ -251,7 +251,11 @@ export const ProductDataDrawer = ({
                 {/* Add to cart */}
                 {/* Yes, you'll find a bunch of "!" (Non Nullish Assertions). Fuck it. Fucking TS can't see that values won't be null where I used it */}
                 {/* Womp womp, stfu */}
-                {unitsEnabled ? (
+                {inCart ? (
+                  <button className="btn btn-outline w-full">
+                    Ver en el carrito
+                  </button>
+                ) : unitsEnabled ? (
                   <div className="flex flex-col gap-2">
                     <div className="flex h-12 min-h-12 w-full items-center gap-2">
                       {/* <Select onValueChange={(v) => setValue(v)} value={value}> */}
@@ -367,7 +371,10 @@ export const ProductDataDrawer = ({
                             className={cn(
                               "btn btn-primary w-full items-center gap-3"
                             )}
-                            isPending={addToCart.isPending}
+                            isPending={
+                              addToCart.isPending &&
+                              addToCart.variables.productID === product?.id
+                            }
                             disabled={addToCart.isPending || vacationLocked}
                             animation="dots"
                           >
@@ -444,7 +451,10 @@ export const ProductDataDrawer = ({
                             !vacationLocked && "max-w-80",
                             "btn btn-primary w-full min-w-80 items-center gap-3"
                           )}
-                          isPending={addToCart.isPending}
+                          isPending={
+                            addToCart.isPending &&
+                            addToCart.variables.productID === product?.id
+                          }
                           disabled={addToCart.isPending || vacationLocked}
                           animation="dots"
                         >
@@ -454,7 +464,7 @@ export const ProductDataDrawer = ({
                       ) : (
                         <Link
                           href="/account/cart"
-                          className="btn btn-outline btn-secondary w-full items-center gap-3"
+                          className="btn btn-outline w-full items-center gap-3"
                         >
                           Ver en el carrito
                         </Link>
@@ -630,7 +640,10 @@ export const ProductDataDrawer = ({
                           });
                         }}
                         className="btn btn-primary w-full min-w-64 items-center gap-3"
-                        isPending={addToCart.isPending}
+                        isPending={
+                          addToCart.isPending &&
+                          addToCart.variables.productID === product?.id
+                        }
                         disabled={addToCart.isPending || vacationLocked}
                         animation="dots"
                       >
@@ -640,7 +653,7 @@ export const ProductDataDrawer = ({
                     ) : (
                       <Link
                         href="/account/cart"
-                        className="btn btn-outline btn-secondary w-full items-center gap-3"
+                        className="btn btn-outline w-full items-center gap-3"
                       >
                         Ver en el carrito
                       </Link>

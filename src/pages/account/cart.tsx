@@ -9,7 +9,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Check, Minus, Plus, Trash2, Undo2 } from "lucide-react";
+import { Check, Minus, Plus, Trash2, Undo2, Weight } from "lucide-react";
 import Image from "next/image";
 import NoImage from "../../../public/no_image.png";
 import { cn } from "@/utils/lib";
@@ -56,10 +56,7 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
   });
 
   const total = cart.cartItems.data?.reduce((acc, curr) => {
-    const product = productsQuery.data?.find((p) => p.id === curr.productID);
-    if (!product) return 0;
-
-    const price = curr.quantity * product?.price;
+    const price = curr.quantity * curr.unit.price;
     return acc + price;
   }, 0);
 
@@ -305,7 +302,7 @@ export function CartItem({
   product: Product;
   category?: string;
 }) {
-  const price = item.quantity * product.price;
+  const price = item.quantity * item.unit.price;
 
   return (
     <div className="relative flex h-36 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 lg:h-28 lg:flex-row">
@@ -314,6 +311,7 @@ export function CartItem({
         className="absolute right-2 top-2 size-5 cursor-pointer text-secondary/60 transition-all hover:text-error"
       />
 
+      {/* PRODUCT */}
       <div className="flex flex-row gap-6">
         {/* Image and shadow effect */}
         <div className="relative size-16 min-w-16 rounded-full">
@@ -335,6 +333,7 @@ export function CartItem({
         </div>
       </div>
 
+      {/* PRICE */}
       <div className="flex h-fit flex-row items-end justify-end gap-4 lg:mr-6 lg:flex-col lg:justify-center lg:gap-2">
         <div className="flex w-fit items-center justify-center gap-1 text-center lg:w-full lg:items-end">
           <span className="text-base text-primary/70">$</span>
@@ -343,34 +342,43 @@ export function CartItem({
           </span>
         </div>
 
-        <div className="flex h-8 w-24 items-center rounded-lg">
-          <button
-            onClick={() =>
-              updateItem.mutate({ id: item.id, quantity: --item.quantity })
-            }
-            disabled={item.quantity === 1}
-            className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 disabled:text-secondary/50"
-          >
-            <Minus className="size-4" />
-          </button>
-          <input
-            value={item.quantity}
-            onChange={(e) => {
-              const num = Number(e.target.value);
-              if (!isNaN(num))
-                // updateItem.mutate({ id: item.id, quantity: num > 0 ? num : 1 });
-                updateItem.mutate({ id: item.id, quantity: num });
-            }}
-            className="btn-sm m-0 h-8 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center font-semibold outline-none"
-          />
-          <button
-            onClick={() =>
-              updateItem.mutate({ id: item.id, quantity: ++item.quantity })
-            }
-            className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0"
-          >
-            <Plus className="size-4" />
-          </button>
+        <div className="flex items-center gap-2">
+          {/* Quantity */}
+          <div className="flex h-8 w-24 items-center rounded-lg">
+            <button
+              onClick={() =>
+                updateItem.mutate({ id: item.id, quantity: --item.quantity })
+              }
+              disabled={item.quantity === 1}
+              className="flex h-8 w-8 items-center justify-center rounded-l-lg rounded-r-none border-2 border-secondary/20 bg-base-100/70 p-0 disabled:text-secondary/50"
+            >
+              <Minus className="size-4" />
+            </button>
+            <input
+              value={item.quantity}
+              onChange={(e) => {
+                const num = Number(e.target.value);
+                if (!isNaN(num))
+                  // updateItem.mutate({ id: item.id, quantity: num > 0 ? num : 1 });
+                  updateItem.mutate({ id: item.id, quantity: num });
+              }}
+              className="btn-sm m-0 h-8 w-full max-w-10 rounded-none border-y-2 border-y-secondary/20 bg-base-100/70 p-1 text-center font-semibold outline-none"
+            />
+            <button
+              onClick={() =>
+                updateItem.mutate({ id: item.id, quantity: ++item.quantity })
+              }
+              className="flex h-8 w-8 items-center justify-center rounded-l-none rounded-r-lg border-2 border-secondary/20 bg-base-100/70 p-0"
+            >
+              <Plus className="size-4" />
+            </button>
+          </div>
+
+          {/* Unit */}
+          <div className="flex items-center gap-2 uppercase">
+            <Weight className="-mt-0.5 size-5 min-w-5 text-secondary" />
+            {item.unit.unit}
+          </div>
         </div>
       </div>
     </div>

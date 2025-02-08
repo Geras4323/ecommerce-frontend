@@ -543,7 +543,10 @@ function ProductItem({
                 });
               }}
               className="btn btn-primary btn-sm flex min-w-48 items-center gap-3"
-              isPending={addToCart.isPending}
+              isPending={
+                addToCart.isPending &&
+                addToCart.variables.productID === product?.id
+              }
               disabled={addToCart.isPending || vacationLocked}
               animation="dots"
             >
@@ -563,7 +566,7 @@ function ProductItem({
             <Link
               onClick={(e) => e.stopPropagation()}
               href="/account/cart"
-              className="btn btn-outline btn-secondary btn-sm flex min-w-48 items-center gap-3"
+              className="btn btn-outline btn-sm flex min-w-48 items-center gap-3"
             >
               Ver en el carrito
             </Link>
