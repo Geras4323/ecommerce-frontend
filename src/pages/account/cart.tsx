@@ -71,6 +71,7 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
         console.log(item);
         return {
           productID: item.productID,
+          unitID: item.unit.id,
           quantity: item.quantity,
         };
       });
@@ -95,11 +96,17 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
       const products: { name?: string; value: string; inline: boolean }[] = [];
 
       data.order.orderProducts?.map((item) => {
-        return products.push({
-          name: productsQuery.data?.find((p) => p.id === item.product.id)?.name,
-          value: `x ${item.quantity}`,
-          inline: true,
-        });
+        const product = productsQuery.data?.find(
+          (p) => p.id === item.product.id
+        );
+        if (product)
+          return products.push({
+            name: product.name,
+            value: `${item.quantity}${
+              item.unit.unit
+            } x $${item.unit.price.toLocaleString(vars.region)}`,
+            inline: true,
+          });
       });
 
       return axios.postForm(`${vars.discordNotify}`, {
