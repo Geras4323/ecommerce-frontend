@@ -21,9 +21,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import NoImage from "../../../public/no_image.png";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type OrderStates } from "src/pages/administration/orders/[code]";
 import { vars } from "@/utils/vars";
+import { useUnits } from "@/hooks/states";
 
 export function OrdersItemSkeleton({
   fromAdmin = false,
@@ -326,8 +327,15 @@ export function SingleOrderItem({
   category?: string;
   showCategory?: boolean;
 }) {
+  const unitsState = useUnits();
+
   const product = item.product;
-  const price = item.quantity * product.price;
+  const total = item.quantity * item.unit.price;
+
+  const unitsEnabled = useMemo(
+    () => unitsState.data?.active,
+    [unitsState.data]
+  );
 
   return (
     <div className="flex h-36 w-full flex-col justify-between gap-2 rounded-xl border-2 border-secondary/20 p-4 xs:h-28 xs:flex-row xs:gap-6">
@@ -356,19 +364,22 @@ export function SingleOrderItem({
         <div className="order-2 flex w-fit items-end justify-center gap-1 border-l border-secondary/50 pl-3 text-center xs:order-1 xs:border-none xs:pl-0">
           <span className="text-lg text-primary/70">$</span>
           <span className="text-xl text-primary">
-            {price.toLocaleString(vars.region)}
+            {total.toLocaleString(vars.region)}
           </span>
         </div>
 
         <div className="order-1 flex h-8 w-fit items-end justify-center gap-2 rounded-lg xs:order-2">
           <div className="flex items-end gap-0.5">
             <span className="text-xl text-primary">{item.quantity}</span>
+            {unitsEnabled && (
+              <span className="text-xl text-primary">{item.unit.unit}</span>
+            )}
             <span className="text-base text-primary/70">x</span>
           </div>
           <div className="flex items-end gap-0.5">
             <span className="text-base text-primary/70">$</span>
             <span className="text-lg text-primary">
-              {product.price.toLocaleString(vars.region)}
+              {item.unit.price.toLocaleString(vars.region)}
             </span>
           </div>
         </div>

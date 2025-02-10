@@ -68,7 +68,6 @@ const Cart: ServerPage<typeof getServerSideProps> = ({ session }) => {
     mutationFn: async () => {
       const url = `${vars.serverUrl}/api/v1/orders`;
       const items = cart.cartItems.data?.map((item) => {
-        console.log(item);
         return {
           productID: item.productID,
           unitID: item.unit.id,

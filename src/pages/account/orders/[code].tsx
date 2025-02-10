@@ -50,14 +50,15 @@ import {
 } from "@/functions/mercadopago";
 import { toast, Toaster } from "sonner";
 import { AwaitingPaymentModal } from "@/components/modals/payment";
-import { getState } from "@/functions/states";
 import { mqs, useMediaQueries } from "@/hooks/screen";
+import { useMercadopago } from "@/hooks/states";
 
 export default function Order() {
   const params = useParams();
   const queryClient = useQueryClient();
 
   const mq = useMediaQueries();
+  const mercadopagoState = useMercadopago();
 
   const [isOrderDataShown, setIsOrderDataShown] = useState(true);
 
@@ -71,14 +72,9 @@ export default function Order() {
   const [paymentToCheck, setPaymentToCheck] = useState<number>();
   const waitingForPaymentToast = useRef<ReturnType<typeof toast>>();
 
-  // Queries ///////////////////////////////////////////////////////////////////////////////
-  const mercadopagoStateQuery = useQuery({
-    queryKey: ["mercadopago"],
-    queryFn: () => getState("mercadopago"),
-    retry: false,
-    refetchOnWindowFocus: true,
-  });
+  const mercadopago = mercadopagoState.data;
 
+  // Queries ///////////////////////////////////////////////////////////////////////////////
   const productsQuery = useQuery<
     Awaited<ReturnType<typeof getProducts>>,
     ServerError
@@ -223,8 +219,6 @@ export default function Order() {
     createMPPaymentMutation.mutate(productsList);
   }
   // Functions /////////////////////////////////////////////////////////////////////////////
-
-  console.log("token: ", vars.mp_access_token);
 
   return (
     <>
@@ -381,91 +375,87 @@ export default function Order() {
                 </>
               )}
 
-              {!orderQuery.isPending &&
-                !orderQuery.isError &&
-                !mercadopagoStateQuery.isPending &&
-                !mercadopagoStateQuery.isError && (
-                  <div className="flex w-full flex-col gap-2">
-                    {mercadopagoStateQuery.data.active &&
-                      !!vars.mp_access_token && (
-                        <LoadableButton
-                          isPending={createMPPaymentMutation.isPending}
-                          onClick={redirectToMP}
-                          className="btn btn-outline btn-primary w-full border border-sky-500"
+              {!orderQuery.isPending && !orderQuery.isError && (
+                <div className="flex w-full flex-col gap-2">
+                  {mercadopago?.active && !!vars.mp_access_token && (
+                    <LoadableButton
+                      isPending={createMPPaymentMutation.isPending}
+                      onClick={redirectToMP}
+                      className="btn btn-outline btn-primary w-full border border-sky-500"
+                    >
+                      <Image
+                        alt="mp"
+                        src={MercadoPago}
+                        className="size-9 min-w-9"
+                        unoptimized
+                      />
+                      Abonar con MercadoPago
+                    </LoadableButton>
+                  )}
+
+                  {!uploadedVoucher && (
+                    <>
+                      <input
+                        id="voucher"
+                        type="file"
+                        hidden
+                        onChange={(e) => {
+                          if (e.target.files) loadVoucher(e.target.files[0]);
+                        }}
+                      />
+                      <label
+                        htmlFor="voucher"
+                        className="btn btn-outline btn-primary w-full"
+                      >
+                        <Paperclip className="size-5" /> Adjuntar comprobante de
+                        pago
+                      </label>
+
+                      <ErrorAlert
+                        message={
+                          uploadVoucherMutation.error?.response?.data.comment
+                        }
+                      />
+                    </>
+                  )}
+
+                  {uploadedVoucher && (
+                    <div className="my-1.5 flex items-center justify-between gap-2">
+                      <Tooltip>
+                        <TooltipTrigger className="cursor-default truncate text-lg">
+                          {uploadedVoucher.name}
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="bottom"
+                          align="start"
+                          className="w-fit rounded-md border border-secondary/30 bg-base-100 px-2 py-1"
                         >
-                          <Image
-                            alt="mp"
-                            src={MercadoPago}
-                            className="size-9 min-w-9"
-                            unoptimized
-                          />
-                          Abonar con MercadoPago
-                        </LoadableButton>
-                      )}
+                          <TooltipArrow className="fill-secondary" />
+                          {uploadedVoucher.name}
+                        </TooltipContent>
+                      </Tooltip>
 
-                    {!uploadedVoucher && (
-                      <>
-                        <input
-                          id="voucher"
-                          type="file"
-                          hidden
-                          onChange={(e) => {
-                            if (e.target.files) loadVoucher(e.target.files[0]);
-                          }}
-                        />
-                        <label
-                          htmlFor="voucher"
-                          className="btn btn-outline btn-primary w-full"
-                        >
-                          <Paperclip className="size-5" /> Adjuntar comprobante
-                          de pago
-                        </label>
+                      <button
+                        type="button"
+                        onClick={() => setUploadedVoucher(undefined)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        <Trash2 className="size-4 min-w-4" />
+                      </button>
 
-                        <ErrorAlert
-                          message={
-                            uploadVoucherMutation.error?.response?.data.comment
-                          }
-                        />
-                      </>
-                    )}
-
-                    {uploadedVoucher && (
-                      <div className="my-1.5 flex items-center justify-between gap-2">
-                        <Tooltip>
-                          <TooltipTrigger className="cursor-default truncate text-lg">
-                            {uploadedVoucher.name}
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="bottom"
-                            align="start"
-                            className="w-fit rounded-md border border-secondary/30 bg-base-100 px-2 py-1"
-                          >
-                            <TooltipArrow className="fill-secondary" />
-                            {uploadedVoucher.name}
-                          </TooltipContent>
-                        </Tooltip>
-
-                        <button
-                          type="button"
-                          onClick={() => setUploadedVoucher(undefined)}
-                          className="btn btn-outline btn-sm"
-                        >
-                          <Trash2 className="size-4 min-w-4" />
-                        </button>
-
-                        <LoadableButton
-                          isPending={uploadVoucherMutation.isPending}
-                          onClick={() => uploadVoucherMutation.mutate()}
-                          className="btn btn-primary btn-sm w-52"
-                          animation="dots"
-                        >
-                          <FileUp className="size-5" />
-                          <span>Subir comprobante</span>
-                        </LoadableButton>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      <LoadableButton
+                        isPending={uploadVoucherMutation.isPending}
+                        onClick={() => uploadVoucherMutation.mutate()}
+                        className="btn btn-primary btn-sm w-52"
+                        animation="dots"
+                      >
+                        <FileUp className="size-5" />
+                        <span>Subir comprobante</span>
+                      </LoadableButton>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Payment Vouchers */}
               {!orderQuery.isPending &&
