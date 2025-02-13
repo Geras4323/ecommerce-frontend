@@ -45,6 +45,7 @@ import {
   DropdownItem,
   DropdownTrigger,
 } from "@/components/shadcn/dropdown";
+import { Comfortaa } from "next/font/google";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -66,6 +67,8 @@ const inputSchema = z.object({
   // ),
   description: z.string().min(10, { message: "Mínimo 10 caracteres" }),
 });
+
+const comfortaa = Comfortaa({ subsets: ["latin"] });
 
 export function ProductCreateAside() {
   const queryClient = useQueryClient();
@@ -222,7 +225,10 @@ export function ProductCreateAside() {
     <Sheet open={create_isOpen}>
       <SheetContent
         side="right"
-        className="flex h-full w-full flex-col border-l border-l-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
+        className={cn(
+          comfortaa.className,
+          "flex h-full w-full flex-col border-l border-l-secondary/20 bg-base-100 md:w-1/3 md:min-w-screen-sm"
+        )}
       >
         {/* HEADER */}
         <div className="mb-8 flex h-fit w-full items-center justify-end gap-4">
@@ -263,7 +269,7 @@ export function ProductCreateAside() {
                   type="text"
                   placeholder="Nuevo nombre"
                   {...register("name")}
-                  className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
+                  className="input input-bordered w-full shadow-inner-sm placeholder:text-secondary focus:shadow-inner-sm focus:outline-none"
                 />
                 <ErrorSpan message={errors.name?.message} />
               </div>
@@ -324,7 +330,7 @@ export function ProductCreateAside() {
                             // defaultValue="no_category"
                             onValueChange={(v) => field.onChange(v)}
                           >
-                            <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
+                            <SelectTrigger className="input input-bordered h-12 w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                               <SelectValue placeholder="Seleccionar categoría" />
                             </SelectTrigger>
                             <SelectContent>
@@ -362,7 +368,7 @@ export function ProductCreateAside() {
                             defaultValue="no_supplier"
                             onValueChange={(v) => field.onChange(v)}
                           >
-                            <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
+                            <SelectTrigger className="input input-bordered h-12 w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                               {/* <SelectValue placeholder="Seleccionar proveedor" /> */}
                               <SelectValue />
                             </SelectTrigger>
@@ -453,7 +459,7 @@ export function ProductCreateAside() {
                                     </Dropdown>
                                     <input
                                       type="text"
-                                      className="input input-bordered w-full rounded-none focus:outline-none"
+                                      className="input input-bordered w-full rounded-none placeholder:text-secondary focus:outline-none"
                                       placeholder={
                                         !selectedUnitName
                                           ? "Precio"

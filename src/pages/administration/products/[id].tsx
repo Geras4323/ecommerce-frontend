@@ -9,7 +9,16 @@ import { vars } from "@/utils/vars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { ArrowLeft, ChevronLeft, Trash2, Upload, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronLeft,
+  Info,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { type SubmitHandler, useForm, Controller } from "react-hook-form";
@@ -28,7 +37,7 @@ import {
 } from "@/components/shadcn/select";
 import { getCategories } from "@/functions/categories";
 import { getSuppliers } from "@/functions/suppliers";
-import { getProduct, type Product } from "@/functions/products";
+import { getProduct, unitSchema, type Product } from "@/functions/products";
 import { ReactSortable } from "react-sortablejs";
 import { cn } from "@/utils/lib";
 import { type ProductImage } from "@/functions/images";
@@ -38,6 +47,14 @@ import imageCompression from "browser-image-compression";
 import _, { round } from "lodash";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useUnits } from "@/hooks/states";
+import { measurementUnits, measurementUnitsValues } from "@/utils/measurement";
+import {
+  Dropdown,
+  DropdownContent,
+  DropdownItem,
+  DropdownTrigger,
+} from "@/components/shadcn/dropdown";
 
 export type ProductsFilters = {
   name: string | null;
@@ -60,6 +77,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .transform((id) => (id ? parseInt(id) : undefined)),
+  units: unitSchema.array(),
   description: z.string().min(10, { message: "Mínimo 10 caracteres" }),
 });
 
@@ -67,6 +85,9 @@ export default function ProductData() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
+
+  const unitsState = useUnits();
+  const unitsEnabled = unitsState.data?.active;
 
   const [existentFiles, setExistentFiles] = useState<
     (ProductImage & { isDeleted: boolean })[]
@@ -151,7 +172,8 @@ export default function ProductData() {
       Number(values.price).toLocaleString(vars.region) !==
         productQuery.data?.price.toLocaleString(vars.region) ||
       Number(values.categoryID) !== productQuery.data?.categoryID ||
-      Number(values.supplierID) !== productQuery.data?.supplierID
+      Number(values.supplierID) !== productQuery.data?.supplierID ||
+      !_.isEqual(values.units, productQuery.data?.units)
     );
   }
 
@@ -197,6 +219,11 @@ export default function ProductData() {
       price: `${round(productQuery.data?.price ?? 0, 2)}`,
       categoryID: `${productQuery.data?.categoryID}`,
       supplierID: `${productQuery.data?.supplierID}`,
+      units:
+        productQuery.data?.units.map((unit) => ({
+          unit: unit.unit,
+          price: unit.price,
+        })) ?? [],
     },
   });
 
@@ -404,13 +431,13 @@ export default function ProductData() {
                         type="text"
                         placeholder="Nuevo nombre"
                         {...register("name")}
-                        className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
+                        className="input input-bordered w-full shadow-inner-sm placeholder:text-secondary focus:shadow-inner-sm focus:outline-none"
                       />
                     )}
                     <ErrorSpan message={errors.name?.message} />
                   </div>
 
-                  <div className="flex flex-col gap-1">
+                  {/* <div className="flex flex-col gap-1">
                     <label
                       htmlFor="price"
                       className="text-base tracking-wide text-primary"
@@ -431,9 +458,9 @@ export default function ProductData() {
                       </div>
                     )}
                     <ErrorSpan message={errors.price?.message} />
-                  </div>
+                  </div> */}
 
-                  <div className="flex h-full flex-col justify-start gap-1">
+                  {/* <div className="flex h-full flex-col justify-start gap-1">
                     <label
                       htmlFor="code"
                       className="text-base tracking-wide text-primary"
@@ -448,12 +475,13 @@ export default function ProductData() {
                         type="text"
                         placeholder="Nuevo código"
                         {...register("code")}
-                        className="input input-bordered w-full shadow-inner-sm focus:shadow-inner-sm focus:outline-none"
+                        className="input input-bordered w-full shadow-inner-sm placeholder:text-secondary focus:shadow-inner-sm focus:outline-none"
                       />
                     )}
                     <ErrorSpan message={errors.code?.message} />
-                  </div>
+                  </div> */}
 
+                  {/* Category */}
                   <div className="col-span-2 flex flex-col gap-1 md:col-span-1">
                     <label
                       htmlFor="category"
@@ -472,7 +500,7 @@ export default function ProductData() {
                             defaultValue={`${productQuery.data.categoryID}`}
                             onValueChange={(v) => field.onChange(v)}
                           >
-                            <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
+                            <SelectTrigger className="input input-bordered h-12 w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -492,6 +520,7 @@ export default function ProductData() {
                     <ErrorSpan message={errors.categoryID?.message} />
                   </div>
 
+                  {/* Provider */}
                   <div className="col-span-2 flex flex-col gap-1 md:col-span-1">
                     <label
                       htmlFor="supplier"
@@ -514,7 +543,7 @@ export default function ProductData() {
                             }
                             onValueChange={(v) => field.onChange(v)}
                           >
-                            <SelectTrigger className="input input-bordered w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
+                            <SelectTrigger className="input input-bordered h-12 w-full border shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -539,6 +568,129 @@ export default function ProductData() {
                     <ErrorSpan message={errors.supplierID?.message} />
                   </div>
 
+                  {/* Measurement Units */}
+                  <div className="col-span-2 flex h-full flex-col justify-start gap-1">
+                    <label
+                      htmlFor="units"
+                      className="text-base tracking-wide text-primary"
+                    >
+                      <MandatoryMark /> UNIDADES DE MEDIDA:
+                    </label>
+                    {suppliersQuery.isPending ? (
+                      <div className="h-12 w-full animate-pulse rounded-lg bg-secondary/20" />
+                    ) : (
+                      <Controller
+                        name="units"
+                        control={control}
+                        render={({ field }) => {
+                          const selectedUnits = field.value.map(
+                            (unit) => unit.unit
+                          );
+                          const unitsLeft = measurementUnits.filter(
+                            (unit) => !selectedUnits.includes(unit.value)
+                          );
+                          return (
+                            <div className="flex w-full flex-col rounded-none first:rounded-t-md last:rounded-b-md">
+                              {field.value.map((newUnit, i) => {
+                                const selectedUnitName = measurementUnits.find(
+                                  (unit) => newUnit.unit === unit.value
+                                )?.label;
+                                return (
+                                  <div
+                                    key={newUnit.unit}
+                                    className="flex h-12 min-h-12 w-full items-center"
+                                  >
+                                    <Dropdown>
+                                      <DropdownTrigger className="input input-bordered flex w-full items-center justify-between rounded-none border text-left shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none data-[state=open]:rounded-b-none">
+                                        {selectedUnitName ??
+                                          "Seleccionar unidad"}
+                                        <ChevronDown className="size-6 min-w-6 text-secondary" />
+                                      </DropdownTrigger>
+                                      <DropdownContent
+                                        sideOffset={0}
+                                        className="max-w-[var(--radix-dropdown-menu-trigger-width)] border border-secondary/30 bg-base-100"
+                                      >
+                                        {unitsLeft.length !== 0 ? (
+                                          unitsLeft.map((unit) => (
+                                            <DropdownItem
+                                              key={unit.value}
+                                              onClick={() => {
+                                                const temp = [...field.value];
+                                                temp[i]!.unit = unit.value; // There will always be something in that position
+                                                field.onChange(temp);
+                                              }}
+                                              className="flex h-10 w-full cursor-pointer items-center px-4 hover:bg-secondary/15"
+                                            >
+                                              {unit.label}
+                                            </DropdownItem>
+                                          ))
+                                        ) : (
+                                          <div className="flex min-h-10 w-full items-center justify-center gap-2 px-3 py-1.5 text-sm text-secondary">
+                                            <Info className="size-4 min-w-4" />
+                                            <p>No quedan unidades de medida</p>
+                                          </div>
+                                        )}
+                                      </DropdownContent>
+                                    </Dropdown>
+                                    <input
+                                      type="text"
+                                      className="input input-bordered w-full rounded-none placeholder:text-secondary focus:outline-none"
+                                      placeholder={
+                                        !selectedUnitName
+                                          ? "Precio"
+                                          : `Precio por ${
+                                              selectedUnitName === "Unidades"
+                                                ? "unidad"
+                                                : selectedUnitName
+                                                    ?.slice(0, -1)
+                                                    .toLowerCase()
+                                            }`
+                                      }
+                                      value={newUnit.price}
+                                      onChange={(e) => {
+                                        const temp = [...field.value];
+                                        temp[i]!.price = Number(e.target.value); // There will always be something in that position
+                                        field.onChange(temp);
+                                      }}
+                                    />
+                                    {field.value.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          // Remove new measurement unit
+                                          const temp = field.value;
+                                          temp.splice(i, 1);
+                                          field.onChange(temp);
+                                        }}
+                                        className="flex aspect-square h-full cursor-pointer items-center justify-center border border-secondary/30 text-secondary hover:bg-secondary/15 hover:text-error"
+                                      >
+                                        <Trash2 className="size-5 min-w-5" />
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              {/* New Measurement Unit */}
+                              {field.value.length <
+                                measurementUnitsValues.length && (
+                                <div
+                                  onClick={
+                                    () => field.onChange([...field.value, {}]) // Add new empty measurement unit
+                                  }
+                                  className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-b-md border-x border-b border-secondary/30 hover:bg-secondary/15"
+                                >
+                                  <Plus className="size-5 min-w-5" />
+                                  Nueva unidad
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                    )}
+                    <ErrorSpan message={errors.units?.message} />
+                  </div>
+
                   <div className="col-span-2 flex flex-col gap-1">
                     <label
                       htmlFor="description"
@@ -561,7 +713,7 @@ export default function ProductData() {
                 </div>
 
                 {/* IMAGES */}
-                <div className="flex w-full min-w-80 flex-col gap-1 sm:w-80">
+                <div className="flex w-full min-w-80 flex-col gap-2 sm:w-80">
                   <label className="text-base tracking-wide text-primary">
                     IMÁGENES:
                   </label>
