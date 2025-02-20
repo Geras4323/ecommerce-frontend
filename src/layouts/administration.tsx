@@ -8,6 +8,7 @@ import {
   WalletCards,
   Tags,
   Boxes,
+  SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { Toaster } from "sonner";
@@ -17,39 +18,51 @@ type Section = {
   url: string;
   icon: LucideIcon;
   disabled: boolean;
+  separator: boolean;
 };
 
 export type SectionName = (typeof sections)[number]["name"];
 export const sections = [
+  // {
+  //   name: "Inicio",
+  //   url: "/administration",
+  //   icon: SlidersHorizontal,
+  //   disabled: false,
+  // },
   {
     name: "Proveedores",
     url: "/administration/suppliers",
     icon: ClipboardList,
     disabled: false,
+    separator: false,
   },
   {
     name: "Categorías",
     url: "/administration/categories",
     icon: Tags,
     disabled: false,
+    separator: false,
   },
   {
     name: "Productos",
     url: "/administration/products",
     icon: Boxes,
     disabled: false,
+    separator: true,
   },
   {
     name: "Usuarios",
     url: "/administration/users",
     icon: UsersRound,
     disabled: true,
+    separator: false,
   },
   {
     name: "Pedidos",
     url: "/administration/orders",
     icon: WalletCards,
     disabled: false,
+    separator: false,
   },
 ] as const satisfies readonly Section[];
 
@@ -62,26 +75,33 @@ export function AdministrationLayout({
       <Toaster richColors />
       <GeneralLayout title="Dashboard" description="This is the dashboard">
         <div className="relative flex w-full xs:pl-20">
-          <section className="fixed left-0 top-0 z-10 hidden h-full w-20 flex-col overflow-hidden border-r border-r-secondary/20 bg-base-100 pt-16 transition-all delay-300 hover:w-72 xs:flex">
-            {sections.map((section, i) => {
-              if (i < 3)
+          <section className="fixed left-0 top-0 z-10 hidden h-full w-20 flex-col overflow-hidden border-r border-r-secondary/30 bg-base-100 pt-16 transition-all delay-300 hover:w-72 xs:flex">
+            <>
+              <SectionItem
+                section={{
+                  name: "Inicio",
+                  url: "/administration",
+                  icon: SlidersHorizontal,
+                  disabled: false,
+                  separator: false,
+                }}
+                active={false}
+              />
+              <hr className="border-secondary/30" />
+            </>
+            {sections.map((section) => {
+              if (!section.disabled)
                 return (
-                  <SectionItem
-                    key={section.name}
-                    section={section}
-                    active={section.name === active}
-                  />
-                );
-            })}
-            <hr className="border-secondary/20" />
-            {sections.map((section, i) => {
-              if (i >= 3 && !section.disabled)
-                return (
-                  <SectionItem
-                    key={section.name}
-                    section={section}
-                    active={section.name === active}
-                  />
+                  <>
+                    <SectionItem
+                      key={section.name}
+                      section={section}
+                      active={section.name === active}
+                    />
+                    {section.separator && (
+                      <hr className="border-secondary/30" />
+                    )}
+                  </>
                 );
             })}
           </section>
@@ -138,7 +158,7 @@ const SectionItem = ({
         "flex h-16 w-auto select-none items-center justify-start gap-8 px-6 text-xl transition-all"
       )}
     >
-      <section.icon className="size-8 min-w-fit text-primary/90" />
+      <section.icon className="size-8 min-w-fit stroke-1 text-primary/80" />
       {section.name}
     </Link>
   );
