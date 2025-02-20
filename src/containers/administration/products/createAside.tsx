@@ -46,6 +46,7 @@ import {
   DropdownTrigger,
 } from "@/components/shadcn/dropdown";
 import { Comfortaa } from "next/font/google";
+import { useUnits } from "@/hooks/states";
 
 type Input = z.input<typeof inputSchema>;
 const inputSchema = z.object({
@@ -58,7 +59,10 @@ const inputSchema = z.object({
     .string()
     .optional()
     .transform((id) => (id ? parseInt(id) : undefined)),
-  units: unitSchema.array(),
+  units: unitSchema
+    .omit({ price: true })
+    .merge(z.object({ price: z.string() })) // Handle all prices as strings until mutation. Fuck this number type shit
+    .array(),
   // .enum(measurementUnits.map((unit) => unit.value) as [string, ...string[]])
   // .array()
   // .min(1, { message: "Unidad/es requerida/s" }),
@@ -72,6 +76,9 @@ const comfortaa = Comfortaa({ subsets: ["latin"] });
 
 export function ProductCreateAside() {
   const queryClient = useQueryClient();
+
+  const unitsState = useUnits();
+  const unitsEnabled = unitsState.data?.active;
 
   const {
     create_isOpen,
@@ -133,7 +140,7 @@ export function ProductCreateAside() {
   }
 
   function refreshQuery() {
-    queryClient.invalidateQueries({ queryKey: ["products"] });
+    queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
   }
 
   function handleCancel() {
@@ -158,9 +165,14 @@ export function ProductCreateAside() {
     formState: { errors },
     control,
     getValues,
+    watch,
   } = useForm<Input>({
     resolver: zodResolver(inputSchema),
-    defaultValues: { code: "", name: "", units: [{}] },
+    defaultValues: {
+      code: "",
+      name: "",
+      units: unitsEnabled ? [{}] : [{ unit: "u" }],
+    },
   });
 
   const onSubmit: SubmitHandler<Input> = (data) => {
@@ -174,8 +186,16 @@ export function ProductCreateAside() {
 
   const dataMutation = useMutation<ServerSuccess<Product>, ServerError, Input>({
     mutationFn: async (data) => {
+      const body = {
+        ...data,
+        // turn string prices into numbers
+        units: data.units.map((u) => ({
+          unit: u.unit,
+          price: Number(u.price),
+        })),
+      };
       const url = `${vars.serverUrl}/api/v1/products`;
-      return axios.post(url, data, { withCredentials: true });
+      return axios.post(url, body, { withCredentials: true });
     },
     onSuccess: (res) => {
       if (uploadedFiles.length !== 0) {
@@ -273,25 +293,6 @@ export function ProductCreateAside() {
                 />
                 <ErrorSpan message={errors.name?.message} />
               </div>
-
-              {/* <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="price"
-                  className="text-base tracking-wide text-primary"
-                >
-                  <MandatoryMark /> PRECIO:
-                </label>
-                <div className="flex h-12 items-center justify-start gap-3 rounded-lg border border-[var(--fallback-bc,oklch(var(--bc)/0.2))] px-4 shadow-inner-sm outline-none">
-                  <span className="text-xl text-secondary">$</span>
-                  <input
-                    type="text"
-                    placeholder="..."
-                    {...register("price")}
-                    className="h-full w-full bg-transparent pr-3 focus:outline-none"
-                  />
-                </div>
-                <ErrorSpan message={errors.price?.message} />
-              </div> */}
 
               {/* <div className="flex h-full flex-col justify-start gap-1">
                 <label
@@ -394,127 +395,178 @@ export function ProductCreateAside() {
                     <ErrorSpan message={errors.supplierID?.message} />
                   </div>
 
-                  <div className="col-span-2 flex h-full flex-col justify-start gap-1">
-                    <label
-                      htmlFor="units"
-                      className="text-base tracking-wide text-primary"
-                    >
-                      <MandatoryMark /> UNIDADES DE MEDIDA:
-                    </label>
-                    {suppliersQuery.isPending ? (
-                      <div className="h-12 w-full animate-pulse rounded-lg bg-secondary/20" />
-                    ) : (
-                      <Controller
-                        name="units"
-                        control={control}
-                        render={({ field }) => {
-                          const selectedUnits = field.value.map(
-                            (unit) => unit.unit
-                          );
-                          const unitsLeft = measurementUnits.filter(
-                            (unit) => !selectedUnits.includes(unit.value)
-                          );
-                          return (
-                            <div className="flex w-full flex-col rounded-none first:rounded-t-md last:rounded-b-md">
-                              {field.value.map((newUnit, i) => {
-                                const selectedUnitName = measurementUnits.find(
-                                  (unit) => newUnit.unit === unit.value
-                                )?.label;
-                                return (
-                                  <div
-                                    key={newUnit.unit}
-                                    className="flex h-12 min-h-12 w-full items-center"
-                                  >
-                                    <Dropdown>
-                                      <DropdownTrigger className="input input-bordered flex w-full items-center justify-between rounded-none border text-left shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none data-[state=open]:rounded-b-none">
-                                        {selectedUnitName ??
-                                          "Seleccionar unidad"}
-                                        <ChevronDown className="size-6 min-w-6 text-secondary" />
-                                      </DropdownTrigger>
-                                      <DropdownContent
-                                        sideOffset={0}
-                                        className="max-w-[var(--radix-dropdown-menu-trigger-width)] border border-secondary/30 bg-base-100"
-                                      >
-                                        {unitsLeft.length !== 0 ? (
-                                          unitsLeft.map((unit) => (
-                                            <DropdownItem
-                                              key={unit.value}
-                                              onClick={() => {
-                                                const temp = [...field.value];
-                                                temp[i]!.unit = unit.value; // There will always be something in that position
-                                                field.onChange(temp);
-                                              }}
-                                              className="flex h-10 w-full cursor-pointer items-center px-4 hover:bg-secondary/15"
-                                            >
-                                              {unit.label}
-                                            </DropdownItem>
-                                          ))
-                                        ) : (
-                                          <div className="flex min-h-10 w-full items-center justify-center gap-2 px-3 py-1.5 text-sm text-secondary">
-                                            <Info className="size-4 min-w-4" />
-                                            <p>No quedan unidades de medida</p>
-                                          </div>
-                                        )}
-                                      </DropdownContent>
-                                    </Dropdown>
-                                    <input
-                                      type="text"
-                                      className="input input-bordered w-full rounded-none placeholder:text-secondary focus:outline-none"
-                                      placeholder={
-                                        !selectedUnitName
-                                          ? "Precio"
-                                          : `Precio por ${
-                                              selectedUnitName === "Unidades"
-                                                ? "unidad"
-                                                : selectedUnitName
-                                                    ?.slice(0, -1)
-                                                    .toLowerCase()
-                                            }`
-                                      }
-                                      value={newUnit.price}
-                                      onChange={(e) => {
-                                        const temp = [...field.value];
-                                        temp[i]!.price = Number(e.target.value); // There will always be something in that position
-                                        field.onChange(temp);
-                                      }}
-                                    />
-                                    {field.value.length > 1 && (
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          // Remove new measurement unit
-                                          const temp = field.value;
-                                          temp.splice(i, 1);
-                                          field.onChange(temp);
+                  {unitsEnabled ? (
+                    <div className="col-span-2 flex h-full flex-col justify-start gap-1">
+                      <label
+                        htmlFor="units"
+                        className="text-base tracking-wide text-primary"
+                      >
+                        <MandatoryMark /> UNIDADES DE MEDIDA:
+                      </label>
+                      {suppliersQuery.isPending ? (
+                        <div className="h-12 w-full animate-pulse rounded-lg bg-secondary/20" />
+                      ) : (
+                        <Controller
+                          name="units"
+                          control={control}
+                          render={({ field }) => {
+                            const selectedUnits = field.value.map(
+                              (unit) => unit.unit
+                            );
+                            const unitsLeft = measurementUnits.filter(
+                              (unit) => !selectedUnits.includes(unit.value)
+                            );
+                            return (
+                              <div className="flex w-full flex-col first:rounded-t-md last:rounded-b-md">
+                                {field.value.map((newUnit, i) => {
+                                  const selectedUnitName =
+                                    measurementUnits.find(
+                                      (unit) => newUnit.unit === unit.value
+                                    )?.label;
+                                  return (
+                                    <div
+                                      key={newUnit.unit}
+                                      className="flex h-12 min-h-12 w-full items-center"
+                                    >
+                                      <Dropdown>
+                                        <DropdownTrigger className="input input-bordered flex w-full items-center justify-between rounded-none border text-left shadow-inner-sm outline-none focus:shadow-inner-sm focus:outline-none data-[state=open]:rounded-b-none">
+                                          {selectedUnitName ??
+                                            "Seleccionar unidad"}
+                                          <ChevronDown className="size-5 min-w-5 text-secondary" />
+                                        </DropdownTrigger>
+                                        <DropdownContent
+                                          sideOffset={0}
+                                          className="max-w-[var(--radix-dropdown-menu-trigger-width)] border border-secondary/30 bg-base-100"
+                                        >
+                                          {unitsLeft.length !== 0 ? (
+                                            unitsLeft.map((unit) => (
+                                              <DropdownItem
+                                                key={unit.value}
+                                                onClick={() => {
+                                                  const temp = [...field.value];
+                                                  temp[i]!.unit = unit.value; // There will always be something in that position
+                                                  field.onChange(temp);
+                                                }}
+                                                className="flex h-10 w-full cursor-pointer items-center px-4 hover:bg-secondary/15"
+                                              >
+                                                {unit.label}
+                                              </DropdownItem>
+                                            ))
+                                          ) : (
+                                            <div className="flex min-h-10 w-full items-center justify-center gap-2 px-3 py-1.5 text-sm text-secondary">
+                                              <Info className="size-4 min-w-4" />
+                                              <p>
+                                                No quedan unidades de medida
+                                              </p>
+                                            </div>
+                                          )}
+                                        </DropdownContent>
+                                      </Dropdown>
+                                      <input
+                                        type="text"
+                                        className="input input-bordered w-full rounded-none placeholder:text-secondary focus:outline-none"
+                                        placeholder={
+                                          !selectedUnitName
+                                            ? "Precio"
+                                            : `Precio por ${
+                                                selectedUnitName === "Unidades"
+                                                  ? "unidad"
+                                                  : selectedUnitName
+                                                      ?.slice(0, -1)
+                                                      .toLowerCase()
+                                              }`
+                                        }
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          const isValid =
+                                            /^([0-9]+[,\.])?[0-9]*$/.test(
+                                              value
+                                            );
+                                          if (isValid) {
+                                            const temp = [...field.value];
+                                            temp[i]!.price = value.replace(
+                                              ",",
+                                              "."
+                                            ); // There will always be something in that position
+                                            field.onChange(temp);
+                                          }
                                         }}
-                                        className="flex aspect-square h-full cursor-pointer items-center justify-center border border-secondary/30 text-secondary hover:bg-secondary/15 hover:text-error"
-                                      >
-                                        <Trash2 className="size-5 min-w-5" />
-                                      </button>
-                                    )}
+                                        value={newUnit.price?.replace(".", ",")}
+                                      />
+                                      {field.value.length > 1 && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            // Remove new measurement unit
+                                            const temp = field.value;
+                                            temp.splice(i, 1);
+                                            field.onChange(temp);
+                                          }}
+                                          className="flex aspect-square h-full cursor-pointer items-center justify-center border border-secondary/30 text-secondary hover:bg-secondary/15 hover:text-error"
+                                        >
+                                          <Trash2 className="size-5 min-w-5" />
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                                {/* New Measurement Unit */}
+                                {field.value.length <
+                                  measurementUnitsValues.length && (
+                                  <div
+                                    onClick={
+                                      () => field.onChange([...field.value, {}]) // Add new empty measurement unit
+                                    }
+                                    className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-b-md border-x border-b border-secondary/30 hover:bg-secondary/15"
+                                  >
+                                    <Plus className="size-5 min-w-5" />
+                                    Nueva unidad
                                   </div>
+                                )}
+                              </div>
+                            );
+                          }}
+                        />
+                      )}
+                      <ErrorSpan message={errors.units?.message} />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      <label
+                        htmlFor="price"
+                        className="text-base tracking-wide text-primary"
+                      >
+                        <MandatoryMark /> PRECIO:
+                      </label>
+                      <Controller
+                        control={control}
+                        name="units"
+                        render={({ field }) => (
+                          <div className="flex h-12 items-center justify-start gap-3 rounded-lg border border-[var(--fallback-bc,oklch(var(--bc)/0.2))] px-4 shadow-inner-sm outline-none">
+                            <span className="text-xl text-secondary">$</span>
+                            <input
+                              type="text"
+                              placeholder="..."
+                              className="h-full w-full bg-transparent pr-3 focus:outline-none"
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const isValid = /^([0-9]+[,\.])?[0-9]*$/.test(
+                                  value
                                 );
-                              })}
-                              {/* New Measurement Unit */}
-                              {field.value.length <
-                                measurementUnitsValues.length && (
-                                <div
-                                  onClick={
-                                    () => field.onChange([...field.value, {}]) // Add new empty measurement unit
-                                  }
-                                  className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-b-md border-x border-b border-secondary/30 hover:bg-secondary/15"
-                                >
-                                  <Plus className="size-5 min-w-5" />
-                                  Nueva unidad
-                                </div>
-                              )}
-                            </div>
-                          );
-                        }}
+                                if (isValid) {
+                                  const temp = [...field.value];
+                                  temp[0]!.price = value.replace(",", "."); // There will always be something in that position
+                                  field.onChange(temp);
+                                }
+                              }}
+                              value={field.value[0]?.price?.replace(".", ",")}
+                            />
+                          </div>
+                        )}
                       />
-                    )}
-                    <ErrorSpan message={errors.units?.message} />
-                  </div>
+                      <ErrorSpan message={errors.units?.message} />
+                    </div>
+                  )}
                 </>
               )}
 
